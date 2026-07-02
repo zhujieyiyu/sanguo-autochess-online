@@ -35,7 +35,7 @@ body {
 
 /* ═══ 游戏容器 ═══ */
 #game-container {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
   min-height: 100vh;
   display: flex;
@@ -1181,7 +1181,7 @@ body {
 .log-win { color: var(--green); }
 
 /* ═══ 响应式 ═══ */
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   #main-area {
     flex-direction: column;
   }
