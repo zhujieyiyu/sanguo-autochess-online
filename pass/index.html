@@ -18,20 +18,20 @@ header {
   text-align: center;
   padding: 30px 0 20px;
   border-bottom: 1px solid #21262d;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
-h1 { font-size: 28px; margin-bottom: 8px; }
+h1 { font-size: 26px; margin-bottom: 6px; }
 h1 .logo { color: #FFD700; }
-.subtitle { color: #8b949e; font-size: 13px; }
+.subtitle { color: #8b949e; font-size: 12px; }
 
 .warning {
   background: #1c1c00;
   border: 1px solid #FFD700;
   color: #FFD700;
-  padding: 10px 16px;
+  padding: 8px 14px;
   border-radius: 6px;
   font-size: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   text-align: center;
   line-height: 1.6;
 }
@@ -39,10 +39,10 @@ h1 .logo { color: #FFD700; }
   background: #0d1117;
   border: 1px solid #30363d;
   color: #8b949e;
-  padding: 8px 16px;
+  padding: 8px 14px;
   border-radius: 6px;
   font-size: 11px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   text-align: center;
   line-height: 1.6;
 }
@@ -51,13 +51,13 @@ h1 .logo { color: #FFD700; }
   background: #161b22;
   border: 1px solid #30363d;
   border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 16px;
+  padding: 18px;
+  margin-bottom: 14px;
 }
 .card h2 {
-  font-size: 15px;
+  font-size: 14px;
   color: #8b949e;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   font-weight: normal;
   letter-spacing: 0.5px;
 }
@@ -66,7 +66,7 @@ button {
   background: #238636;
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 9px 18px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
@@ -88,54 +88,52 @@ input[type="number"] {
   background: #0d1117;
   border: 1px solid #30363d;
   color: #e6edf3;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 13px;
   font-family: 'Courier New', monospace;
+  width: 60px;
 }
-input[type="number"]:focus {
-  outline: none;
-  border-color: #1f6feb;
-}
+input[type="number"]:focus { outline: none; border-color: #1f6feb; }
 
 label { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
 input[type="checkbox"] { cursor: pointer; }
 
-.entry-list { margin-top: 12px; }
+.entry-list { margin-top: 10px; }
 .entry {
   background: #0d1117;
   border: 1px solid #21262d;
   border-radius: 6px;
-  padding: 10px 12px;
-  margin-bottom: 8px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 12px;
 }
 .entry-idx {
   color: #FFD700;
-  font-size: 12px;
   min-width: 22px;
   font-family: 'Courier New', monospace;
 }
 .entry-content { flex: 1; min-width: 0; }
 .entry-field {
   font-family: 'Courier New', monospace;
-  font-size: 13px;
   word-break: break-all;
+  cursor: pointer;
+  user-select: all;
 }
 .entry-field-1 { color: #79c0ff; }
-.entry-field-2 { color: #a5d6ff; margin-top: 2px; }
+.entry-field-2 { color: #a5d6ff; margin-top: 2px; font-size: 11px; }
+.entry-field:hover { color: #fff; }
 .entry-actions { display: flex; gap: 4px; }
 
 .empty-state {
   text-align: center;
-  padding: 40px 20px;
+  padding: 24px 12px;
   color: #6e7681;
-  font-size: 13px;
+  font-size: 12px;
 }
-
-.hidden { display: none !important; }
 
 .modal-overlay {
   position: fixed;
@@ -157,7 +155,7 @@ input[type="checkbox"] { cursor: pointer; }
 }
 .modal h3 { font-size: 16px; margin-bottom: 12px; }
 .modal p { font-size: 13px; color: #8b949e; margin-bottom: 16px; line-height: 1.5; }
-.modal-buttons { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+.modal-buttons { display: flex; gap: 8px; justify-content: flex-end; }
 
 .toast {
   position: fixed;
@@ -175,26 +173,12 @@ input[type="checkbox"] { cursor: pointer; }
 .toast.error { background: #da3633; }
 @keyframes fadeIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
-.copy-feedback {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #238636;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 12px;
-  z-index: 2000;
-  animation: slideIn 0.2s;
-}
-@keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-
 .generator-output {
   background: #0d1117;
   border: 1px solid #FFD700;
   border-radius: 6px;
-  padding: 12px;
-  margin-top: 12px;
+  padding: 10px;
+  margin-top: 10px;
 }
 .generator-output .label { font-size: 11px; color: #8b949e; margin-bottom: 4px; }
 .generator-output .value {
@@ -205,8 +189,13 @@ input[type="checkbox"] { cursor: pointer; }
   letter-spacing: 1px;
   user-select: all;
   cursor: pointer;
+  padding: 4px 0;
 }
 .generator-output .value:hover { color: #fff; }
+
+.hidden { display: none !important; }
+
+.file-input-wrap { display: inline-block; }
 </style>
 </head>
 <body>
@@ -223,59 +212,55 @@ input[type="checkbox"] { cursor: pointer; }
     💡 本工具不做任何用途标识，请自行记录每个字符串对应哪个网站
   </div>
 
-  <!-- 入口状态 -->
-  <div id="entryState">
-    <div class="card">
-      <h2>📂 选择操作</h2>
-      <div class="row">
-        <button id="btnNew">➕ 新建</button>
-        <button id="btnImport" class="secondary">📥 导入</button>
-        <input type="file" id="fileInput" accept=".json,.txt,.dat,*" class="hidden">
-      </div>
+  <!-- 单一主界面 -->
+
+  <!-- 生成器卡片 -->
+  <div class="card">
+    <h2>🎲 生成新条目</h2>
+    <div class="row">
+      <label><input type="checkbox" id="optDigits" checked> 数字</label>
+      <label><input type="checkbox" id="optLower" checked> 小写</label>
+      <label><input type="checkbox" id="optUpper" checked> 大写</label>
+      <label><input type="checkbox" id="optSymbol"> 符号</label>
+    </div>
+    <div class="row" style="margin-top:10px;">
+      <label>字段2长度</label>
+      <input type="number" id="optLength" value="16" min="4" max="64">
+      <label>字段1长度</label>
+      <input type="number" id="optUserLength" value="12" min="4" max="32">
+    </div>
+    <div class="row" style="margin-top:12px;">
+      <button id="btnGenerate">🎲 生成</button>
+      <button id="btnAddToList" class="secondary" disabled>➕ 加入列表</button>
+    </div>
+    <div id="generatedOutput" class="generator-output hidden">
+      <div class="label">字段1（点击复制）</div>
+      <div class="value" id="genField1"></div>
+      <div class="label" style="margin-top:8px;">字段2（点击复制）</div>
+      <div class="value" id="genField2"></div>
     </div>
   </div>
 
-  <!-- 生成器状态 -->
-  <div id="generatorState" class="hidden">
-    <div class="card">
-      <h2>🎲 生成新条目</h2>
-      <div class="row">
-        <label><input type="checkbox" id="optDigits" checked> 数字 (0-9)</label>
-        <label><input type="checkbox" id="optLower" checked> 小写字母 (a-z)</label>
-        <label><input type="checkbox" id="optUpper" checked> 大写字母 (A-Z)</label>
-        <label><input type="checkbox" id="optSymbol"> 符号 (!@#$...)</label>
-      </div>
-      <div class="row" style="margin-top:12px;">
-        <label>密码长度：</label>
-        <input type="number" id="optLength" value="16" min="4" max="64" style="width:60px;">
-        <span style="color:#6e7681;font-size:12px;">字段1长度：</span>
-        <input type="number" id="optUserLength" value="12" min="4" max="32" style="width:60px;">
-      </div>
-      <div class="row" style="margin-top:16px;">
-        <button id="btnGenerate">🎲 生成</button>
-        <button id="btnAddToList" class="secondary" disabled>➕ 加入列表</button>
-      </div>
-      <div id="generatedOutput" class="generator-output hidden">
-        <div class="label">字段1（点击复制）</div>
-        <div class="value" id="genField1"></div>
-        <div class="label" style="margin-top:8px;">字段2（点击复制）</div>
-        <div class="value" id="genField2"></div>
-      </div>
+  <!-- 条目列表卡片 -->
+  <div class="card">
+    <h2>📋 条目列表 <span id="entryCount" style="color:#FFD700;">(0)</span></h2>
+    <div id="entryList" class="entry-list">
+      <div class="empty-state">暂无条目 · 在上面点 🎲 生成 → ➕ 加入列表</div>
     </div>
   </div>
 
-  <!-- 条目列表状态 -->
-  <div id="listState" class="hidden">
-    <div class="card">
-      <h2>📋 条目列表 <span id="entryCount" style="color:#FFD700;">(0)</span></h2>
-      <div class="row" style="margin-bottom:12px;">
-        <button id="btnBackToEntry" class="secondary small">↩ 返回</button>
-        <button id="btnExport">💾 导出</button>
-      </div>
-      <div id="entryList" class="entry-list">
-        <div class="empty-state">暂无条目 · 从上面生成第一条</div>
-      </div>
+  <!-- 导出/导入卡片 -->
+  <div class="card">
+    <h2>💾 文件操作</h2>
+    <div class="row">
+      <button id="btnExport">💾 导出</button>
+      <button id="btnImport" class="secondary">📥 导入新文件</button>
+      <input type="file" id="fileInput" accept=".json,.txt,.dat,*" class="hidden">
     </div>
+    <p style="font-size:11px;color:#6e7681;margin-top:10px;line-height:1.5;">
+      导出文件名随机（如 q7k9m2x4.json），下载后建议改名为无意义字符。<br>
+      导入相当于新会话，将清空当前列表。
+    </p>
   </div>
 </div>
 
@@ -292,28 +277,21 @@ input[type="checkbox"] { cursor: pointer; }
 </div>
 
 <script>
-// ==================== 状态管理 ====================
+// ==================== 状态 ====================
 const state = {
-  entries: [],       // [{a8f2k1m9: f1, f9g1h4j6: f2}]
+  entries: [],
   generated: null,
 };
 
-// 文件魔数（看着像哈希值，不暴露工具名）
+// 魔数（看着像哈希值，不暴露工具名）
 const MAGIC = 'X7K9Q2M4';
-// 数据字段名（看起来像哈希值，导入时按这些 key 识别）
+// 数据 key（哈希风格，不暴露字段语义）
 const K_ENTRY = 'a8f2k1m9';
 const K_FIELD1 = 'b3c7d2e5';
 const K_FIELD2 = 'f9g1h4j6';
 
-// ==================== 工具函数 ====================
+// ==================== 工具 ====================
 const $ = (id) => document.getElementById(id);
-
-function showState(name) {
-  $('entryState').classList.add('hidden');
-  $('generatorState').classList.add('hidden');
-  $('listState').classList.add('hidden');
-  $(name).classList.remove('hidden');
-}
 
 function toast(msg, type = 'success') {
   const t = document.createElement('div');
@@ -325,11 +303,7 @@ function toast(msg, type = 'success') {
 
 function copyToClipboard(text) {
   navigator.clipboard.writeText(text).then(() => {
-    const f = document.createElement('div');
-    f.className = 'copy-feedback';
-    f.textContent = '✓ 已复制';
-    document.body.appendChild(f);
-    setTimeout(() => f.remove(), 1500);
+    toast('✓ 已复制');
   }).catch(() => {
     const ta = document.createElement('textarea');
     ta.value = text;
@@ -337,6 +311,7 @@ function copyToClipboard(text) {
     ta.select();
     document.execCommand('copy');
     document.body.removeChild(ta);
+    toast('✓ 已复制');
   });
 }
 
@@ -347,13 +322,11 @@ function showModal({ title, content, okText = '确定', cancelText = '取消' })
     $('modalOk').textContent = okText;
     $('modalCancel').textContent = cancelText;
     $('modal').classList.remove('hidden');
-    
     const cleanup = () => {
       $('modal').classList.add('hidden');
       $('modalOk').onclick = null;
       $('modalCancel').onclick = null;
     };
-    
     $('modalOk').onclick = () => { cleanup(); resolve(true); };
     $('modalCancel').onclick = () => { cleanup(); resolve(false); };
   });
@@ -372,9 +345,7 @@ function randomString(length, charset) {
   const arr = new Uint32Array(length);
   crypto.getRandomValues(arr);
   let s = '';
-  for (let i = 0; i < length; i++) {
-    s += charset[arr[i] % charset.length];
-  }
+  for (let i = 0; i < length; i++) s += charset[arr[i] % charset.length];
   return s;
 }
 
@@ -428,7 +399,6 @@ function generate() {
 
 function addToList() {
   if (!state.generated) return;
-  // 用 K_FIELD1/K_FIELD2 哈希风格的 key 存储
   state.entries.push({
     [K_FIELD1]: state.generated.f1,
     [K_FIELD2]: state.generated.f2
@@ -437,7 +407,7 @@ function addToList() {
   $('generatedOutput').classList.add('hidden');
   $('btnAddToList').disabled = true;
   renderList();
-  toast('已加入列表');
+  toast('✓ 已加入列表');
 }
 
 // ==================== 列表渲染 ====================
@@ -446,7 +416,7 @@ function renderList() {
   $('entryCount').textContent = `(${state.entries.length})`;
   
   if (state.entries.length === 0) {
-    list.innerHTML = '<div class="empty-state">暂无条目 · 从上面生成第一条</div>';
+    list.innerHTML = '<div class="empty-state">暂无条目 · 在上面点 🎲 生成 → ➕ 加入列表</div>';
     return;
   }
   
@@ -457,20 +427,18 @@ function renderList() {
     <div class="entry">
       <div class="entry-idx">#${String(i + 1).padStart(2, '0')}</div>
       <div class="entry-content">
-        <div class="entry-field entry-field-1">📋 ${f1}</div>
-        <div class="entry-field entry-field-2">🔑 ${f2}</div>
+        <div class="entry-field entry-field-1" data-act="copy-f1" data-i="${i}">${f1}</div>
+        <div class="entry-field entry-field-2" data-act="copy-f2" data-i="${i}">${f2}</div>
       </div>
       <div class="entry-actions">
-        <button class="small secondary" data-act="copy-f1" data-i="${i}">复制字段1</button>
-        <button class="small secondary" data-act="copy-f2" data-i="${i}">复制字段2</button>
         <button class="small danger" data-act="del" data-i="${i}">删除</button>
       </div>
     </div>
   `;
   }).join('');
   
-  list.querySelectorAll('button').forEach(btn => {
-    btn.onclick = () => handleEntryAction(btn.dataset.act, parseInt(btn.dataset.i));
+  list.querySelectorAll('[data-act]').forEach(el => {
+    el.onclick = () => handleEntryAction(el.dataset.act, parseInt(el.dataset.i));
   });
 }
 
@@ -496,14 +464,13 @@ async function handleEntryAction(act, idx) {
 }
 
 // ==================== 导出 ====================
-async function exportVault() {
+function exportVault() {
   if (state.entries.length === 0) {
-    toast('条目为空', 'error');
+    toast('列表为空，无可导出', 'error');
     return;
   }
   
   const filename = randomFilename();
-  // 用 MAGIC 字段 + 哈希风格 key 构造，外部看不出含义
   const data = {
     [MAGIC]: 1,
     [K_ENTRY]: state.entries
@@ -528,12 +495,10 @@ async function importVault(file) {
     const text = await file.text();
     const data = JSON.parse(text);
     
-    // 用 MAGIC 字段识别（不暴露工具名）
     if (data[MAGIC] === undefined || !data[K_ENTRY] || !Array.isArray(data[K_ENTRY])) {
       throw new Error('文件格式不识别');
     }
     
-    // 验证每个条目结构
     const entries = [];
     for (const e of data[K_ENTRY]) {
       if (!e || typeof e[K_FIELD1] !== 'string' || typeof e[K_FIELD2] !== 'string') {
@@ -545,8 +510,18 @@ async function importVault(file) {
       });
     }
     
+    // 如果当前有内容，提示确认
+    if (state.entries.length > 0) {
+      const ok = await showModal({
+        title: '导入将清空当前列表',
+        content: `当前有 ${state.entries.length} 条记录，导入后将全部替换。\n\n确定导入？`,
+        okText: '导入',
+        cancelText: '取消'
+      });
+      if (!ok) return;
+    }
+    
     state.entries = entries;
-    showState('listState');
     renderList();
     toast(`✓ 已导入 ${state.entries.length} 条`);
   } catch (e) {
@@ -555,14 +530,9 @@ async function importVault(file) {
 }
 
 // ==================== 事件绑定 ====================
-$('btnNew').onclick = () => {
-  showState('generatorState');
-  state.entries = [];
-  state.generated = null;
-  $('generatedOutput').classList.add('hidden');
-  $('btnAddToList').disabled = true;
-};
-
+$('btnGenerate').onclick = generate;
+$('btnAddToList').onclick = addToList;
+$('btnExport').onclick = exportVault;
 $('btnImport').onclick = () => $('fileInput').click();
 
 $('fileInput').onchange = (e) => {
@@ -571,19 +541,12 @@ $('fileInput').onchange = (e) => {
   e.target.value = '';
 };
 
-$('btnGenerate').onclick = generate;
-$('btnAddToList').onclick = addToList;
-
-$('btnBackToEntry').onclick = () => showState('entryState');
-
-$('btnExport').onclick = exportVault;
-
 // 点击生成结果复制
 $('genField1').onclick = () => state.generated && copyToClipboard(state.generated.f1);
 $('genField2').onclick = () => state.generated && copyToClipboard(state.generated.f2);
 
 // 启动
-showState('entryState');
+renderList();
 </script>
 </body>
 </html>
