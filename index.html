@@ -236,27 +236,44 @@
     <!-- 联机版弹窗 -->
     <div id="online-overlay" class="hidden">
         <div id="online-modal">
-            <h3>🌐 联机对战</h3>
+            <!-- 步骤 1: 登录 -->
             <div id="online-step-login">
-                <p style="font-size:13px;color:#8b949e;">输入你的名字加入/创建房间</p>
-                <input type="text" id="online-username" placeholder="你的名字" maxlength="20" style="padding:8px 12px;font-size:14px;border-radius:4px;border:1px solid #30363d;background:#0d1117;color:#e6edf3;width:80%;margin:8px 0;">
+                <h3>🌐 进入联机对战</h3>
+                <p style="font-size:13px;color:#8b949e;">输入你的名字开始匹配</p>
+                <input type="text" id="online-username" placeholder="你的名字" maxlength="20" style="padding:10px 14px;font-size:15px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#e6edf3;width:80%;margin:12px 0;">
                 <br>
-                <button id="online-login-btn" style="margin-top:8px;padding:8px 24px;background:#238636;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;">✓ 确定</button>
+                <button id="online-login-btn" style="margin-top:8px;padding:10px 32px;background:linear-gradient(135deg,#238636,#2ea043);color:white;border:none;border-radius:6px;cursor:pointer;font-size:15px;font-weight:bold;">⚔️ 开始匹配</button>
+                <p style="font-size:11px;color:#6e7681;margin-top:16px;">4 人对战 · 单人也能玩（AI 自动补位）</p>
             </div>
-            <div id="online-step-lobby" class="hidden">
-                <p style="font-size:13px;">房间邀请码：<strong id="online-room-code" style="color:#FFD700;font-size:18px;letter-spacing:2px;"></strong></p>
-                <p style="font-size:11px;color:#8b949e;">把邀请码发给朋友，让他们加入</p>
-                <h4 style="margin-top:12px;font-size:13px;">👥 房间成员 (<span id="online-member-count">0</span>/8)</h4>
-                <div id="online-member-list" style="text-align:left;background:#0d1117;padding:8px;border-radius:4px;min-height:80px;max-height:160px;overflow-y:auto;"></div>
-                <button id="online-start-btn" style="margin-top:12px;padding:8px 24px;background:#1f6feb;color:white;border:none;border-radius:4px;cursor:pointer;font-size:14px;display:none;">▶ 开始游戏</button>
-                <button id="online-leave-btn" style="margin-top:8px;padding:6px 16px;background:#da3633;color:white;border:none;border-radius:4px;cursor:pointer;font-size:12px;">🚪 离开房间</button>
-            </div>
-            <div id="online-step-join">
-                <p style="font-size:12px;color:#8b949e;margin-top:8px;">或者加入已有房间：</p>
-                <input type="text" id="online-join-code" placeholder="6位邀请码" maxlength="6" style="padding:6px 10px;font-size:13px;border-radius:4px;border:1px solid #30363d;background:#0d1117;color:#e6edf3;width:140px;text-transform:uppercase;">
-                <button id="online-join-btn" style="padding:6px 14px;background:#1f6feb;color:white;border:none;border-radius:4px;cursor:pointer;font-size:13px;margin-left:4px;">→ 加入</button>
-            </div>
-            <button id="online-close-btn" style="margin-top:16px;padding:4px 12px;background:transparent;color:#8b949e;border:1px solid #30363d;border-radius:4px;cursor:pointer;font-size:12px;">✕ 关闭</button>
+        </div>
+    </div>
+
+    <!-- 匹配中浮层 -->
+    <div id="match-overlay" class="hidden">
+        <div id="match-modal">
+            <h3>🔍 正在匹配对手</h3>
+            <div id="match-countdown" style="font-size:48px;font-weight:bold;color:#FFD700;margin:16px 0;">30</div>
+            <p style="font-size:12px;color:#8b949e;">秒后自动补满 AI · 单人也能玩</p>
+            <div id="match-players" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:20px 0;max-width:360px;"></div>
+            <button id="match-cancel-btn" style="padding:6px 16px;background:transparent;color:#8b949e;border:1px solid #30363d;border-radius:4px;cursor:pointer;font-size:12px;">✕ 取消匹配</button>
+        </div>
+    </div>
+
+    <!-- 匹配成功浮层 -->
+    <div id="match-success-overlay" class="hidden">
+        <div id="match-success-modal">
+            <div style="font-size:60px;">⚔️</div>
+            <h3 style="color:#FFD700;font-size:24px;margin:8px 0;">匹配成功！</h3>
+            <p style="font-size:13px;color:#8b949e;" id="match-success-msg">4 名玩家已就位</p>
+        </div>
+    </div>
+
+    <!-- 多人对战结果浮层 -->
+    <div id="multiplayer-result-overlay" class="hidden">
+        <div id="multiplayer-result-modal">
+            <h3 id="multiplayer-result-title">🏆 战斗结束</h3>
+            <div id="multiplayer-result-list" style="margin:16px 0;max-height:300px;overflow-y:auto;"></div>
+            <button id="multiplayer-result-close-btn" style="padding:8px 24px;background:linear-gradient(135deg,#1f6feb,#388bfd);color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;">返回大厅</button>
         </div>
     </div>
 
@@ -333,6 +350,7 @@
     <script src="js/renderer.js"></script>
     <script src="js/config.js"></script>
     <script src="js/supabase-client.js"></script>
+    <script src="js/matchmaker.js"></script>
     <script src="js/game.js"></script>
 </body>
 </html>

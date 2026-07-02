@@ -2448,141 +2448,210 @@ class Game {
     }
 
     // =============================================
-    // 联机版逻辑
+    // 联机版逻辑（v2 - 用户感受度优先）
     // =============================================
+
+    onlinePlayerName: null,
+    isMultiplayer: false,
+    multiplayerPlayers: [],
 
     _openOnlineOverlay() {
         const overlay = document.getElementById('online-overlay');
         if (!overlay) return;
         overlay.classList.remove('hidden');
-        // 重置步骤
-        document.getElementById('online-step-login').classList.remove('hidden');
-        document.getElementById('online-step-lobby').classList.add('hidden');
-        document.getElementById('online-step-join').classList.remove('hidden');
         // 自动填上次的用户名
         const lastName = localStorage.getItem('online_player_name') || '';
         const input = document.getElementById('online-username');
         if (input) input.value = lastName;
-        // 绑定事件
-        this._bindOnlineEvents();
+        // 绑定登录按钮
+        this._bindOnlineStart();
     }
 
     _closeOnlineOverlay() {
         document.getElementById('online-overlay').classList.add('hidden');
     }
 
-    _bindOnlineEvents() {
-        // 避免重复绑定
-        if (this._onlineEventsBound) return;
-        this._onlineEventsBound = true;
-
-        document.getElementById('online-close-btn').addEventListener('click', () => {
-            this._closeOnlineOverlay();
-        });
-
-        document.getElementById('online-login-btn').addEventListener('click', async () => {
+    _bindOnlineStart() {
+        if (this._onlineStartBound) return;
+        this._onlineStartBound = true;
+        const self = this;
+        document.getElementById('online-login-btn').addEventListener('click', () => {
             const name = document.getElementById('online-username').value.trim();
             if (!name) {
-                alert('请输入名字');
+                alert('请输入你的名字');
                 return;
             }
-            if (!window.Online || !window.Online._initialized) {
-                alert('联机服务还未就绪，请稍等几秒再试');
-                return;
+            self.onlinePlayerName = name;
+            localStorage.setItem('online_player_name', name);
+            self._closeOnlineOverlay();
+            // 直接进入匹配
+            if (!self.matchmaker) {
+                self.matchmaker = new Matchmaker(self);
             }
-            try {
-                await window.Online.login(name);
-                await this._enterLobby(true);
-            } catch (e) {
-                alert('登录失败：' + (e.message || e));
-            }
-        });
-
-        document.getElementById('online-join-btn').addEventListener('click', async () => {
-            const code = document.getElementById('online-join-code').value.trim();
-            if (!code || code.length < 4) {
-                alert('请输入正确的邀请码');
-                return;
-            }
-            if (!window.Online || !window.Online._initialized) {
-                alert('联机服务还未就绪，请稍等几秒再试');
-                return;
-            }
-            if (!window.Online.currentPlayer) {
-                alert('请先输入名字登录');
-                return;
-            }
-            try {
-                await window.Online.joinRoom(code);
-                await this._enterLobby(false);
-            } catch (e) {
-                alert('加入房间失败：' + (e.message || e));
-            }
-        });
-
-        document.getElementById('online-start-btn').addEventListener('click', async () => {
-            try {
-                await window.Online.startGame();
-            } catch (e) {
-                alert('开始游戏失败：' + (e.message || e));
-            }
-        });
-
-        document.getElementById('online-leave-btn').addEventListener('click', async () => {
-            await window.Online.leaveRoom();
-            this._closeOnlineOverlay();
-            this.addLog('round', '🚪 已离开房间');
+            self.matchmaker.startMatching();
         });
     }
 
-    async _enterLobby(isHost) {
-        // 切换到 lobby 步骤
-        document.getElementById('online-step-login').classList.add('hidden');
-        document.getElementById('online-step-join').classList.add('hidden');
-        document.getElementById('online-step-lobby').classList.remove('hidden');
+    // =============================================
+    // 匹配浮层 UI
+    // =============================================
 
-        if (isHost) {
-            try {
-                const room = await window.Online.createRoom();
-                document.getElementById('online-room-code').textContent = room.code;
-                document.getElementById('online-start-btn').style.display = 'inline-block';
-            } catch (e) {
-                alert('创建房间失败：' + (e.message || e));
-                this._closeOnlineOverlay();
-                return;
-            }
-        } else {
-            const room = window.Online.currentRoom;
-            if (room) {
-                document.getElementById('online-room-code').textContent = room.code;
-                document.getElementById('online-start-btn').style.display = window.Online.isHost ? 'inline-block' : 'none';
+    _showMatchOverlay() {
+        document.getElementById('match-overlay').classList.remove('hidden');
+        // 绑定取消按钮
+        if (!this._matchCancelBound) {
+            this._matchCancelBound = true;
+            const self = this;
+            document.getElementById('match-cancel-btn').addEventListener('click', () => {
+                if (self.matchmaker) self.matchmaker.cancelMatching();
+            });
+        }
+    }
+
+    _hideMatchOverlay() {
+        document.getElementById('match-overlay').classList.add('hidden');
+    }
+
+    _updateMatchCountdown(sec) {
+        document.getElementById('match-countdown').textContent = sec;
+    }
+
+    _updateMatchUI() {
+        const players = this.matchmaker ? this.matchmaker.players : [];
+        const list = document.getElementById('match-players');
+        if (!list) return;
+        // 渲染 4 个位置（没人的显示空位）
+        const slots = [];
+        for (let i = 0; i < 4; i++) {
+            const p = players[i];
+            if (p) {
+                slots.push(`
+                    <div style="background:#161b22;border:2px solid ${p.trait.color};border-radius:8px;padding:10px;display:flex;align-items:center;gap:8px;animation:slideIn 0.3s ease;">
+                        <div style="font-size:24px;">${p.avatar}</div>
+                        <div style="text-align:left;flex:1;">
+                            <div style="font-size:13px;font-weight:bold;color:${p.trait.color};">${p.name}${p.isMe ? ' (你)' : ''}</div>
+                            <div style="font-size:10px;color:#8b949e;">${p.trait.emoji} ${p.trait.name}</div>
+                        </div>
+                    </div>
+                `);
+            } else {
+                slots.push(`
+                    <div style="background:#0d1117;border:2px dashed #30363d;border-radius:8px;padding:10px;display:flex;align-items:center;justify-content:center;color:#484f58;font-size:12px;min-height:54px;">
+                        等待玩家...
+                    </div>
+                `);
             }
         }
-
-        // 加载成员列表
-        await this._refreshOnlineMembers();
-
-        // 订阅成员加入/离开
-        window.Online.onMemberJoin = () => this._refreshOnlineMembers();
-        window.Online.onMemberLeave = () => this._refreshOnlineMembers();
-        window.Online.onRoomUpdate = (room) => {
-            if (room.status === 'playing') {
-                this.addLog('round', '🎮 房主已开启游戏！');
-                this._closeOnlineOverlay();
-            }
-        };
+        list.innerHTML = slots.join('');
     }
 
-    async _refreshOnlineMembers() {
-        const members = await window.Online.getRoomMembers();
-        document.getElementById('online-member-count').textContent = members.length;
-        const list = document.getElementById('online-member-list');
-        list.innerHTML = members.map(m => {
-            const name = m.player ? m.player.username : '?';
-            const hp = m.health || 0;
-            const hostMark = m.player_id === (window.Online.currentRoom?.host_id) ? ' 👑' : '';
-            return `<div style="padding:4px 8px;border-bottom:1px solid #21262d;font-size:12px;">${name}${hostMark} <span style="color:#8b949e;float:right;">❤️${hp}</span></div>`;
+    _showMatchSuccess(playerCount) {
+        this._hideMatchOverlay();
+        const overlay = document.getElementById('match-success-overlay');
+        overlay.classList.remove('hidden');
+        document.getElementById('match-success-msg').textContent = `${playerCount} 名玩家已就位 · 战斗即将开始`;
+        // 2.5 秒后由 matchmaker 自动开始游戏
+    }
+
+    // =============================================
+    // 多人对战模式
+    // =============================================
+
+    _enterMultiplayerMode(players) {
+        // 隐藏匹配成功浮层
+        document.getElementById('match-success-overlay').classList.add('hidden');
+
+        this.isMultiplayer = true;
+        this.multiplayerPlayers = players;
+        this.playerHP = 40;
+
+        // 替换 AI 对手为这些"玩家"
+        this.aiOpponents = players.filter(p => !p.isMe).map((p, idx) => ({
+            id: p.id,
+            name: p.name,
+            avatar: p.avatar,
+            trait: p.trait,
+            hp: p.hp,
+            alive: p.alive,
+            isPlayer: true,
+            // 这些 AI 玩家用原有的 AI 配置行为
+            ...AI_PROFILES[idx % AI_PROFILES.length],
+            // 覆盖 name 用玩家名
+            name: p.name
+        }));
+
+        // 重新走一遍游戏初始化
+        this.round = 1;
+        this.phase = 'preparation';
+        this.shop.init(5);
+        this.legend.init();
+        this._playerOpponentIdx = 0;
+        this.updateUI();
+        this._refreshAIUI();
+        this._refreshLegendModeUI();
+
+        this.addLog('round', `🎮 多人对战开始！${players.length} 名玩家同台竞技`);
+        this.addLog('round', `📋 你的对手：${this.aiOpponents.map(a => a.name).join('、')}`);
+    }
+
+    _showMultiplayerResult(players, winner) {
+        const overlay = document.getElementById('multiplayer-result-overlay');
+        overlay.classList.remove('hidden');
+
+        const list = document.getElementById('multiplayer-result-list');
+        // 排序：存活 > 血量
+        const sorted = [...players].sort((a, b) => {
+            if (a.alive && !b.alive) return -1;
+            if (!a.alive && b.alive) return 1;
+            return b.hp - a.hp;
+        });
+
+        list.innerHTML = sorted.map((p, idx) => {
+            const rankEmoji = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '💀';
+            const aliveText = p.alive ? `<span style="color:#3fb950;">${p.hp} HP</span>` : '<span style="color:#da3633;">已淘汰</span>';
+            return `
+                <div style="display:flex;align-items:center;gap:10px;padding:8px;background:#0d1117;border-radius:6px;margin:4px 0;${p.isMe ? 'border:1px solid #FFD700;' : ''}">
+                    <div style="font-size:18px;">${rankEmoji}</div>
+                    <div style="font-size:18px;">${p.avatar}</div>
+                    <div style="flex:1;text-align:left;">
+                        <div style="font-size:13px;font-weight:bold;color:${p.trait.color};">${p.name}${p.isMe ? ' (你)' : ''}</div>
+                        <div style="font-size:10px;color:#8b949e;">${p.trait.emoji} ${p.trait.name}</div>
+                    </div>
+                    <div style="font-size:12px;">${aliveText}</div>
+                </div>
+            `;
         }).join('');
+
+        // 设置标题
+        if (winner && winner.isMe) {
+            document.getElementById('multiplayer-result-title').innerHTML = '🏆 你赢了！';
+        } else if (winner) {
+            document.getElementById('multiplayer-result-title').innerHTML = `💀 ${winner.name} 获胜`;
+        } else {
+            document.getElementById('multiplayer-result-title').innerHTML = '⚔️ 战斗结束';
+        }
+
+        // 绑定关闭按钮
+        if (!this._multiplayerCloseBound) {
+            this._multiplayerCloseBound = true;
+            const self = this;
+            document.getElementById('multiplayer-result-close-btn').addEventListener('click', () => {
+                overlay.classList.add('hidden');
+                self.isMultiplayer = false;
+                // 恢复单机模式
+                self._initAIOpponents();
+                self.round = 1;
+                self.playerHP = 40;
+                self.phase = 'preparation';
+                self._playerOpponentIdx = 0;
+                self.shop.init(5);
+                self.legend.init();
+                self.updateUI();
+                self._refreshAIUI();
+                self._refreshLegendModeUI();
+                self.addLog('round', '🏠 已返回大厅（单机模式）');
+            });
+        }
     }
 }
 
