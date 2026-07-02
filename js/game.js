@@ -194,6 +194,9 @@ class Game {
 
         // 图鉴全屏浮层
         this._bindCodexOverlay();
+
+        // 联机版按钮
+        document.getElementById('online-btn').addEventListener('click', () => this._openOnlineOverlay());
     }
 
     // =============================================
@@ -2442,6 +2445,144 @@ class Game {
         c.appendChild(el);
         document.getElementById('battle-log').scrollTop = 9999;
         while (c.children.length > 120) c.removeChild(c.firstChild);
+    }
+
+    // =============================================
+    // 联机版逻辑
+    // =============================================
+
+    _openOnlineOverlay() {
+        const overlay = document.getElementById('online-overlay');
+        if (!overlay) return;
+        overlay.classList.remove('hidden');
+        // 重置步骤
+        document.getElementById('online-step-login').classList.remove('hidden');
+        document.getElementById('online-step-lobby').classList.add('hidden');
+        document.getElementById('online-step-join').classList.remove('hidden');
+        // 自动填上次的用户名
+        const lastName = localStorage.getItem('online_player_name') || '';
+        const input = document.getElementById('online-username');
+        if (input) input.value = lastName;
+        // 绑定事件
+        this._bindOnlineEvents();
+    }
+
+    _closeOnlineOverlay() {
+        document.getElementById('online-overlay').classList.add('hidden');
+    }
+
+    _bindOnlineEvents() {
+        // 避免重复绑定
+        if (this._onlineEventsBound) return;
+        this._onlineEventsBound = true;
+
+        document.getElementById('online-close-btn').addEventListener('click', () => {
+            this._closeOnlineOverlay();
+        });
+
+        document.getElementById('online-login-btn').addEventListener('click', async () => {
+            const name = document.getElementById('online-username').value.trim();
+            if (!name) {
+                alert('请输入名字');
+                return;
+            }
+            if (!window.Online || !window.Online._initialized) {
+                alert('联机服务还未就绪，请稍等几秒再试');
+                return;
+            }
+            try {
+                await window.Online.login(name);
+                await this._enterLobby(true);
+            } catch (e) {
+                alert('登录失败：' + (e.message || e));
+            }
+        });
+
+        document.getElementById('online-join-btn').addEventListener('click', async () => {
+            const code = document.getElementById('online-join-code').value.trim();
+            if (!code || code.length < 4) {
+                alert('请输入正确的邀请码');
+                return;
+            }
+            if (!window.Online || !window.Online._initialized) {
+                alert('联机服务还未就绪，请稍等几秒再试');
+                return;
+            }
+            if (!window.Online.currentPlayer) {
+                alert('请先输入名字登录');
+                return;
+            }
+            try {
+                await window.Online.joinRoom(code);
+                await this._enterLobby(false);
+            } catch (e) {
+                alert('加入房间失败：' + (e.message || e));
+            }
+        });
+
+        document.getElementById('online-start-btn').addEventListener('click', async () => {
+            try {
+                await window.Online.startGame();
+            } catch (e) {
+                alert('开始游戏失败：' + (e.message || e));
+            }
+        });
+
+        document.getElementById('online-leave-btn').addEventListener('click', async () => {
+            await window.Online.leaveRoom();
+            this._closeOnlineOverlay();
+            this.addLog('round', '🚪 已离开房间');
+        });
+    }
+
+    async _enterLobby(isHost) {
+        // 切换到 lobby 步骤
+        document.getElementById('online-step-login').classList.add('hidden');
+        document.getElementById('online-step-join').classList.add('hidden');
+        document.getElementById('online-step-lobby').classList.remove('hidden');
+
+        if (isHost) {
+            try {
+                const room = await window.Online.createRoom();
+                document.getElementById('online-room-code').textContent = room.code;
+                document.getElementById('online-start-btn').style.display = 'inline-block';
+            } catch (e) {
+                alert('创建房间失败：' + (e.message || e));
+                this._closeOnlineOverlay();
+                return;
+            }
+        } else {
+            const room = window.Online.currentRoom;
+            if (room) {
+                document.getElementById('online-room-code').textContent = room.code;
+                document.getElementById('online-start-btn').style.display = window.Online.isHost ? 'inline-block' : 'none';
+            }
+        }
+
+        // 加载成员列表
+        await this._refreshOnlineMembers();
+
+        // 订阅成员加入/离开
+        window.Online.onMemberJoin = () => this._refreshOnlineMembers();
+        window.Online.onMemberLeave = () => this._refreshOnlineMembers();
+        window.Online.onRoomUpdate = (room) => {
+            if (room.status === 'playing') {
+                this.addLog('round', '🎮 房主已开启游戏！');
+                this._closeOnlineOverlay();
+            }
+        };
+    }
+
+    async _refreshOnlineMembers() {
+        const members = await window.Online.getRoomMembers();
+        document.getElementById('online-member-count').textContent = members.length;
+        const list = document.getElementById('online-member-list');
+        list.innerHTML = members.map(m => {
+            const name = m.player ? m.player.username : '?';
+            const hp = m.health || 0;
+            const hostMark = m.player_id === (window.Online.currentRoom?.host_id) ? ' 👑' : '';
+            return `<div style="padding:4px 8px;border-bottom:1px solid #21262d;font-size:12px;">${name}${hostMark} <span style="color:#8b949e;float:right;">❤️${hp}</span></div>`;
+        }).join('');
     }
 }
 
