@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三国自走棋 · 图鉴</title>
+<style>
+:root {
+  --bg: #0d1117; --card-bg: #161b22; --border: #30363d;
+  --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
+  --gold: #ffd700; --green: #3fb950; --red: #f85149; --purple: #bc8cff;
+  --orange: #f0883e; --wei: #1d4ed8; --shu: #16a34a; --wu: #dc2626; --qun: #f59e0b;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: -apple-system, "Microsoft YaHei", sans-serif;
+  min-height: 100vh;
+}
+
+/* ── 顶部导航 ── */
+#top-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 24px; background: var(--card-bg); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+#top-nav h1 { font-size: 20px; color: var(--gold); }
+#top-nav .nav-links { display: flex; gap: 4px; }
+.nav-btn {
+  padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); cursor: pointer; font-size: 13px;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none; -webkit-user-select: none;
+}
+.nav-btn:hover { border-color: var(--accent); color: var(--text); }
+.nav-btn.active { background: rgba(88,166,255,0.15); border-color: var(--accent); color: var(--accent); }
+.nav-btn:active { opacity: 0.7; }
+
+/* ── 进度条 ── */
+#progress-bar {
+  padding: 16px 24px; background: var(--card-bg); border-bottom: 1px solid var(--border);
+  display: flex; gap: 24px; flex-wrap: wrap; align-items: center;
+}
+.prog-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.prog-track {
+  width: 160px; height: 8px; background: #21262d; border-radius: 4px; overflow: hidden;
+}
+.prog-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+.prog-fill.sr-prog { background: linear-gradient(90deg, #3b82f6, #22c55e); }
+.prog-fill.prism-prog { background: linear-gradient(90deg, #ff4444, #ff8c00, #ffd700, #3fb950, #3b82f6, #a855f7); }
+.prog-fill.synergies { background: var(--purple); }
+.prog-fill.modes { background: var(--orange); }
+.prog-fill.hidden { background: var(--gold); }
+.prog-label { font-size: 11px; color: var(--muted); }
+
+/* ── 主体 ── */
+#main-content {
+  max-width: 1100px; margin: 0 auto; padding: 24px;
+}
+.section-title {
+  font-size: 16px; color: var(--accent); margin: 24px 0 12px;
+  border-bottom: 1px solid var(--border); padding-bottom: 8px;
+}
+
+/* ── 筛选栏 ── */
+#filter-bar {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.filter-btn {
+  padding: 4px 12px; border-radius: 12px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); cursor: pointer; font-size: 12px;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none; -webkit-user-select: none;
+}
+.filter-btn:hover { border-color: var(--accent); color: var(--text); }
+.filter-btn:active { opacity: 0.7; }
+.filter-btn.active { background: rgba(88,166,255,0.2); border-color: var(--accent); color: var(--accent); }
+
+/* ── 图鉴网格 ── */
+#codex-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+}
+.codex-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden; position: relative;
+  transition: transform 0.15s, box-shadow 0.15s; cursor: pointer;
+  aspect-ratio: 3/4;
+}
+.codex-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+.codex-card.locked {
+  opacity: 0.45; cursor: default;
+}
+.codex-card.locked:hover { transform: none; box-shadow: none; }
+
+/* SR 解锁 — 阵营色描边 */
+.codex-card.sr-unlocked {
+  border-color: rgba(88,166,255,0.5);
+  opacity: 1; cursor: pointer;
+}
+
+/* 炫彩 — 彩虹描边+微光 */
+.codex-card.prismatic {
+  border-color: transparent;
+  border-width: 2px;
+  background-image: linear-gradient(var(--card-bg), var(--card-bg)),
+    linear-gradient(135deg, #ff4444, #ff8c00, #ffd700, #3fb950, #3b82f6, #a855f7, #ff4444);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  opacity: 1; cursor: pointer;
+  animation: prism-glow 3s linear infinite;
+}
+@keyframes prism-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(255,215,0,0.3); }
+  50% { box-shadow: 0 0 18px rgba(168,85,247,0.5); }
+}
+
+/* Tier badge */
+.tier-badge {
+  display: block; font-size: 9px; margin-top: 3px;
+  border-radius: 8px; padding: 1px 8px;
+}
+.prismatic-badge { color: #ffd700; background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); }
+.sr-badge { color: #58a6ff; background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.3); }
+.locked-badge { color: #555; background: rgba(255,255,255,0.03); border: 1px solid #333; }
+
+/* 卡片内部 */
+.card-icon {
+  width: 100%; height: 60%; display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.card-icon img {
+  width: 80%; height: 80%; object-fit: contain;
+}
+.card-icon .lock-icon {
+  position: absolute; font-size: 32px; opacity: 0.6;
+}
+.card-info {
+  padding: 8px; text-align: center;
+}
+.card-name {
+  font-size: 13px; font-weight: 600; margin-bottom: 2px;
+}
+.card-sub {
+  font-size: 10px; color: var(--muted);
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.card-rarity {
+  position: absolute; top: 6px; right: 6px;
+  font-size: 10px; font-weight: bold;
+}
+
+/* 稀有度色 */
+.rarity-common { color: #8b7355; }
+.rarity-rare { color: #a0a0a0; }
+.rarity-epic { color: #3b82f6; }
+.rarity-legend { color: #a855f7; }
+.rarity-mythic { color: #ffd700; }
+
+/* 解锁高亮环 */
+.codex-card.unlocked { border-color: rgba(88,166,255,0.4); }
+.codex-card.unlocked .card-icon::after {
+  content: '✅'; position: absolute; top: 4px; left: 6px; font-size: 10px;
+}
+
+/* ── 详情模态 ── */
+#detail-modal {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7); z-index: 200;
+  align-items: center; justify-content: center;
+}
+#detail-modal.open { display: flex; }
+#detail-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 14px; padding: 24px; max-width: 420px; width: 90%;
+  text-align: center;
+}
+#detail-card .large-icon { margin: 0 auto 12px; }
+#detail-card .large-icon img { width: 100px; height: 100px; }
+#detail-card h2 { font-size: 22px; color: var(--gold); margin-bottom: 4px; }
+#detail-card .faction-tag {
+  display: inline-block; padding: 2px 10px; border-radius: 10px;
+  font-size: 11px; font-weight: bold; margin: 4px 2px;
+}
+#detail-card .skill-desc {
+  font-size: 13px; color: var(--muted); margin: 12px 0; line-height: 1.6;
+}
+#detail-card .tags-line { font-size: 11px; margin: 6px 0; }
+#detail-card .lore-text {
+  font-size: 12px; color: var(--muted); margin-top: 10px; padding-top: 10px;
+  border-top: 1px solid var(--border); line-height: 1.7; font-style: italic;
+}
+#detail-card .unlock-hint {
+  font-size: 12px; color: var(--red); margin-top: 10px;
+}
+#close-modal, .close-modal-btn {
+  margin-top: 16px; padding: 8px 24px; border-radius: 8px;
+  background: var(--accent); color: #fff; border: none; cursor: pointer; font-size: 13px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── 风格/模式图鉴卡片 ── */
+.synergy-card, .mode-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px; margin-bottom: 10px;
+  transition: border-color 0.15s;
+}
+.synergy-card.unlocked { border-color: rgba(188,140,255,0.4); }
+.mode-card.unlocked { border-color: rgba(240,136,62,0.4); }
+.synergy-card h4, .mode-card h4 { font-size: 15px; margin-bottom: 4px; }
+.synergy-card .syn-stats, .mode-card .mode-stats {
+  font-size: 12px; color: var(--muted);
+}
+
+/* ── 响应式 ── */
+@media (max-width: 600px) {
+  #codex-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
+  #top-nav { flex-direction: column; gap: 8px; }
+}
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div id="top-nav">
+  <h1>📖 三国自走棋 · 图鉴</h1>
+  <div class="nav-links" id="nav-links">
+    <button class="nav-btn active" data-tab="heroes">⚔️ 武将</button>
+    <button class="nav-btn" data-tab="synergies">🎯 协鸣</button>
+    <button class="nav-btn" data-tab="modes">🎮 模式</button>
+    <button class="nav-btn" data-tab="hidden">🏛️ 传说</button>
+  </div>
+</div>
+
+<!-- 进度条 -->
+<div id="progress-bar">
+  <div class="prog-item">
+    <span>🔥 SR</span>
+    <div class="prog-track"><div class="prog-fill sr-prog" id="sr-prog"></div></div>
+    <span class="prog-label" id="sr-label">0/38</span>
+  </div>
+  <div class="prog-item">
+    <span>🌈 炫彩</span>
+    <div class="prog-track"><div class="prog-fill prism-prog" id="prism-prog"></div></div>
+    <span class="prog-label" id="prism-label">0/38</span>
+  </div>
+  <div class="prog-item">
+    <span>🎯 协鸣</span>
+    <div class="prog-track"><div class="prog-fill synergies" id="syn-prog"></div></div>
+    <span class="prog-label" id="syn-label">0/10</span>
+  </div>
+  <div class="prog-item">
+    <span>🎮 模式</span>
+    <div class="prog-track"><div class="prog-fill modes" id="modes-prog"></div></div>
+    <span class="prog-label" id="modes-label">0/10</span>
+  </div>
+  <div class="prog-item">
+    <span>🏛️ 传说</span>
+    <div class="prog-track"><div class="prog-fill hidden" id="hidden-prog"></div></div>
+    <span class="prog-label" id="hidden-label">0/25</span>
+  </div>
+</div>
+
+<!-- 筛选栏 -->
+<div id="filter-bar"></div>
+
+<!-- 主体 -->
+<div id="main-content">
+  <div id="codex-grid"></div>
+</div>
+
+<!-- 详情模态 -->
+<div id="detail-modal">
+  <div id="detail-card"></div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/icon-builder.js"></script>
+<script>
+// ============================================
+// 图鉴逻辑
+// ============================================
+
+// ═══ 数据 ═══
+// 新格式: codex_s1_heroes = { heroId: { sr: bool, prismatic: bool } }
+// sr       = 用该英雄夺冠过 → 阵营色图标点亮
+// prismatic = 完成三星合成 → 炫彩图标点亮
+var CODEX_KEYS = {
+  heroes: 'codex_s1_heroes',
+  synergies: 'codex_s1_synergies',
+  modes: 'codex_s1_modes',
+  hidden: 'codex_s1_hidden',
+};
+
+function loadCodex(key) {
+  try {
+    var raw = JSON.parse(localStorage.getItem(key) || '{}');
+    // 兼容旧格式（旧的只存了 true/false）
+    if (key === CODEX_KEYS.heroes) {
+      var upgraded = {};
+      var ids = Object.keys(raw);
+      for (var i = 0; i < ids.length; i++) {
+        var id = ids[i];
+        var val = raw[id];
+        if (typeof val === 'object' && ('sr' in val || 'prismatic' in val)) {
+          upgraded[id] = val;
+        } else if (val === true) {
+          upgraded[id] = { sr: true, prismatic: false };
+        } else {
+          upgraded[id] = val;
+        }
+      }
+      return upgraded;
+    }
+    return raw;
+  }
+  catch(e) { return {}; }
+}
+
+// ═══ 小说设定文本 ═══
+var LORE = {
+  zhao_yun: '龙胆长枪，龙族护卫。前世为昆仑龙族一脉，投蜀汉以人身行走天下。',
+  huang_zhong: '老将烈弓，百步穿杨。定军山一役斩夏侯渊，蜀汉五虎之末。',
+  xu_chu: '虎痴，白虎之力守护者。典韦死后为曹操贴身护卫，魏国第一猛将。',
+  sun_quan: '江东之主，制衡三方。继承父兄基业，少年坐断东南。',
+  liu_bei: '仁德之君，大汉龙脉继承者。织席贩履出身，终成一方帝业。',
+  yu_jin: '五子良将之一，治军严整。后降关羽，晚节不保。',
+  guan_ping: '关羽义子，青龙随侍。随父镇守荆州，麦城同死。',
+  zhang_bao: '张飞之子，虎贲校尉。继承父志，北伐中原。',
+  han_xiandi: '大汉末代天子，龙脉绝唱。曹操挟天子以令诸侯。',
+  guan_yu: '武圣。剐龙台上监斩天官转世——前世只斩了半刀。以玄武之力驾驭青龙。',
+  zhang_fei: '燕人张飞，丈八蛇矛。相柳遗躯所铸蛇矛，万军之中取上将首级。',
+  dian_wei: '古之恶来。双铁戟重八十斤，宛城护主而死。',
+  lian_hua: '江东才女法师。水乡莲花化身，以花瓣为术。',
+  hua_xiong: '九黎焚天刀持有者。凤凰族交易锻造的魔刀加持。',
+  zhang_liao: '威震逍遥津。白虎之将，八百破十万。关羽旧友——还欠三百斛绿豆。',
+  yue_jin: '五子良将之先登。每战必先登城，魏国攻城先锋。',
+  huang_gai: '苦肉计主演。赤壁火攻的执行者，以忠勇闻。',
+  guo_jia: '鬼才军师。短命鬼之首——遗计定辽东，英年早逝。',
+  xun_yu: '王佐之才。曹操首席谋主，居中持重。因反对称公而自尽。',
+  xiahou_yuan: '夏侯弓神。神速连射，虎步关右。定军山被黄忠斩首。',
+  taishi_ci: '东莱太史慈。箭无虚发，信义笃烈。孙策的生死之交。',
+  zhu_ge: '卧龙。目睹彭城屠杀后立誓以凡躯为炉炼焚神之火。七星灯续命被魏延踏灭。',
+  sima_yi: '冢虎。潜伏爪牙，三马同槽。最终窃取魏国江山的军师。',
+  zhou_yu: '美周郎，凤鸣琴持有者。赤壁火攻主帅。凤凰族标记的收割者。',
+  lv_meng: '吴下阿蒙。白衣渡江奇袭荆州，士别三日刮目相看。',
+  pang_tong: '凤雏。连环计锁战船。落凤坡中箭身亡——凤凰归天。',
+  xu_huang: '五子良将之长驱。治军严谨，周亚夫之风。',
+  cheng_yu: '十面埋伏之谋主。以人肉为军粮的冷酷军师。',
+  lu_xun: '火烧连营。夷陵之战一把火烧尽刘备七百里连营。',
+  lian_po: '赵国老将。负荆请罪的传奇，老当益壮的坦克。',
+  zhang_he: '五子良将之巧变。街亭破马谡，木门道中伏身亡。',
+  ma_chao: '锦马超。西凉铁骑，威震羌胡。潼关杀得曹操割须弃袍。',
+  cao_cao: '奸雄。剐龙台监斩天官前身。借神魔之力以制神魔，玄武族的收割者。',
+  zuo_ci: '遁甲天书之主。玄武方士，能役使鬼神。验印揭穿曹操玄武族身份。',
+  jiang_wei: '诸葛亮继志者。九伐中原，薪火相传。蜀汉最后的军师。',
+  lv_bu: '飞将军。三龙护体——赤/黄/金三龙，金龙已被辕门射戟所伤。紫微天命被四圣兽截断。',
+  sun_ce: '小霸王。以玉玺借兵，横扫江东。被刺客所伤，英年早逝。',
+  dian_yong: '典勇。刺客与法师的双面手。',
+};
+
+// ═══ 渲染函数 ═══
+function getCostRarity(cost) {
+  const map = { 1:'common', 2:'rare', 3:'epic', 4:'legend', 5:'mythic' };
+  const labels = { 1:'普通', 2:'稀有', 3:'史诗', 4:'传说', 5:'神话' };
+  return { cls: map[cost] || 'common', label: labels[cost] || '' };
+}
+
+function getFactionColor(faction) {
+  const map = { wei:'#1d4ed8', shu:'#16a34a', wu:'#dc2626', qun:'#f59e0b' };
+  return map[faction] || '#555';
+}
+
+function getFactionName(faction) {
+  const map = { wei:'魏', shu:'蜀', wu:'吴', qun:'群' };
+  return map[faction] || faction;
+}
+
+function renderHeroes(filter) {
+  const grid = document.getElementById('codex-grid');
+  const codex = loadCodex(CODEX_KEYS.heroes);
+  grid.innerHTML = '';
+
+  var heroes = [];
+  for (var i = 0; i < HEROES.length; i++) { heroes.push(HEROES[i]); }
+  if (filter && filter !== 'all') {
+    if (['wei','shu','wu','qun'].indexOf(filter) >= 0) {
+      heroes = heroes.filter(function(h) { return h.synergies.indexOf(filter) >= 0; });
+    } else if (['warrior','mage','tank','archer','assassin','support'].indexOf(filter) >= 0) {
+      heroes = heroes.filter(function(h) { return h.synergies.indexOf(filter) >= 0; });
+    } else if (filter === 'sr') {
+      heroes = heroes.filter(function(h) { return codex[h.id] && codex[h.id].sr && !codex[h.id].prismatic; });
+    } else if (filter === 'prismatic') {
+      heroes = heroes.filter(function(h) { return codex[h.id] && codex[h.id].prismatic; });
+    } else if (filter === 'locked') {
+      heroes = heroes.filter(function(h) { return !codex[h.id] || (!codex[h.id].sr && !codex[h.id].prismatic); });
+    } else if (['dragon','phoenix','tortoise','tiger'].indexOf(filter) >= 0) {
+      heroes = heroes.filter(function(h) { return h.tags && h.tags.indexOf(filter) >= 0; });
+    }
+  }
+
+  heroes.forEach(function(h) {
+    var state = codex[h.id] || null;
+    var tier = ICONS.getTier(state);
+    var faction = h.synergies.find(function(s) { return ['wei','shu','wu','qun'].indexOf(s) >= 0; }) || 'wei';
+    var rarity = getCostRarity(h.cost);
+
+    // 选对应 tier 的 PNG
+    var pngSrc = tier === 2 ? h.iconPNG_prismatic
+      : tier === 1 ? h.iconPNG_sr
+      : h.iconPNG_locked;
+    var displayName = tier > 0 ? h.name : '???';
+    var factionColor = tier > 0 ? getFactionColor(faction) : '#555';
+
+    var cardCls = 'codex-card';
+    if (tier === 2) cardCls += ' prismatic';
+    else if (tier === 1) cardCls += ' sr-unlocked';
+    else cardCls += ' locked';
+
+    var tierBadge = tier === 2
+      ? '<span class="tier-badge prismatic-badge">✦ 炫彩</span>'
+      : tier === 1
+        ? '<span class="tier-badge sr-badge">⭐ SR</span>'
+        : '<span class="tier-badge locked-badge">🔒</span>';
+
+    var card = document.createElement('div');
+    card.className = cardCls;
+
+    // 图标区：优先 Canvas PNG，若为空串/iVBOR 占位则降级为 emoji
+    var isBlankPng = !pngSrc || pngSrc === 'data:image/png;base64,iVBORw0KGgo=';
+    var iconHtml;
+    if (!isBlankPng) {
+      // 用 inline img，并在 load 后检测是否全透明（小程序 Canvas 有时会返回空白）
+      iconHtml = '<img src="' + pngSrc + '" alt="' + h.name + '"'
+        + ' style="width:60px;height:60px;border-radius:6px;object-fit:contain;image-rendering:pixelated;"'
+        + ' onerror="this.style.display=\'none\';this.nextSibling.style.display=\'inline\'">'
+        + '<span style="font-size:36px;display:none;">' + h.icon + '</span>';
+    } else {
+      iconHtml = '<span style="font-size:36px;">' + h.icon + '</span>';
+    }
+
+    card.innerHTML =
+      '<span class="card-rarity rarity-' + rarity.cls + '">' + '⬥'.repeat(h.cost) + '</span>' +
+      '<div class="card-icon">' + iconHtml + '</div>' +
+      '<div class="card-info">' +
+        '<div class="card-name" style="color:' + factionColor + '">' + displayName + '</div>' +
+        '<div class="card-sub">' +
+          '<span style="color:' + factionColor + '">' + (tier > 0 ? getFactionName(faction) : '???') + '</span>' +
+          '<span>·</span>' +
+          '<span>' + h.cost + '费</span>' +
+        '</div>' +
+        tierBadge +
+      '</div>';
+
+    if (tier > 0) {
+      card.onclick = (function(hero) { return function() { showHeroDetail(hero); }; })(h);
+    }
+
+    grid.appendChild(card);
+  });
+}
+
+function showHeroDetail(hero) {
+  var codex = loadCodex(CODEX_KEYS.heroes);
+  var state = codex[hero.id] || {};
+  var tier = ICONS.getTier(state);
+  var faction = hero.synergies.find(function(s) { return ['wei','shu','wu','qun'].indexOf(s) >= 0; }) || 'wei';
+  var rarity = getCostRarity(hero.cost);
+
+  var pngSrc = tier === 2 ? hero.iconPNG_prismatic
+    : tier === 1 ? hero.iconPNG_sr
+    : hero.iconPNG_locked;
+
+  var lore = LORE[hero.id] || '';
+  var synNames = hero.synergies.map(function(s) {
+    var syn = SYNERGIES[s];
+    return syn ? syn.icon + ' ' + syn.name : s;
+  }).join(' · ');
+  var tagNames = hero.tags ? hero.tags.join(' · ') : '';
+
+  var unlockHint = '';
+  if (tier === 0) unlockHint = '<p class="unlock-hint">🔒 用此武将取得冠军胜利即可解锁 SR 阵营配色</p>';
+  else if (tier === 1) unlockHint = '<p class="unlock-hint">🌈 将此武将合成为 ★★★ 三星即可解锁炫彩徽章</p>';
+  else unlockHint = '<p class="unlock-hint" style="color:#ffd700">✨ 炫彩已解锁！这是最高荣誉徽章</p>';
+
+  var modal = document.getElementById('detail-modal');
+  var card = document.getElementById('detail-card');
+  var isBlankDetail = !pngSrc || pngSrc === 'data:image/png;base64,iVBORw0KGgo=';
+  var largeIconHtml = isBlankDetail
+    ? '<span style="font-size:80px">' + hero.icon + '</span>'
+    : '<img src="' + pngSrc + '" alt="' + hero.name + '" style="width:100px;height:100px;object-fit:contain;image-rendering:pixelated;" onerror="this.style.display=\'none\';this.insertAdjacentHTML(\'afterend\',\'<span style=font-size:80px>' + hero.icon + '</span>\')">';
+  card.innerHTML =
+    '<div class="large-icon">' + largeIconHtml + '</div>' +
+    '<h2>' + hero.name + ' <span style="font-size:14px;color:var(--muted);">' + (tier === 2 ? '✦炫彩' : tier === 1 ? '⭐SR' : '🔒灰标') + '</span></h2>' +
+    '<span class="faction-tag" style="background:' + getFactionColor(faction) + '33;color:' + getFactionColor(faction) + ';border:1px solid ' + getFactionColor(faction) + '">' +
+      getFactionName(faction) + ' · ' + hero.cost + '费 · ' + rarity.label +
+    '</span>' +
+    '<p style="margin:8px 0;font-size:13px;">' + synNames + '</p>' +
+    (tagNames ? '<p class="tags-line">🏷️ ' + tagNames + '</p>' : '') +
+    '<p class="skill-desc"><strong>' + hero.skill.name + '</strong>：' + hero.skill.description + '</p>' +
+    (lore ? '<p class="lore-text">📜 ' + lore + '</p>' : '') +
+    unlockHint +
+    '<button id="close-modal-btn" class="close-modal-btn">关闭</button>';
+  modal.classList.add('open');
+  // 绑定本次弹窗内的关闭按钮
+  var closeBtn2 = document.getElementById('close-modal-btn');
+  if (closeBtn2) {
+    closeBtn2.onclick = null;
+    closeBtn2.addEventListener('click', closeDetail);
+  }
+}
+
+function closeDetail() {
+  document.getElementById('detail-modal').classList.remove('open');
+}
+
+// ═══ 协鸣图鉴 ═══
+function renderSynergies() {
+  var grid = document.getElementById('codex-grid');
+  var codex = loadCodex(CODEX_KEYS.synergies);
+  grid.innerHTML = '';
+
+  var keys = Object.keys(SYNERGIES);
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    var syn = SYNERGIES[key];
+    var unlocked = !!codex[key];
+    var html = '<div class="synergy-card' + (unlocked ? ' unlocked' : '') + '">';
+    html += '<h4>' + syn.icon + ' ' + syn.name + ' ' + (unlocked ? '✅' : '🔒') + '</h4>';
+    html += '<p style="font-size:12px;color:var(--muted);margin:4px 0;">' + syn.description + '</p>';
+    html += '<div class="syn-stats">';
+    for (var j = 0; j < syn.tiers.length; j++) {
+      var t = syn.tiers[j];
+      html += '<div style="margin:3px 0;">';
+      html += unlocked ? ('[' + t.count + '人] ' + t.effect) : ('[' + t.count + '人] ???');
+      html += '</div>';
+    }
+    html += '</div>';
+    if (unlocked && codex[key].tier) {
+      var stars = '';
+      for (var k = 0; k < codex[key].tier; k++) stars += '⭐';
+      html += '<p style="font-size:11px;color:var(--gold);margin-top:6px;">最高达成：' + stars + '</p>';
+    }
+    html += '</div>';
+    grid.innerHTML += html;
+  }
+}
+
+// ═══ 模式图鉴 ═══
+var MODE_LIST = [
+  { id:'standard', name:'⚔️ 标准模式', desc:'经典自走棋体验，纯策略博弈。永远的起手式。', priority:'P0' },
+  { id:'double_star', name:'⭐⭐ 双星闪耀', desc:'每轮首购英雄直接二星，所有人同步加速。', priority:'P0' },
+  { id:'synergy_component', name:'🧩 协鸣组件开局', desc:'开局每人获得一个万能协鸣组件，策略深度翻倍。', priority:'P1' },
+  { id:'free_reroll', name:'🆓 零元刷新', desc:'收入减半，商店刷新免费。极致刷新体验。', priority:'P1' },
+  { id:'legend_overthrow', name:'🏛️ 传说体系颠覆', desc:'基于《诸界异宇》的隐藏协鸣被激活。', priority:'P2' },
+  { id:'destiny_peak', name:'👑 天命最高', desc:'每个协鸣满层效果翻倍或质变。', priority:'P2' },
+  { id:'targeted_synergy', name:'🎯 定向协鸣', desc:'随机阵营获得全局 buff。', priority:'P3' },
+  { id:'high_buyback', name:'💸 高价回收', desc:'卖出金额翻倍，鼓励频繁换阵。', priority:'P3' },
+  { id:'eight_rules', name:'🎲 八人异则', desc:'8 人各不同规则，终极混沌。', priority:'远期' },
+  { id:'lightning_war', name:'⚡ 闪电战', desc:'20 轮上限，收入翻倍，节奏极快。', priority:'远期' },
+];
+
+function renderModes() {
+  var grid = document.getElementById('codex-grid');
+  var codex = loadCodex(CODEX_KEYS.modes);
+  grid.innerHTML = '';
+
+  for (var i = 0; i < MODE_LIST.length; i++) {
+    var m = MODE_LIST[i];
+    var modeData = codex[m.id];
+    var wins = modeData ? modeData.wins : 0;
+    var tier = wins >= 10 ? '🏆 大师' : wins >= 3 ? '🟪 专家' : wins >= 1 ? '🟦 入门' : '⬜ 未解锁';
+
+    grid.innerHTML +=
+      '<div class="mode-card' + (wins > 0 ? ' unlocked' : '') + '">' +
+        '<h4>' + m.name + ' <span style="font-size:11px;color:var(--muted)">' + m.priority + '</span></h4>' +
+        '<p style="font-size:12px;color:var(--muted);margin:4px 0;">' + m.desc + '</p>' +
+        '<div class="mode-stats">' +
+          (wins > 0 ? '🏆 ' + wins + ' 胜 · ' + tier : '🔒 尚未尝试') +
+        '</div>' +
+      '</div>';
+  }
+}
+
+// ═══ 传说协鸣图鉴 ═══
+var HIDDEN_SYNERGIES = [
+  // A线·兵器谱
+  { id:'execution_ledge', name:'⚔️ 剐龙台遗恨', line:'兵器谱', hint:'关羽装备青龙偃月刀破龙族', lore:'瑶池玄龟被剐龙台天刑处死，遗骨铸刀。此刀对龙族有宿命压制。' },
+  { id:'xiangliu_will', name:'🐍 相柳遗志', line:'兵器谱', hint:'张飞装备丈八蛇矛附毒', lore:'被天庭镇压的相柳遗躯化矛，每次攻击都带着上古水神的怨恨。' },
+  { id:'executioner_blade', name:'🗡️ 监斩之刃', line:'兵器谱', hint:'曹操持有青釭剑', lore:'剐龙台上监斩玄龟的那把刀——曹操前世为监斩天官。' },
+  { id:'three_dragons', name:'🐉 三龙护体', line:'兵器谱', hint:'吕布装备方天画戟', lore:'方天画戟封印赤黄金三龙。金龙已伤——被辕门射戟所断。' },
+  { id:'red_hare_split', name:'🐎 赤兔双主', line:'兵器谱', hint:'赤兔马装备在不同人身上效果不同', lore:'赤龙凭依，水火双精。关羽骑则水火双攻，吕布骑仅火——赤龙认主。' },
+  { id:'jiuli_blaze', name:'🔥 九黎焚天', line:'兵器谱', hint:'华雄装备九黎焚天刀', lore:'张角与凤凰族交易锻造的魔刀。凤凰之火加持。' },
+  // B线·前世因果
+  { id:'half_blade_grace', name:'🙏 斩玄之恩', line:'前世因果', hint:'曹操为关羽挡一次致命伤害', lore:'曹操前世监斩天官故意留了半刀没斩尽。这一刀，是前世欠下的。' },
+  { id:'green_bean_debt', name:'🫘 绿豆债', line:'前世因果', hint:'关羽+张辽经济互助', lore:'关羽卖绿豆欠张辽三百斛。土山劝降时还债。' },
+  { id:'burn_gods_oath', name:'🔥 焚神之誓', line:'前世因果', hint:'诸葛亮唯一军师时技能增伤', lore:'目睹彭城屠杀后立誓：以凡躯为炉，炼一把焚尽诸神的火。' },
+  // C线·神话政治
+  { id:'plum_wine', name:'🍷 青梅论道', line:'神话政治', hint:'曹操+刘备互不克', lore:'曹操借神魔之力以制神魔 vs 刘备人道制衡天道。两种理念，互相承认。' },
+  { id:'zhiwei_broken', name:'💫 紫微断章', line:'神话政治', hint:'吕布三星独有天命', lore:'紫微天命已被四圣兽截断——吕布获得力量的同时也在消耗自己。' },
+  { id:'sleeping_dragon', name:'🐉 卧龙蛰渊', line:'神话政治', hint:'诸葛亮+汉献帝', lore:'龙脉守护——汉室最后的龙族与承诺焚神的人，两股力量碰撞。' },
+  // D线·历史战役
+  { id:'red_cliff_embers', name:'🔥 赤壁余烬', line:'历史战役', hint:'周瑜+黄盖+诸葛亮开场debuff', lore:'以火攻火，以神制神。赤壁的余烬至今灼烧着所有踏足长江的人。' },
+  { id:'seven_stars', name:'⭐ 七星续命', line:'历史战役', hint:'诸葛亮+赵云概率复活', lore:'七星灯被魏延踏灭——成功率仅30%。赵云护法的最后责任。' },
+  // E线·演义
+  { id:'peach_garden', name:'🌸 桃园结义', line:'演义叙事', hint:'刘备+关羽+张飞', lore:'不求同年同月同日生，但求同年同月同日死。' },
+  { id:'five_tigers', name:'🐯 五虎上将', line:'演义叙事', hint:'关张赵马黄 3/5', lore:'蜀汉最强五人组。' },
+  { id:'five_elites', name:'🛡️ 五子良将', line:'演义叙事', hint:'张辽于禁张郃乐进徐晃 3/5', lore:'魏国最强五人组。' },
+  { id:'strategist_squad', name:'📜 军师天团', line:'演义叙事', hint:'诸葛/司马/周瑜/陆逊/荀彧 2/5', lore:'三国最强智囊团。' },
+  { id:'short_lived', name:'💀 短命鬼小队', line:'演义叙事', hint:'郭嘉/周瑜/庞统/典韦/孙策 2/5', lore:'天妒英才——阵亡时燃烧最后的生命。' },
+  { id:'father_son', name:'👨‍👦 虎父无犬子', line:'演义叙事', hint:'关羽+关平 / 张飞+张苞', lore:'将门虎子。' },
+  { id:'four_beasts', name:'🐉🐅🐢🔥 四象归一', line:'隐藏成就', hint:'四神兽三星图鉴全齐', lore:'龙腾虎跃，玄凤齐鸣。四象归一之日，天下大势已定。' },
+];
+
+function renderHidden() {
+  var grid = document.getElementById('codex-grid');
+  var codex = loadCodex(CODEX_KEYS.hidden);
+  grid.innerHTML = '';
+
+  var lines = {};
+  for (var i = 0; i < HIDDEN_SYNERGIES.length; i++) {
+    var s = HIDDEN_SYNERGIES[i];
+    if (!lines[s.line]) lines[s.line] = [];
+    lines[s.line].push(s);
+  }
+
+  var lineNames = Object.keys(lines);
+  for (var li = 0; li < lineNames.length; li++) {
+    var lineName = lineNames[li];
+    var synergies = lines[lineName];
+    grid.innerHTML += '<div class="section-title" style="grid-column:1/-1;margin-top:8px;">' + lineName + '</div>';
+
+    for (var si = 0; si < synergies.length; si++) {
+      var s = synergies[si];
+      var unlocked = !!codex[s.id];
+      grid.innerHTML +=
+        '<div class="codex-card' + (unlocked ? ' unlocked' : ' locked') + '" style="aspect-ratio:auto;min-height:100px;padding:12px;text-align:left;">' +
+          '<h4 style="font-size:14px;margin-bottom:4px;">' + s.name + ' ' + (unlocked ? '✅' : '🔒') + '</h4>' +
+          '<p style="font-size:11px;color:var(--muted);">' + (unlocked ? s.hint : '???') + '</p>' +
+          (unlocked ? '<p style="font-size:10px;color:var(--gold);margin-top:4px;">📜 ' + s.lore + '</p>' : '') +
+        '</div>';
+    }
+  }
+}
+
+// ═══ 筛选栏 ═══
+function buildFilters(tab) {
+  var bar = document.getElementById('filter-bar');
+  if (tab === 'heroes') {
+    bar.innerHTML =
+      '<button class="filter-btn active" data-filter="all">全部</button>' +
+      '<button class="filter-btn" data-filter="wei" style="color:#1d4ed8">魏</button>' +
+      '<button class="filter-btn" data-filter="shu" style="color:#16a34a">蜀</button>' +
+      '<button class="filter-btn" data-filter="wu" style="color:#dc2626">吴</button>' +
+      '<button class="filter-btn" data-filter="qun" style="color:#f59e0b">群</button>' +
+      '<span style="color:var(--border);margin:0 4px;">|</span>' +
+      '<button class="filter-btn" data-filter="warrior">战士</button>' +
+      '<button class="filter-btn" data-filter="mage">法师</button>' +
+      '<button class="filter-btn" data-filter="tank">坦克</button>' +
+      '<button class="filter-btn" data-filter="archer">弓手</button>' +
+      '<button class="filter-btn" data-filter="assassin">刺客</button>' +
+      '<button class="filter-btn" data-filter="support">辅助</button>' +
+      '<span style="color:var(--border);margin:0 4px;">|</span>' +
+      '<button class="filter-btn" data-filter="dragon">🐉龙族</button>' +
+      '<button class="filter-btn" data-filter="phoenix">🔥凤凰</button>' +
+      '<button class="filter-btn" data-filter="tortoise">🐢玄武</button>' +
+      '<button class="filter-btn" data-filter="tiger">🐅白虎</button>' +
+      '<span style="color:var(--border);margin:0 4px;">|</span>' +
+      '<button class="filter-btn" data-filter="prismatic" style="color:#ffd700;border-color:#ffd70044;">🌈炫彩</button>' +
+      '<button class="filter-btn" data-filter="sr" style="color:#58a6ff;border-color:#58a6ff44;">⭐SR</button>' +
+      '<button class="filter-btn" data-filter="locked" style="color:#8b949e;">🔒灰锁</button>';
+  } else {
+    bar.innerHTML = '';
+  }
+
+  var btns = bar.querySelectorAll('.filter-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].addEventListener('click', function() {
+      var allBtns = bar.querySelectorAll('.filter-btn');
+      for (var j = 0; j < allBtns.length; j++) { allBtns[j].classList.remove('active'); }
+      this.classList.add('active');
+      renderHeroes(this.getAttribute('data-filter'));
+    });
+  }
+}
+
+// ═══ 进度条更新 ═══
+function updateProgress() {
+  var heroes = loadCodex(CODEX_KEYS.heroes);
+  var synergies = loadCodex(CODEX_KEYS.synergies);
+  var modes = loadCodex(CODEX_KEYS.modes);
+  var hidden = loadCodex(CODEX_KEYS.hidden);
+
+  var totalHeroes = HEROES.length;
+  var srCount = 0, prismCount = 0;
+  var ids = Object.keys(heroes);
+  for (var i = 0; i < ids.length; i++) {
+    var v = heroes[ids[i]];
+    if (typeof v === 'object') {
+      if (v.sr) srCount++;
+      if (v.prismatic) prismCount++;
+    } else if (v === true) {
+      srCount++;
+    }
+  }
+
+  var sc = Object.keys(synergies).length;
+  var mc = Object.keys(modes).length;
+  var hdc = Object.keys(hidden).length;
+
+  document.getElementById('sr-prog').style.width = (srCount / totalHeroes * 100) + '%';
+  document.getElementById('prism-prog').style.width = (prismCount / totalHeroes * 100) + '%';
+  document.getElementById('syn-prog').style.width = (sc / 10 * 100) + '%';
+  document.getElementById('modes-prog').style.width = (mc / MODE_LIST.length * 100) + '%';
+  document.getElementById('hidden-prog').style.width = (hdc / HIDDEN_SYNERGIES.length * 100) + '%';
+
+  document.getElementById('sr-label').textContent = srCount + '/' + totalHeroes;
+  document.getElementById('prism-label').textContent = prismCount + '/' + totalHeroes;
+  document.getElementById('syn-label').textContent = sc + '/10';
+  document.getElementById('modes-label').textContent = mc + '/' + MODE_LIST.length;
+  document.getElementById('hidden-label').textContent = hdc + '/' + HIDDEN_SYNERGIES.length;
+}
+
+// ═══ Tab 切换 ═══
+var currentTab = 'heroes';
+
+function switchTab(tab) {
+    currentTab = tab;
+    var btns = document.querySelectorAll('.nav-btn');
+    for (var i = 0; i < btns.length; i++) { btns[i].classList.remove('active'); }
+    var activeBtn = document.querySelector('.nav-btn[data-tab="' + tab + '"]');
+    if (activeBtn) activeBtn.classList.add('active');
+
+    if (tab === 'heroes') {
+        buildFilters('heroes');
+        renderHeroes('all');
+    } else if (tab === 'synergies') {
+        document.getElementById('filter-bar').innerHTML = '';
+        renderSynergies();
+    } else if (tab === 'modes') {
+        document.getElementById('filter-bar').innerHTML = '';
+        renderModes();
+    } else if (tab === 'hidden') {
+        document.getElementById('filter-bar').innerHTML = '';
+        renderHidden();
+    }
+}
+
+// ═══ 初始化 ═══
+function _initCodex() {
+  try {
+    if (typeof ICONS === 'undefined') throw new Error('icon-builder.js 未加载');
+    if (typeof HEROES === 'undefined') throw new Error('data.js 未加载');
+    ICONS.buildAllIcons(HEROES);
+
+    // ── 导航按钮事件绑定（addEventListener 替代 onclick，兼容小程序 WebView）──
+    var navLinks = document.getElementById('nav-links');
+    if (navLinks) {
+      var navBtns = navLinks.querySelectorAll('.nav-btn');
+      for (var ni = 0; ni < navBtns.length; ni++) {
+        (function(btn) {
+          btn.addEventListener('click', function() {
+            switchTab(btn.getAttribute('data-tab'));
+          });
+        })(navBtns[ni]);
+      }
+    }
+
+    // 关闭弹窗
+    var closeBtn = document.getElementById('close-modal');
+    if (closeBtn) closeBtn.addEventListener('click', closeDetail);
+    var detailModal = document.getElementById('detail-modal');
+    if (detailModal) detailModal.addEventListener('click', function(e) {
+      if (e.target === detailModal) closeDetail();
+    });
+
+    buildFilters('heroes');
+    renderHeroes('all');
+    updateProgress();
+  } catch(e) {
+    document.getElementById('codex-grid').innerHTML =
+      '<div style="text-align:center;padding:40px;color:#f85149;grid-column:1/-1;">' +
+      '<h3>⚠️ 图鉴加载失败</h3>' +
+      '<p style="font-size:13px;color:#8b949e;">' + e.message + '</p>' +
+      '</div>';
+  }
+}
+
+// 支持 DOMContentLoaded 和直接执行两种时序（小程序 WebView 有时 DOM 已就绪）
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _initCodex);
+} else {
+  _initCodex();
+}
+</script>
+
+</body>
+</html>

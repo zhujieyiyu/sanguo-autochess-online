@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三国自走棋 · 武将费率全表</title>
+<style>
+  :root { --bg:#0d1117; --card:#161b22; --border:#30363d; --text:#c9d1d9; --muted:#8b949e; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:"Microsoft YaHei",sans-serif; padding:20px; }
+  h1 { text-align:center; font-size:24px; margin-bottom:6px; }
+  .subtitle { text-align:center; color:var(--muted); font-size:12px; margin-bottom:24px; }
+  h2 { font-size:18px; margin:28px 0 12px; padding-left:8px; border-left:3px solid; }
+  table { width:100%; border-collapse:collapse; margin-bottom:16px; font-size:13px; background:var(--card); border-radius:8px; overflow:hidden; }
+  th, td { padding:8px 10px; text-align:center; border-bottom:1px solid var(--border); }
+  th { background:#21262d; color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; }
+  td { white-space:nowrap; }
+  td.name { text-align:left; font-weight:600; }
+  td.cost span { display:inline-block; width:22px; height:22px; line-height:22px; border-radius:50%; font-size:11px; font-weight:700; text-align:center; }
+  .cost-1 span { background:#9aa0a6; color:#fff; }
+  .cost-2 span { background:#238636; color:#fff; }
+  .cost-3 span { background:#1f6feb; color:#fff; }
+  .cost-4 span { background:#8957e5; color:#fff; }
+  .cost-5 span { background:#d29922; color:#000; }
+  .syn-tag, .tag-tag { display:inline-block; padding:1px 6px; border-radius:3px; font-size:10px; margin:1px; }
+  .syn-tag { background:rgba(255,255,255,0.08); }
+  .tag-tag { background:rgba(255,215,0,0.15); color:#d29922; }
+  .notes { font-size:11px; color:var(--muted); font-style:italic; }
+  .summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-bottom:20px; }
+  .summary-card { background:var(--card); border-radius:8px; padding:12px 14px; text-align:center; }
+  .summary-card .big { font-size:32px; font-weight:700; }
+  .summary-card .label { font-size:11px; color:var(--muted); }
+  .skill-row td { font-size:11px; color:#a5d6ff; max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:normal; }
+  .warn-box { background:rgba(218,54,51,0.12); border:1px solid rgba(218,54,51,0.3); border-radius:8px; padding:12px 16px; margin:16px 0; }
+  .warn-box h4 { color:#da3633; margin-bottom:4px; }
+  .warn-box ul { padding-left:20px; font-size:13px; color:var(--text); }
+  .warn-box li { margin:4px 0; }
+</style>
+</head>
+<body>
+
+<h1>🐉 三国自走棋 · 武将费率全表</h1>
+<div class="subtitle">当前版本 38 将 | 调整前请确认所有关联系统</div>
+
+<!-- ═══ 总览卡片 ═══ -->
+<div class="summary-grid">
+  <div class="summary-card"><div class="big" style="color:#9aa0a6">9</div><div class="label">1费 · 白卡</div></div>
+  <div class="summary-card"><div class="big" style="color:#238636">12</div><div class="label">2费 · 绿卡</div></div>
+  <div class="summary-card"><div class="big" style="color:#1f6feb">8</div><div class="label">3费 · 蓝卡</div></div>
+  <div class="summary-card"><div class="big" style="color:#8957e5">6</div><div class="label">4费 · 紫卡</div></div>
+  <div class="summary-card"><div class="big" style="color:#d29922">3</div><div class="label">5费 · 金卡</div></div>
+</div>
+
+<!-- ═══ 疑似问题提示 ═══ -->
+<div class="warn-box">
+  <h4>⚠️ 潜在费率争议</h4>
+  <ul>
+    <li><b>关羽</b> — 当前 <span style="color:#238636;font-weight:700;">2费</span>，堂堂武圣与张苞(1费)同一梯队？建议至少 <b>4费</b> 或 <b>5费</b></li>
+    <li><b>赵云</b> — 当前 <span style="color:#9aa0a6;font-weight:700;">1费</span>，长坂坡战神是否太低？建议 <b>2-3费</b></li>
+    <li><b>吕布</b> — 当前 <span style="color:#d29922;font-weight:700;">5费</span>，合理，但缺少张辽、高顺等配套将</li>
+    <li><b>汉献帝</b> — 当前 <span style="color:#9aa0a6;font-weight:700;">1费</span>，光环型辅助定位合理</li>
+    <li><b>典勇</b> — 非三国核心人物却占了 <span style="color:#d29922;font-weight:700;">5费</span>，是否降级腾位？</li>
+  </ul>
+</div>
+
+<!-- ═══ 1费 ═══ -->
+<h2 style="color:#9aa0a6;">⬜ 1费英雄（白色·基础牌）— 9 张</h2>
+<table>
+<tr><th>武将</th><th>费用</th><th>❤️血量</th><th>⚔️攻击</th><th>🛡️防御</th><th>⚡攻速</th><th>🎯射程</th><th>协鸣</th><th>标签</th><th>技能</th></tr>
+<tr class="cost-1">
+  <td class="name">🐉 赵云</td><td class="cost"><span>1</span></td>
+  <td>600</td><td>45</td><td>25</td><td>1.0</td><td>1</td>
+  <td><span class="syn-tag">蜀</span><span class="syn-tag">战士</span></td>
+  <td><span class="tag-tag">dragon</span></td>
+  <td class="skill-row">龙胆·每第3次攻击附带15%最大血量伤害</td>
+</tr>
+<tr class="cost-1">
+  <td class="name">🏹 黄忠</td><td class="cost"><span>1</span></td>
+  <td>500</td><td>50</td><td>20</td><td>0.9</td><td>3</td>
+  <td><span class="syn-tag">蜀</span><span class="syn-tag">弓手</span></td>
+  <td></td>
+  <td class="skill-row">老当益壮·攻击20%概率暴击(2倍)</td>
+</tr>
+<tr class="cost-1">
+  <td class="name">💪 许褚</td><td class="cost"><span>1</span></td>
+  <td>750</td><td>40</td><td>35</td><td>0.8</td><td>1</td>
+  <td><span class="syn-tag">魏</span><span class="syn-tag">坦克</span></td>
+  <td><span class="tag-tag">tiger</span></td>
+  <td class="skill-row">虎痴·血量&lt;50%时防御+50%</td>
+</tr>
+<tr class="cost-1">
+  <td class="name">👑 孙权</td><td class="cost"><span>1</span></td>
+  <td>550</td><td>35</td><td>25</td><td>1.0</td><td>2</td>
+  <td><span class="syn-tag">吴</span><span class="syn-tag">辅助</span></td>
+  <td></td>
+  <td class="skill-row">制衡·每5秒回复自身8%血量</td>
+</tr>
+<tr class="cost-1">
+  <td class="name">👑 刘备</td><td class="cost"><span>1</span></td>
+  <td>550</td><td>35</td><td>25</td><td>1.0</td><td>2</td>
+  <td><span class="syn-tag">蜀</span><span class="syn-tag">辅助</span></td>
+  <td><span class="tag-tag">emperor</span></td>
+  <td class="skill-row">仁德·每6秒为周围1格血量最低友方回复10%最大生命</td>
+</tr>
+<tr class="cost-1">
+  <td class="name">🛡️ 于禁</td><td class="cost"><span>1</span></td>
+  <td>700</td><td>35</td><td>42</td><td>0.75</td><td>1</td>
+  <td><span class="syn-tag">魏</span><span class="syn-tag">坦克</span></td>
+  <td></td>
+  <td class="skill-row">严整·受到刺客攻击伤害-20%</td>
+</tr>
+<tr class="cost-1">
+  <td class="name">🗡️ 关平</td><td class="cost"><span>1</span></td>
+  <td>620</td><td>50</td><td>20</td><td>1.05</td><td>1</td>
+  <td><span class="syn-tag">蜀</span><span class="syn-tag">战士</span></td>
+  <td></td>
+  <td class="skill-row">青龙随侍·与关羽相邻时自身攻击+15%</td>
+</tr>
+<tr class="cost-1">
+  <td class="name">🐯 张苞</td><td class="cost"><span>1</span></td>
+  <td>580</td><td>48</td><td>22</td><td>1.0</td><td>1</td>
+  <td><span class="syn-tag">蜀</span><span class="syn-tag">战士</span></td>
+  <td></td>
+  <td class="skill-row">虎贲·攻击15%概率使目标眩晕1秒</td>
+</tr>
+<tr class="cost-1">
+  <td class="name">🏛️ 汉献帝</td><td class="cost"><span>1</span></td>
+  <td>450</td><td>22</td><td>18</td><td>0.85</td><td>3</td>
+  <td><span class="syn-tag">群</span><span class="syn-tag">辅助</span></td>
+  <td><span class="tag-tag">emperor</span><span class="tag-tag">dragon</span></td>
+  <td class="skill-row">天命所归·在场时全体友方全属性+3%</td>
+</tr>
+</table>
+<div class="notes">💡 蜀国(boy)占了5张1费，蜀国比率偏高。刘备作为一方主公在1费也偏低了。</div>
+
+<!-- ═══ 2费 ═══ -->
+<h2 style="color:#238636;">🟩 2费英雄（绿色·进阶牌）— 12 张</h2>
+<table>
+<tr><th>武将</th><th>费用</th><th>❤️血量</th><th>⚔️攻击</th><th>🛡️防御</th><th>⚡攻速</th><th>🎯射程</th><th>协鸣</th><th>标签</th><th>技能</th></tr>
+<tr class="cost-2">
+  <td class="name">🔴 <b>关羽</b></td><td class="cost"><span>2</span></td>
+  <td>800</td><td>65</td><td>35</td><td>0.95</td><td>1</td>
+  <td><span class="syn-tag">蜀</span><span class="syn-tag">战士</span></td>
+  <td><span class="tag-tag">dragon</span><span class="tag-tag">tortoise</span></td>
+  <td class="skill-row">武圣·攻击附带目标最大血量5%额外伤害</td>
+</tr>
+<tr class="cost-2">
+  <td class="name">🐯 张飞</td><td class="cost"><span>2</span></td>
+  <td>900</td><td>60</td><td>40</td><td>0.85</td><td>1</td>
+  <td><span class="syn-tag">蜀</span><span class="syn-tag">战士</span></td>
+  <td></td>
+  <td class="skill-row">怒吼·每10秒周围敌人攻速-30%持续3秒</td>
+</tr>
+<tr class="cost-2">
+  <td class="name">🪓 典韦</td><td class="cost"><span>2</span></td>
+  <td>700</td><td>60</td><td>30</td><td>0.9</td><td>1</td>
+  <td><span class="syn-tag">魏</span><span class="syn-tag">战士</span></td>
+  <td></td>
+  <td class="skill-row">恶来·每击败敌人攻击永久+10%</td>
+</tr>
+<tr class="cost-2">
+  <td class="name">🌸 莲花</td><td class="cost"><span>2</span></td>
+  <td>500</td><td>55</td><td>20</td><td>1.1</td><td>3</td>
+  <td><span class="syn-tag">吴</span><span class="syn-tag">法师</span></td>
+  <td></td>
+  <td class="skill-row">灼莲·攻击附带灼烧(3秒内每秒10点伤害)</td>
+</tr>
+<tr class="cost-2">
+  <td class="name">🪓 华雄</td><td class="cost"><span>2</span></td>
+  <td>850</td><td>48</td><td>38</td><td>0.8</td><td>1</td>
+  <td><span class="syn-tag">群</span><span class="syn-tag">坦克</span></td>
+  <td><span class="tag-tag">fire_touched</span><span class="tag-tag">phoenix</span></td>
+  <td class="skill-row">悍将·血量&lt;40%时攻击力+35%</td>
+</tr>
+<tr class="cost-2">
+  <td class="name">⚔️ 张辽</td><td class="cost"><span>2</span></td>
+  <td>720</td><td>55</td><td>30</td><td>1.08</td><td>1</td>
+  <td><span class="syn-tag">魏</span><span class="syn-tag">战士</span></td>
+  <td><span class="tag-tag">tiger</span></td>
+  <td class="skill-row">威震逍遥津·每7秒冲向最远敌人造成90%伤害+减速</td>
+</tr>
+<tr class="cost-2">
+  <td class="name">🏃 乐进</td><td class="cost"><span>2</span></td>
+  <td>680</td><td>52</td><td>28</td><td>1.2</td><td>1</td>
+  <td><span class="syn-tag">魏</span><span class="syn-tag">战士</span></td>
+  <td></td>
+  <td class="skill-row">先登·战斗首次攻击造成250%伤害</td>
+</tr>
+<tr class="cost-2">
+  <td class="name">⛵ 黄盖</td><td class="cost"><span>2</span></td>
+  <td>800</td><td>40</td><td>45</td><td>0.75</td><td>1</td>
+  <td><span class="syn-tag">吴</span><span class="syn-tag">坦克</span></td>
+  <td></td>
+  <td class="skill-row">苦肉·受到伤害反弹15%给攻击者</td>
+</tr>
+<tr class="cost-2">
+  <td class="name">🍷 郭嘉</td><td class="cost"><span>2</span></td>
+  <td>480</td><td>45</td><td>18</td><td>1.0</td><td>3</td>
+  <td><span class="syn-tag">魏</span><span class="syn-tag">法师</span></td>
+  <td><span class="tag-tag">strategist</span></td>
+  <td class="skill-row">遗计·阵亡时全体友方攻击力+20%持续8秒</td>
+</tr>
+<tr class="cost-2">
+  <td class="name">📋 荀彧</td><td class="cost"><span>2</span></td>
+  <td>520</td><td>32</td><td>24</td><td>0.95</td><td>3</td>
+  <td><span class="syn-tag">魏</span><span class="syn-tag">辅助</span></td>
+  <td><span class="tag-tag">strategist</span></td>
+  <td class="skill-row">王佐之才·每5秒为血量最低友方回复120点生命</td>
+</tr>
+<tr class="cost-2">
+  <td class="name">🏹 夏侯渊</td><td class="cost"><span>2</span></td>
+  <td>550</td><td>58</td><td>22</td><td>1.1</td><td>4</td>
+  <td><span class="syn-tag">魏</span><span class="syn-tag">弓手</span></td>
+  <td></td>
+  <td class="skill-row">神速·攻击25%概率追加一箭(50%伤害)</td>
+</tr>
+<tr class="cost-2">
+  <td class="name">🎯 太史慈</td><td class="cost"><span>2</span></td>
+  <td>600</td><td>55</td><td>25</td><td>1.0</td><td>4</td>
+  <td><span class="syn-tag">吴</span><span class="syn-tag">弓手</span></td>
+  <td></td>
+  <td class="skill-row">箭无虚发·每第3次攻击造成180%伤害+无视30%防御</td>
+</tr>
+</table>
+<div class="notes">💡 魏国在2费区又占了6张（典韦、张辽、乐进、郭嘉、荀彧、夏侯渊）。关羽放这里明显不合适。</div>
+
+<!-- ═══ 3费 ═══ -->
+<h2 style="color:#1f6feb;">🟦 3费英雄（蓝色·稀世牌）— 8 张</h2>
+<table>
+<tr><th>武将</th><th>费用</th><th>❤️血量</th><th>⚔️攻击</th><th>🛡️防御</th><th>⚡攻速</th><th>🎯射程</th><th>协鸣</th><th>标签</th><th>技能</th></tr>
+<tr class="cost-3">
+  <td class="name">🪄 诸葛亮</td><td class="cost"><span>3</span></td>
+  <td>500</td><td>40</td><td>20</td><td>1.0</td><td>4</td>
+  <td><span class="syn-tag">蜀</span><span class="syn-tag">法师</span></td>
+  <td><span class="tag-tag">strategist</span><span class="tag-tag">dragon</span></td>
+  <td class="skill-row">八阵图·每8秒对全体敌人造成攻击力80%法术伤害</td>
+</tr>
+<tr class="cost-3">
+  <td class="name">🦊 司马懿</td><td class="cost"><span>3</span></td>
+  <td>600</td><td>55</td><td>30</td><td>1.0</td><td>2</td>
+  <td><span class="syn-tag">魏</span><span class="syn-tag">法师</span></td>
+  <td><span class="tag-tag">strategist</span><span class="tag-tag">tiger</span></td>
+  <td class="skill-row">鬼才·受到技能伤害时反弹30%给释放者</td>
+</tr>
+<tr class="cost-3">
+  <td class="name">🔥 周瑜</td><td class="cost"><span>3</span></td>
+  <td>550</td><td>50</td><td>25</td><td>1.05</td><td>3</td>
+  <td><span class="syn-tag">吴</span><span class="syn-tag">法师</span></td>
+  <td><span class="tag-tag">strategist</span><span class="tag-tag">phoenix</span></td>
+  <td class="skill-row">赤壁·攻击25%概率触发火焰风暴(相邻敌人50%伤害)</td>
+</tr>
+<tr class="cost-3">
+  <td class="name">📚 吕蒙</td><td class="cost"><span>3</span></td>
+  <td>650</td><td>50</td><td>35</td><td>0.95</td><td>2</td>
+  <td><span class="syn-tag">吴</span><span class="syn-tag">辅助</span></td>
+  <td></td>
+  <td class="skill-row">白衣渡江·战斗开始隐身3秒后攻速+50%持续5秒</td>
+</tr>
+<tr class="cost-3">
+  <td class="name">🔗 庞统</td><td class="cost"><span>3</span></td>
+  <td>520</td><td>48</td><td>22</td><td>0.95</td><td>3</td>
+  <td><span class="syn-tag">蜀</span><span class="syn-tag">法师</span></td>
+  <td><span class="tag-tag">strategist</span><span class="tag-tag">phoenix</span></td>
+  <td class="skill-row">连环计·技能命中后对相邻1名敌人传递50%伤害</td>
+</tr>
+<tr class="cost-3">
+  <td class="name">🪓 徐晃</td><td class="cost"><span>3</span></td>
+  <td>880</td><td>55</td><td>50</td><td>0.82</td><td>1</td>
+  <td><span class="syn-tag">魏</span><span class="syn-tag">坦克</span></td>
+  <td></td>
+  <td class="skill-row">长驱直入·攻击无视目标25%防御</td>
+</tr>
+<tr class="cost-3">
+  <td class="name">🌑 程昱</td><td class="cost"><span>3</span></td>
+  <td>560</td><td>50</td><td>25</td><td>0.9</td><td>3</td>
+  <td><span class="syn-tag">魏</span><span class="syn-tag">法师</span></td>
+  <td><span class="tag-tag">strategist</span></td>
+  <td class="skill-row">十面埋伏·每8秒对全体敌人55%伤害+减速15%</td>
+</tr>
+<tr class="cost-3">
+  <td class="name">🔥 陆逊</td><td class="cost"><span>3</span></td>
+  <td>530</td><td>52</td><td>24</td><td>1.0</td><td>3</td>
+  <td><span class="syn-tag">吴</span><span class="syn-tag">法师</span></td>
+  <td><span class="tag-tag">strategist</span></td>
+  <td class="skill-row">火烧连营·攻击燎烧目标及相邻2名敌人(每秒2%持续3秒)</td>
+</tr>
+</table>
+<div class="notes">💡 诸葛亮3费也太低了，卧龙应该在至少4费甚至5费。</div>
+
+<!-- ═══ 4费 ═══ -->
+<h2 style="color:#8957e5;">🟪 4费英雄（紫色·史诗牌）— 6 张</h2>
+<table>
+<tr><th>武将</th><th>费用</th><th>❤️血量</th><th>⚔️攻击</th><th>🛡️防御</th><th>⚡攻速</th><th>🎯射程</th><th>协鸣</th><th>标签</th><th>技能</th></tr>
+<tr class="cost-4">
+  <td class="name">🏰 廉颇</td><td class="cost"><span>4</span></td>
+  <td>1200</td><td>55</td><td>60</td><td>0.7</td><td>1</td>
+  <td><span class="syn-tag">魏</span><span class="syn-tag">坦克</span></td>
+  <td></td>
+  <td class="skill-row">负荆·血量每降低20%防御+15%（共4层）</td>
+</tr>
+<tr class="cost-4">
+  <td class="name">🎯 张郃</td><td class="cost"><span>4</span></td>
+  <td>700</td><td>75</td><td>30</td><td>1.1</td><td>2</td>
+  <td><span class="syn-tag">魏</span><span class="syn-tag">刺客</span></td>
+  <td></td>
+  <td class="skill-row">巧变·攻击15%概率秒杀血量&lt;30%的敌人</td>
+</tr>
+<tr class="cost-4">
+  <td class="name">⚡ 马超</td><td class="cost"><span>4</span></td>
+  <td>800</td><td>80</td><td>30</td><td>1.3</td><td>1</td>
+  <td><span class="syn-tag">蜀</span><span class="syn-tag">战士</span></td>
+  <td></td>
+  <td class="skill-row">锦马超·攻速快30%+击杀后再+20%</td>
+</tr>
+<tr class="cost-4">
+  <td class="name">🐺 曹操</td><td class="cost"><span>4</span></td>
+  <td>780</td><td>70</td><td>38</td><td>1.05</td><td>3</td>
+  <td><span class="syn-tag">魏</span><span class="syn-tag">法师</span></td>
+  <td><span class="tag-tag">warlord</span><span class="tag-tag">tortoise</span></td>
+  <td class="skill-row">奸雄·每7秒偷取全体敌人8%攻击力持续5秒</td>
+</tr>
+<tr class="cost-4">
+  <td class="name">☯️ 左慈</td><td class="cost"><span>4</span></td>
+  <td>520</td><td>42</td><td>22</td><td>1.0</td><td>4</td>
+  <td><span class="syn-tag">群</span><span class="syn-tag">法师</span></td>
+  <td><span class="tag-tag">immortal</span><span class="tag-tag">tortoise</span></td>
+  <td class="skill-row">遁甲天书·每10秒虚无2秒+回复18%生命</td>
+</tr>
+<tr class="cost-4">
+  <td class="name">⭐ 姜维</td><td class="cost"><span>4</span></td>
+  <td>750</td><td>72</td><td>35</td><td>1.08</td><td>2</td>
+  <td><span class="syn-tag">蜀</span><span class="syn-tag">刺客</span></td>
+  <td><span class="tag-tag">strategist</span></td>
+  <td class="skill-row">继志·每有友方阵亡全属性永久+6%</td>
+</tr>
+</table>
+<div class="notes">💡 廉颇在魏国阵营有误（应为赵国/群雄）；与许褚同为坦克但差3费，定位梯度尚可。</div>
+
+<!-- ═══ 5费 ═══ -->
+<h2 style="color:#d29922;">🟨 5费英雄（金色·传说牌）— 3 张</h2>
+<table>
+<tr><th>武将</th><th>费用</th><th>❤️血量</th><th>⚔️攻击</th><th>🛡️防御</th><th>⚡攻速</th><th>🎯射程</th><th>协鸣</th><th>标签</th><th>技能</th></tr>
+<tr class="cost-5">
+  <td class="name">👹 吕布</td><td class="cost"><span>5</span></td>
+  <td>1000</td><td>100</td><td>45</td><td>1.1</td><td>1</td>
+  <td><span class="syn-tag">战士</span><span class="syn-tag">刺客</span></td>
+  <td><span class="tag-tag">flying_general</span><span class="tag-tag">dragon_guard</span><span class="tag-tag">dragon</span></td>
+  <td class="skill-row">无双·每5秒周围全体攻击力100%伤害+自身无敌1秒</td>
+</tr>
+<tr class="cost-5">
+  <td class="name">🌟 孙策</td><td class="cost"><span>5</span></td>
+  <td>950</td><td>90</td><td>40</td><td>1.15</td><td>1</td>
+  <td><span class="syn-tag">吴</span><span class="syn-tag">战士</span></td>
+  <td></td>
+  <td class="skill-row">霸王·每击败敌人全属性+10%</td>
+</tr>
+<tr class="cost-5">
+  <td class="name">🗡️ 典勇</td><td class="cost"><span>5</span></td>
+  <td>850</td><td>85</td><td>35</td><td>1.2</td><td>2</td>
+  <td><span class="syn-tag">刺客</span><span class="syn-tag">法师</span></td>
+  <td></td>
+  <td class="skill-row">影杀·攻击30%概率使目标沉默2秒</td>
+</tr>
+</table>
+<div class="notes">💡 5费只有3张太少了。建议把关羽、诸葛亮、曹操至少其中两位提到5费。典勇可以降到3-4费。</div>
+
+<!-- ═══ 阵营分布 ═══ -->
+<h2 style="color:#58a6ff;">📊 阵营分布与协鸣统计</h2>
+<table>
+<tr><th>阵营/协鸣</th><th>1费</th><th>2费</th><th>3费</th><th>4费</th><th>5费</th><th>合计</th><th>满协鸣需</th></tr>
+<tr><td><span class="syn-tag" style="background:rgba(65,105,225,0.2)">🏛️ 魏</span></td><td>2</td><td>6</td><td>4</td><td>3</td><td>0</td><td><b>15</b></td><td>2/4/6 ✓</td></tr>
+<tr><td><span class="syn-tag" style="background:rgba(255,99,71,0.2)">🌲 蜀</span></td><td>5</td><td>2</td><td>2</td><td>2</td><td>0</td><td><b>11</b></td><td>2/4/6 ✓</td></tr>
+<tr><td><span class="syn-tag" style="background:rgba(50,205,50,0.2)">🌊 吴</span></td><td>1</td><td>2</td><td>3</td><td>0</td><td>1</td><td><b>7</b></td><td>2/4/6 ✓</td></tr>
+<tr><td><span class="syn-tag" style="background:rgba(218,165,32,0.2)">👤 群</span></td><td>1</td><td>1</td><td>0</td><td>1</td><td>0</td><td><b>3</b></td><td>2/3 ✓</td></tr>
+<tr><td><span class="syn-tag" style="background:rgba(178,34,34,0.2)">⚔️ 战士</span></td><td>4</td><td>6</td><td>0</td><td>2</td><td>2</td><td><b>14</b></td><td>2/4 ✓</td></tr>
+<tr><td><span class="syn-tag" style="background:rgba(153,50,204,0.2)">🔮 法师</span></td><td>0</td><td>2</td><td>5</td><td>2</td><td>0</td><td><b>9</b></td><td>2/4 ✓</td></tr>
+<tr><td><span class="syn-tag" style="background:rgba(112,128,144,0.2)">🛡️ 坦克</span></td><td>2</td><td>2</td><td>1</td><td>1</td><td>0</td><td><b>6</b></td><td>2/4 ✓</td></tr>
+<tr><td><span class="syn-tag" style="background:rgba(47,79,79,0.2)">🗡️ 刺客</span></td><td>0</td><td>0</td><td>0</td><td>2</td><td>2</td><td><b>4</b></td><td>2/3 ✓</td></tr>
+<tr><td><span class="syn-tag" style="background:rgba(255,140,0,0.2)">🏹 弓手</span></td><td>1</td><td>2</td><td>0</td><td>0</td><td>0</td><td><b>3</b></td><td>2/4 ✓ (仅3张)</td></tr>
+<tr><td><span class="syn-tag" style="background:rgba(0,206,209,0.2)">💚 辅助</span></td><td>3</td><td>2</td><td>1</td><td>0</td><td>0</td><td><b>6</b></td><td>2/3 ✓</td></tr>
+</table>
+
+<!-- ═══ 商店刷新率参考 ═══ -->
+<h2 style="color:#58a6ff;">🎰 商店刷新率（按玩家等级）</h2>
+<div class="notes" style="margin:8px 0;">玩家在对应等级时，商店每个格子刷新对应费用英雄的概率分布：</div>
+<table>
+<tr><th>等级</th><th>1费</th><th>2费</th><th>3费</th><th>4费</th><th>5费</th><th>说明</th></tr>
+<tr><td>Lv1</td><td style="color:#9aa0a6">70%</td><td style="color:#238636">30%</td><td>—</td><td>—</td><td>—</td><td>前期只能见1-2费</td></tr>
+<tr><td>Lv2</td><td style="color:#9aa0a6">50%</td><td style="color:#238636">35%</td><td style="color:#1f6feb">15%</td><td>—</td><td>—</td><td></td></tr>
+<tr><td>Lv3</td><td style="color:#9aa0a6">35%</td><td style="color:#238636">35%</td><td style="color:#1f6feb">20%</td><td style="color:#8957e5">10%</td><td>—</td><td>3费开始出现</td></tr>
+<tr><td>Lv4</td><td style="color:#9aa0a6">20%</td><td style="color:#238636">30%</td><td style="color:#1f6feb">30%</td><td style="color:#8957e5">15%</td><td style="color:#d29922">5%</td><td>4费开始出现</td></tr>
+<tr><td>Lv5</td><td style="color:#9aa0a6">10%</td><td style="color:#238636">20%</td><td style="color:#1f6feb">35%</td><td style="color:#8957e5">25%</td><td style="color:#d29922">10%</td><td>5费出现</td></tr>
+<tr><td>Lv6</td><td style="color:#9aa0a6">5%</td><td style="color:#238636">15%</td><td style="color:#1f6feb">30%</td><td style="color:#8957e5">35%</td><td style="color:#d29922">15%</td><td>4费活跃区</td></tr>
+<tr><td>Lv7</td><td>—</td><td style="color:#238636">10%</td><td style="color:#1f6feb">25%</td><td style="color:#8957e5">40%</td><td style="color:#d29922">25%</td><td>高费版本</td></tr>
+<tr><td>Lv8</td><td>—</td><td style="color:#238636">5%</td><td style="color:#1f6feb">20%</td><td style="color:#8957e5">40%</td><td style="color:#d29922">35%</td><td>4-5费主力期</td></tr>
+</table>
+
+<!-- ═══ 关联系统 ═══ -->
+<h2 style="color:#da3633;">🔗 修改费率时的关联更新清单</h2>
+<table>
+<tr><th>文件</th><th>影响范围</th><th>修改内容</th></tr>
+<tr><td><code>js/data.js</code></td><td>英雄定义</td><td>改 cost 数值 + 调整 hp/atk/def 数值以匹配新费用梯度</td></tr>
+<tr><td><code>js/shop.js</code></td><td>商店刷新概率</td><td>无需改（按 1-5 值映射概率，通用）</td></tr>
+<tr><td><code>js/icon-builder.js</code></td><td>图标色彩映射</td><td>检查 tier 参数逻辑（0=灰/1=阵营色/2=炫彩），与 cost 无直接绑定</td></tr>
+<tr><td><code>js/game.js</code></td><td>商店UI渲染</td><td>无需改（取 hero.cost 展示）</td></tr>
+<tr><td><code>js/combat.js</code></td><td>AI卡组生成</td><td>需要检查 AI 生成卡组时是否按 cost 分布计算强度</td></tr>
+<tr><td><code>codex.html</code></td><td>图鉴页面</td><td>无需改（只读 hero.cost）</td></tr>
+<tr><td><code>css/style.css</code></td><td>费用颜色</td><td>如新增 6 费需补充颜色</td></tr>
+<tr><td>标签系统</td><td>特殊联动</td><td>注意：关平的技能绑定关羽(Guan Yu)，费率调整不影响该关联</td></tr>
+</table>
+
+<hr style="border-color:var(--border);margin:24px 0;">
+<div class="notes" style="text-align:center;">📄 生成时间 2026-06-29 | 数据源 data.js HEROES 数组 | 总计 38 武将</div>
+
+</body>
+</html>

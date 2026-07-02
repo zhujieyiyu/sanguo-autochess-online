@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>研发数据附件 — 职业×兵种克制体系</title>
+<style>
+  :root {
+    --bg: #111;
+    --card: #1a1a1a;
+    --border: #333;
+    --text: #e0e0e0;
+    --muted: #888;
+    --accent: #e8b84b;
+    --red: #e55;
+    --blue: #5af;
+    --green: #5c5;
+    --purple: #b58;
+    --gold: #e8b84b;
+    --warn: #f90;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', '微软雅黑', sans-serif; font-size: 13px; padding: 24px; }
+  h1 { font-size: 20px; color: var(--accent); margin-bottom: 4px; }
+  .subtitle { color: var(--muted); font-size: 12px; margin-bottom: 24px; }
+  h2 { font-size: 15px; color: var(--accent); border-left: 3px solid var(--accent); padding-left: 8px; margin: 28px 0 12px; }
+  h3 { font-size: 13px; color: #ccc; margin: 18px 0 8px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+  th { background: #222; color: var(--accent); padding: 7px 10px; text-align: left; font-size: 12px; border-bottom: 1px solid var(--border); }
+  td { padding: 6px 10px; border-bottom: 1px solid #1e1e1e; font-size: 12px; vertical-align: middle; }
+  tr:hover td { background: #1e1e1e; }
+
+  /* 异化高亮 */
+  .diff { background: rgba(232,184,75,0.08) !important; }
+  .diff td.tag-diff { color: var(--accent); font-weight: bold; }
+
+  /* 费用色 */
+  .cost-1 { color: #aaa; }
+  .cost-2 { color: #5af; }
+  .cost-3 { color: #5c5; }
+  .cost-4 { color: var(--purple); }
+  .cost-5 { color: var(--red); font-weight: bold; }
+
+  /* 职业标签 */
+  .cls { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; }
+  .cls-warrior   { background:#3a1010; color:#e88; }
+  .cls-cavalry   { background:#2a1800; color:#e94; }
+  .cls-tank      { background:#1a2030; color:#78a; }
+  .cls-mage      { background:#2a1540; color:#b7d; }
+  .cls-archer    { background:#2a2000; color:#cc5; }
+  .cls-support   { background:#0e2a2a; color:#5cc; }
+  .cls-special   { background:#2a0a0a; color:#e55; }
+
+  /* 兵种标签 */
+  .ut { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 11px; }
+  .ut-骑兵   { background:#2a1a00; color:#fc8; }
+  .ut-弓兵   { background:#2a2010; color:#dc6; }
+  .ut-刺客   { background:#1a1025; color:#a7c; }
+  .ut-步兵   { background:#181818; color:#bbb; }
+  .ut-枪兵   { background:#0e1e1e; color:#6bd; }
+  .ut-策士   { background:#1a1a10; color:#aa8; }
+  .ut-重装   { background:#1e1e28; color:#99b; }
+  .ut-魔物   { background:#2a0a0a; color:#e55; }
+  .ut-皇帝   { background:#2a2000; color:#fc0; }
+
+  /* 特殊规则 */
+  .rule-box { background: #1e1a10; border: 1px solid #3a3020; border-radius: 6px; padding: 12px 16px; margin-bottom: 14px; }
+  .rule-box .rule-title { color: var(--accent); font-weight: bold; font-size: 13px; margin-bottom: 6px; }
+  .rule-box p { color: #bbb; line-height: 1.7; font-size: 12px; }
+  .rule-box ul { padding-left: 18px; color: #bbb; line-height: 1.8; font-size: 12px; }
+
+  /* 克制链图 */
+  .chain { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+  .chain-node { background: #222; border: 1px solid #444; border-radius: 4px; padding: 4px 10px; font-size: 12px; }
+  .chain-arrow { color: var(--accent); font-size: 14px; }
+
+  /* 对比组 */
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .compare-card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 12px; }
+  .compare-card .card-title { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .compare-card .card-hero { font-size: 13px; color: var(--text); margin: 4px 0; }
+  .compare-card .card-note { font-size: 11px; color: var(--warn); margin-top: 6px; }
+
+  .badge { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 10px; margin-left: 4px; }
+  .badge-immune { background:#0a2a0a; color:#5c5; border:1px solid #2a5a2a; }
+  .badge-decay  { background:#2a1a00; color:#f90; border:1px solid #5a3a00; }
+  .badge-counter{ background:#2a0a0a; color:#e55; border:1px solid #5a1a1a; }
+  .badge-special{ background:#1a0a2a; color:#b58; border:1px solid #3a1a5a; }
+
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<h1>研发数据附件</h1>
+<p class="subtitle">职业 × 兵种克制体系 · 异化武将标注 · 特殊规则组 · 管线补漏完成度 | 版本 v3.1 · 48将</p>
+
+<!-- ─── 一、克制链 ─── -->
+<h2>一、兵种克制链</h2>
+<div class="rule-box">
+  <div class="rule-title">循环克制链（+25% 伤害加成）</div>
+  <div class="chain">
+    <div class="chain-node">🐴 骑兵</div><div class="chain-arrow">▶ +25%</div>
+    <div class="chain-node">🏹 弓兵</div><div class="chain-arrow">▶ +25%</div>
+    <div class="chain-node">🗡️ 刺客</div><div class="chain-arrow">▶ +25%</div>
+    <div class="chain-node">🛡️ 步兵</div><div class="chain-arrow">▶ +20%</div>
+    <div class="chain-node">⚔️ 枪兵</div><div class="chain-arrow">▶ +25%</div>
+    <div class="chain-node" style="border-color:var(--accent)">🐴 骑兵</div>
+  </div>
+  <p style="margin-top:8px">中立兵种：<strong style="color:#aa8">策士</strong>（不参与克制链，两侧各+0%）&nbsp;·&nbsp;
+  <strong style="color:#99b">重装</strong>（无视所有兵种克制，等效"免疫"）&nbsp;·&nbsp;
+  <strong style="color:#e55">魔物</strong>（独立规则，见第四节）&nbsp;·&nbsp;
+  <strong style="color:#fc0">皇帝</strong>（独立规则）</p>
+</div>
+
+<!-- ─── 二、全武将对照表 ─── -->
+<h2>二、全武将职业 × 兵种对照表</h2>
+<p class="legend">
+  <span class="legend-item"><span class="legend-dot" style="background:rgba(232,184,75,0.25)"></span> 异化武将（职业≠兵种直觉方向）</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#111"></span> 普通武将（职业兵种方向一致）</span>
+</p>
+<p style="color:var(--muted);font-size:11px;margin-bottom:10px">⚠️ 只保留具有克制意义的武将条目，纯策士主阵营辅助（职业与兵种均无克制参与）简并为备注。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>费用</th><th>武将</th><th>职业（协鸣维度）</th><th>兵种（克制维度）</th><th>异化类型</th><th>备注</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <!-- 1费 -->
+    <tr>
+      <td class="cost-1">1费</td><td>吕蒙</td>
+      <td><span class="cls cls-cavalry">骑兵</span></td>
+      <td><span class="ut ut-刺客">刺客</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>骑兵协鸣+刺客克制链，擅突袭步兵</td>
+    </tr>
+    <tr class="diff">
+      <td class="cost-1">1费</td><td>关平</td>
+      <td><span class="cls cls-warrior">战士</span></td>
+      <td><span class="ut ut-步兵">步兵</span></td>
+      <td>一致</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td class="cost-1">1费</td><td>刘禅</td>
+      <td><span class="cls cls-mage">法师</span></td>
+      <td><span class="ut ut-策士">策士</span></td>
+      <td>中立</td>
+      <td>策士不参与克制链</td>
+    </tr>
+    <tr>
+      <td class="cost-1">1费</td><td>陆绩</td>
+      <td><span class="cls cls-archer">弓手</span></td>
+      <td><span class="ut ut-弓兵">弓兵</span></td>
+      <td>一致</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td class="cost-1">1费</td><td>曹纯</td>
+      <td><span class="cls cls-cavalry">骑兵</span></td>
+      <td><span class="ut ut-骑兵">骑兵</span></td>
+      <td>一致</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td class="cost-1">1费</td><td>许攸</td>
+      <td><span class="cls cls-mage">法师</span></td>
+      <td><span class="ut ut-策士">策士</span></td>
+      <td>中立</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td class="cost-1">1费</td><td>华雄</td>
+      <td><span class="cls cls-warrior">战士</span></td>
+      <td><span class="ut ut-步兵">步兵</span></td>
+      <td>一致</td>
+      <td>tags: phoenix</td>
+    </tr>
+    <tr>
+      <td class="cost-1">1费</td><td>公孙瓒</td>
+      <td><span class="cls cls-cavalry">骑兵</span></td>
+      <td><span class="ut ut-骑兵">骑兵</span></td>
+      <td>一致</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td class="cost-1">1费</td><td>汉献帝</td>
+      <td><span class="cls cls-support">辅助</span></td>
+      <td><span class="ut ut-策士">策士</span></td>
+      <td>中立</td>
+      <td>tags: emperor, dragon</td>
+    </tr>
+    <tr>
+      <td class="cost-1">1费</td><td>周泰</td>
+      <td><span class="cls cls-tank">坦克</span></td>
+      <td><span class="ut ut-枪兵">枪兵</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>坦克职业但枪兵兵种，对骑兵额外+25%</td>
+    </tr>
+    <tr>
+      <td class="cost-1">1费</td><td>华佗</td>
+      <td><span class="cls cls-support">辅助</span></td>
+      <td><span class="ut ut-策士">策士</span></td>
+      <td>中立</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td class="cost-1">1费</td><td>张苞</td>
+      <td><span class="cls cls-tank">坦克</span></td>
+      <td><span class="ut ut-步兵">步兵</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>坦克职业，步兵兵种被刺客克制 (+25%)</td>
+    </tr>
+
+    <!-- 2费 -->
+    <tr>
+      <td class="cost-2">2费</td><td>刘备</td>
+      <td><span class="cls cls-support">辅助</span></td>
+      <td><span class="ut ut-策士">策士</span></td>
+      <td>中立</td>
+      <td>tags: emperor</td>
+    </tr>
+    <tr>
+      <td class="cost-2">2费</td><td>孙权</td>
+      <td><span class="cls cls-support">辅助</span></td>
+      <td><span class="ut ut-策士">策士</span></td>
+      <td>中立</td>
+      <td>—</td>
+    </tr>
+    <tr class="diff">
+      <td class="cost-2">2费</td><td>张飞</td>
+      <td><span class="cls cls-warrior">战士</span></td>
+      <td><span class="ut ut-枪兵">枪兵</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>战士职业，枪兵兵种克骑兵(+25%)，同时被步兵克制(+20%)</td>
+    </tr>
+    <tr>
+      <td class="cost-2">2费</td><td>于禁</td>
+      <td><span class="cls cls-warrior">战士</span></td>
+      <td><span class="ut ut-枪兵">枪兵</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>技能含"对刺客额外减伤"，呼应克制设计</td>
+    </tr>
+    <tr>
+      <td class="cost-2">2费</td><td>乐进</td>
+      <td><span class="cls cls-warrior">战士</span></td>
+      <td><span class="ut ut-步兵">步兵</span></td>
+      <td>一致</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td class="cost-2">2费</td><td>许褚</td>
+      <td><span class="cls cls-tank">坦克</span></td>
+      <td><span class="ut ut-步兵">步兵</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>坦克职业，步兵兵种被刺客克(+25%)；前排扛伤的同时面临刺客威胁</td>
+    </tr>
+    <tr>
+      <td class="cost-2">2费</td><td>黄盖</td>
+      <td><span class="cls cls-tank">坦克</span></td>
+      <td><span class="ut ut-枪兵">枪兵</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>坦克职业，枪兵克骑兵</td>
+    </tr>
+    <tr>
+      <td class="cost-2">2费</td><td>郭嘉</td>
+      <td><span class="cls cls-mage">法师</span></td>
+      <td><span class="ut ut-策士">策士</span></td>
+      <td>中立</td>
+      <td>tags: tactician, short_lived</td>
+    </tr>
+    <tr>
+      <td class="cost-2">2费</td><td>荀彧</td>
+      <td><span class="cls cls-support">辅助</span></td>
+      <td><span class="ut ut-策士">策士</span></td>
+      <td>中立</td>
+      <td>tags: tactician</td>
+    </tr>
+    <tr>
+      <td class="cost-2">2费</td><td>李儒</td>
+      <td><span class="cls cls-mage">法师</span></td>
+      <td><span class="ut ut-策士">策士</span></td>
+      <td>中立</td>
+      <td>tags: tactician</td>
+    </tr>
+    <tr>
+      <td class="cost-2">2费</td><td>太史慈</td>
+      <td><span class="cls cls-archer">弓手</span></td>
+      <td><span class="ut ut-弓兵">弓兵</span></td>
+      <td>一致</td>
+      <td>—</td>
+    </tr>
+    <tr class="diff">
+      <td class="cost-2">2费</td><td>夏侯渊</td>
+      <td><span class="cls cls-cavalry">骑兵</span></td>
+      <td><span class="ut ut-骑兵">骑兵</span></td>
+      <td>一致</td>
+      <td>—</td>
+    </tr>
+
+    <!-- 3费 -->
+    <tr>
+      <td class="cost-3">3费</td><td>关羽</td>
+      <td><span class="cls cls-cavalry">骑兵</span></td>
+      <td><span class="ut ut-骑兵">骑兵</span></td>
+      <td>一致</td>
+      <td>tags: five_tigers, dragon, tortoise</td>
+    </tr>
+    <tr class="diff">
+      <td class="cost-3">3费</td><td>赵云</td>
+      <td><span class="cls cls-cavalry">骑兵</span></td>
+      <td><span class="ut ut-枪兵">枪兵</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>骑兵职业+枪兵兵种；克骑兵(+25%)，兼顾协鸣+克制双维</td>
+    </tr>
+    <tr class="diff">
+      <td class="cost-3">3费</td><td>黄忠</td>
+      <td><span class="cls cls-archer">弓手</span></td>
+      <td><span class="ut ut-弓兵">弓兵</span></td>
+      <td class="tag-diff">★ 免疫异化 🟢</td>
+      <td>弓手职业+弓兵兵种；<strong>immuneCounters: ['骑兵']</strong>——弓兵被骑兵克制(+25%)，但黄忠精准神射为个人神技（非团体BUFF），免疫骑兵克制</td>
+    </tr>
+    <tr>
+      <td class="cost-3">3费</td><td>张郃</td>
+      <td><span class="cls cls-cavalry">骑兵</span></td>
+      <td><span class="ut ut-骑兵">骑兵</span></td>
+      <td>一致</td>
+      <td>—</td>
+    </tr>
+    <tr class="diff">
+      <td class="cost-3">3费</td><td>姜维</td>
+      <td><span class="cls cls-warrior">战士</span></td>
+      <td><span class="ut ut-刺客">刺客</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>战士职业，刺客兵种克步兵；高费战士行刺客的克制路线</td>
+    </tr>
+    <tr>
+      <td class="cost-3">3费</td><td>典韦</td>
+      <td><span class="cls cls-tank">坦克</span></td>
+      <td><span class="ut ut-枪兵">枪兵</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>坦克职业，枪兵兵种克骑兵</td>
+    </tr>
+    <tr class="diff">
+      <td class="cost-3">3费</td><td>张辽</td>
+      <td><span class="cls cls-warrior">战士</span></td>
+      <td><span class="ut ut-骑兵">骑兵</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>战士协鸣+骑兵克制；被枪兵克制(+25%)，是经典高速战士</td>
+    </tr>
+    <tr class="diff">
+      <td class="cost-3">3费</td><td>徐晃</td>
+      <td><span class="cls cls-tank">坦克</span></td>
+      <td><span class="ut ut-重装">重装</span></td>
+      <td class="tag-diff">★ 特殊免疫 🟢</td>
+      <td><strong>重装兵种 = 无视所有克制加成</strong>；技能"无视所有兵种克制"双重锁定</td>
+    </tr>
+    <tr>
+      <td class="cost-3">3费</td><td>周瑜</td>
+      <td><span class="cls cls-support">辅助</span></td>
+      <td><span class="ut ut-骑兵">骑兵</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>辅助职业+骑兵兵种；骑兵被枪兵克制，需保护</td>
+    </tr>
+    <tr>
+      <td class="cost-3">3费</td><td>庞统</td>
+      <td><span class="cls cls-mage">法师</span></td>
+      <td><span class="ut ut-策士">策士</span></td>
+      <td>中立</td>
+      <td>tags: tactician, short_lived</td>
+    </tr>
+    <tr class="diff">
+      <td class="cost-3">3费</td><td>程昱</td>
+      <td><span class="cls cls-mage">法师</span></td>
+      <td><span class="ut ut-弓兵">弓兵</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>法师职业+弓兵兵种；被骑兵克制(+25%)，法师但弓兵的克制弱点</td>
+    </tr>
+    <tr>
+      <td class="cost-3">3费</td><td>陆逊</td>
+      <td><span class="cls cls-support">辅助</span></td>
+      <td><span class="ut ut-刺客">刺客</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>辅助职业+刺客兵种；刺客克步兵，辅助走刺客路线</td>
+    </tr>
+
+    <!-- 4费 -->
+    <tr class="diff">
+      <td class="cost-4">4费</td><td>马超</td>
+      <td><span class="cls cls-warrior">战士</span></td>
+      <td><span class="ut ut-骑兵">骑兵</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>战士协鸣+骑兵克制；速度极高，战士里最像骑兵的</td>
+    </tr>
+    <tr>
+      <td class="cost-4">4费</td><td>曹操</td>
+      <td><span class="cls cls-cavalry">骑兵</span></td>
+      <td><span class="ut ut-骑兵">骑兵</span></td>
+      <td>一致</td>
+      <td>tags: emperor, tortoise</td>
+    </tr>
+    <tr>
+      <td class="cost-4">4费</td><td>左慈</td>
+      <td><span class="cls cls-support">辅助</span></td>
+      <td><span class="ut ut-策士">策士</span></td>
+      <td>中立</td>
+      <td>tags: immortal</td>
+    </tr>
+    <tr>
+      <td class="cost-4">4费</td><td>诸葛亮</td>
+      <td><span class="cls cls-mage">法师</span></td>
+      <td><span class="ut ut-策士">策士</span></td>
+      <td>中立</td>
+      <td>tags: tactician</td>
+    </tr>
+    <tr>
+      <td class="cost-4">4费</td><td>张角</td>
+      <td><span class="cls cls-mage">法师</span></td>
+      <td><span class="ut ut-策士">策士</span></td>
+      <td>中立</td>
+      <td>tags: mandate</td>
+    </tr>
+    <tr class="diff">
+      <td class="cost-4">4费</td><td>魏延</td>
+      <td><span class="cls cls-tank">坦克</span></td>
+      <td><span class="ut ut-刺客">刺客</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>坦克职业+刺客兵种；坦克走刺客路线，克步兵</td>
+    </tr>
+    <tr class="diff">
+      <td class="cost-4">4费</td><td>甘宁</td>
+      <td><span class="cls cls-archer">弓手</span></td>
+      <td><span class="ut ut-弓兵">弓兵</span></td>
+      <td>一致</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td class="cost-4">4费</td><td>司马懿</td>
+      <td><span class="cls cls-support">辅助</span><span class="cls cls-mage" style="margin-left:3px">法师</span></td>
+      <td><span class="ut ut-策士">策士</span></td>
+      <td>中立</td>
+      <td>双职业协鸣，中立兵种</td>
+    </tr>
+
+    <!-- 5费 -->
+    <tr class="diff">
+      <td class="cost-5">5费</td><td>吕布</td>
+      <td><span class="cls cls-cavalry">骑兵</span></td>
+      <td><span class="ut ut-骑兵">骑兵</span></td>
+      <td>一致</td>
+      <td>tags: flying_general 🟠 飞将衰减组（场上多飞将互削）</td>
+    </tr>
+    <tr class="diff">
+      <td class="cost-5">5费</td><td>孙策</td>
+      <td><span class="cls cls-warrior">战士</span></td>
+      <td><span class="ut ut-骑兵">骑兵</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>战士协鸣+骑兵克制，被枪兵克制</td>
+    </tr>
+    <tr>
+      <td class="cost-5">5费</td><td>董卓</td>
+      <td><span class="cls cls-special">魔王</span></td>
+      <td><span class="ut ut-魔物">魔物</span></td>
+      <td class="tag-diff">★ 特殊规则 🔴</td>
+      <td>魔王协鸣+魔物兵种；见第四节魔王克制规则</td>
+    </tr>
+    <tr class="diff">
+      <td class="cost-5">5费</td><td>袁绍</td>
+      <td><span class="cls cls-warrior">战士</span></td>
+      <td><span class="ut ut-策士">策士</span></td>
+      <td class="tag-diff">★ 异化</td>
+      <td>战士职业+策士兵种；中立免疫克制链，同时参与战士协鸣。tags: demon_slayer</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ─── 三、异化数据对比组 ─── -->
+<h2>三、异化数据对比组（仅保留异化武将）</h2>
+<h3>3-A 坦克职业 × 非步兵兵种（克制异向组）</h3>
+<table>
+  <thead><tr><th>武将</th><th>费用</th><th>职业</th><th>兵种</th><th>HP</th><th>ATK</th><th>DEF</th><th>克制方向</th><th>被克方向</th></tr></thead>
+  <tbody>
+    <tr class="diff"><td>周泰</td><td class="cost-1">1</td><td><span class="cls cls-tank">坦克</span></td><td><span class="ut ut-枪兵">枪兵</span></td><td>750</td><td>35</td><td>35</td><td>克骑兵 +25%</td><td>被步兵 +20%</td></tr>
+    <tr class="diff"><td>张苞</td><td class="cost-1">1</td><td><span class="cls cls-tank">坦克</span></td><td><span class="ut ut-步兵">步兵</span></td><td>650</td><td>45</td><td>25</td><td>克枪兵 +20%</td><td>被刺客 +25%</td></tr>
+    <tr class="diff"><td>许褚</td><td class="cost-2">2</td><td><span class="cls cls-tank">坦克</span></td><td><span class="ut ut-步兵">步兵</span></td><td>850</td><td>42</td><td>38</td><td>克枪兵 +20%</td><td>被刺客 +25%</td></tr>
+    <tr class="diff"><td>黄盖</td><td class="cost-2">2</td><td><span class="cls cls-tank">坦克</span></td><td><span class="ut ut-枪兵">枪兵</span></td><td>800</td><td>40</td><td>45</td><td>克骑兵 +25%</td><td>被步兵 +20%</td></tr>
+    <tr class="diff"><td>典韦</td><td class="cost-3">3</td><td><span class="cls cls-tank">坦克</span></td><td><span class="ut ut-枪兵">枪兵</span></td><td>800</td><td>62</td><td>35</td><td>克骑兵 +25%</td><td>被步兵 +20%</td></tr>
+    <tr class="diff"><td>魏延</td><td class="cost-4">4</td><td><span class="cls cls-tank">坦克</span></td><td><span class="ut ut-刺客">刺客</span></td><td>820</td><td>70</td><td>42</td><td>克步兵 +25%</td><td>被弓兵 +25%</td></tr>
+    <tr class="diff"><td>徐晃</td><td class="cost-3">3</td><td><span class="cls cls-tank">坦克</span></td><td><span class="ut ut-重装">重装</span></td><td>880</td><td>55</td><td>50</td><td><strong>无视所有克制</strong></td><td>无</td></tr>
+  </tbody>
+</table>
+
+<h3>3-B 骑兵职业 × 非骑兵兵种（高费奇异组）</h3>
+<table>
+  <thead><tr><th>武将</th><th>费用</th><th>职业</th><th>兵种</th><th>HP</th><th>ATK</th><th>DEF</th><th>克制方向</th><th>被克方向</th></tr></thead>
+  <tbody>
+    <tr class="diff"><td>吕蒙</td><td class="cost-1">1</td><td><span class="cls cls-cavalry">骑兵</span></td><td><span class="ut ut-刺客">刺客</span></td><td>550</td><td>42</td><td>20</td><td>克步兵 +25%</td><td>被弓兵 +25%</td></tr>
+    <tr class="diff"><td>赵云</td><td class="cost-3">3</td><td><span class="cls cls-cavalry">骑兵</span></td><td><span class="ut ut-枪兵">枪兵</span></td><td>800</td><td>68</td><td>35</td><td>克骑兵 +25%</td><td>被步兵 +20%</td></tr>
+    <tr class="diff"><td>周瑜</td><td class="cost-3">3</td><td><span class="cls cls-support">辅助</span></td><td><span class="ut ut-骑兵">骑兵</span></td><td>580</td><td>52</td><td>25</td><td>克弓兵 +25%</td><td>被枪兵 +25%</td></tr>
+  </tbody>
+</table>
+
+<h3>3-C 战士职业 × 骑兵兵种（速攻异化组）</h3>
+<table>
+  <thead><tr><th>武将</th><th>费用</th><th>职业</th><th>兵种</th><th>HP</th><th>ATK</th><th>SPD</th><th>克制方向</th><th>被克方向</th></tr></thead>
+  <tbody>
+    <tr class="diff"><td>张辽</td><td class="cost-3">3</td><td><span class="cls cls-warrior">战士</span></td><td><span class="ut ut-骑兵">骑兵</span></td><td>750</td><td>58</td><td>1.1</td><td>克弓兵 +25%</td><td>被枪兵 +25%</td></tr>
+    <tr class="diff"><td>马超</td><td class="cost-4">4</td><td><span class="cls cls-warrior">战士</span></td><td><span class="ut ut-骑兵">骑兵</span></td><td>850</td><td>82</td><td>1.3</td><td>克弓兵 +25%</td><td>被枪兵 +25%</td></tr>
+    <tr class="diff"><td>孙策</td><td class="cost-5">5</td><td><span class="cls cls-warrior">战士</span></td><td><span class="ut ut-骑兵">骑兵</span></td><td>950</td><td>90</td><td>1.15</td><td>克弓兵 +25%</td><td>被枪兵 +25%</td></tr>
+  </tbody>
+</table>
+
+<!-- ─── 四、特殊规则组 ─── -->
+<h2>四、特殊规则组</h2>
+
+<div class="rule-box">
+  <div class="rule-title">🔴 魔王 × 魔剑士 克制组（天命所归模式）</div>
+  <p>董卓（5费，兵种：魔物）触发<strong>魔王协鸣</strong>：全场攻防+30%，但每轮末扣5%当前HP。<br>
+  袁绍（5费，tags: demon_slayer）可<strong>压制魔王协鸣</strong>，使全场属性膨胀消除。<br>
+  <br>
+  数值对比：
+  </p>
+  <table style="margin-top:10px">
+    <thead><tr><th>武将</th><th>费用</th><th>HP</th><th>ATK</th><th>DEF</th><th>兵种</th><th>特殊标记</th></tr></thead>
+    <tbody>
+      <tr><td>董卓 👹</td><td class="cost-5">5</td><td>1200</td><td>80</td><td>55</td><td><span class="ut ut-魔物">魔物</span></td><td><span class="badge badge-counter">魔王·全场+30%ATK/DEF</span></td></tr>
+      <tr><td>袁绍 ⚔️</td><td class="cost-5">5</td><td>950</td><td>88</td><td>38</td><td><span class="ut ut-策士">策士(中立)</span></td><td><span class="badge badge-counter">魔剑士·压制魔王</span></td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:8px;color:var(--warn)">⚠️ 设计注意：魔物兵种不参与标准克制链，董卓只能被魔剑士标记从隐藏协鸣层面克制，不能被普通枪兵+25%克制。</p>
+</div>
+
+<div class="rule-box">
+  <div class="rule-title">🟠 飞将衰减组（场上多个飞将时集体衰减）</div>
+  <p>设计逻辑：星海弈境中"元帅"卡被所有玩家争抢，导致单一强势卡主导局面。本方案提出：<br>
+  当场上存在超过1个 <code>flying_general</code> 标记的武将时，所有飞将武将触发<strong>非唯一化衰减</strong>。</p>
+  <table style="margin-top:10px">
+    <thead><tr><th>武将</th><th>费用</th><th>HP</th><th>ATK</th><th>正常属性</th><th>2+飞将时衰减</th><th>衰减后ATK</th></tr></thead>
+    <tbody>
+      <tr class="diff">
+        <td>吕布 👹</td><td class="cost-5">5</td><td>1100</td><td>105</td>
+        <td>无双每5s全体100%伤害+无敌1s</td>
+        <td><span class="badge badge-decay">ATK×0.75，技能伤害×0.8</span></td>
+        <td>~79</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin-top:8px;color:var(--muted)">✅ 已实现：legend.js 设基准值 _allTypeBonusBase=0.20，combat.js 每tick统计场上全部飞将总数（不分敌我），按 sqrt(n) 衰减（1飞将=20%满额 → 2飞将=14.1% → 3飞将=11.5% → 最低5%），hero.js 回合重置。<strong>设计出发点："天下无双"——场上只能有一个飞将称雄，两人同时上阵则互相削弱。</strong>当前数据仅吕布为flying_general，双方吕布对位时衰减生效；未来加入更多飞将角色后自动扩展。</p>
+</div>
+
+<div class="rule-box">
+  <div class="rule-title">🟢 免疫克制特殊组</div>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <div class="card-title">黄忠 — 个人免疫（弓手弓兵 + immuneCounters）</div>
+      <div class="card-hero">黄忠 🏹 · 3费 · 弓手职业 · <span class="ut ut-弓兵">弓兵兵种</span></div>
+      <div class="card-hero">HP 650 | ATK 78 | DEF 28 | SPD 0.95 | Range 3</div>
+      <p style="color:#bbb;font-size:12px;margin-top:8px">弓兵兵种，正常被骑兵克制(+25%)。<br>
+      技能"精准神射"：暴击+25%。<br>
+      <strong style="color:#5c5">immuneCounters: ['骑兵']</strong>——当骑兵试图用兵种克制压制时，<br>
+      黄忠以个人神技（精准神射）免疫此克制线。<br>
+      <span style="color:var(--muted)">设计原理：免疫是英雄维度的个人特质，而非弓兵协鸣的团体BUFF。</span></p>
+      <div class="card-note">✅ 已实现：data.js immuneCounters + hero.js 构造函数 + attack()克制豁免检查</div>
+    </div>
+    <div class="compare-card">
+      <div class="card-title">徐晃 — 重装免疫（全兵种克制）</div>
+      <div class="card-hero">徐晃 🪓 · 3费 · 坦克职业 · <span class="ut ut-重装">重装兵种</span></div>
+      <div class="card-hero">HP 880 | ATK 55 | DEF 50 | SPD 0.82 | Range 1</div>
+      <p style="color:#bbb;font-size:12px;margin-top:8px">重装兵种在克制链中无敌手，配合技能"无视所有兵种克制"形成双重免疫锁定。<br>
+      任何兵种对徐晃均无克制加成，徐晃自身也不克制任何兵种。</p>
+      <div class="card-note">最高DEF(50)武将，双重免疫，当前版本最稳定的坦克</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── 五、数据完整性检查 ─── -->
+<h2>五、数据完整性检查</h2>
+<table>
+  <thead><tr><th>检查项</th><th>状态</th><th>备注</th></tr></thead>
+  <tbody>
+    <tr><td>所有武将均有 unitType 字段</td><td style="color:#5c5">✓ 通过</td><td>48/48 有效</td></tr>
+    <tr><td>所有武将均有 synergies[0] (阵营协鸣)</td><td style="color:#5c5">✓ 通过</td><td>wei/shu/wu/qun 四阵营</td></tr>
+    <tr><td>克制链中立兵种（策士）覆盖率</td><td style="color:#fa0">⚠️ 偏高</td><td>策士17+人，法师辅助角色大量使用；中立兵种比例约35%，偏高</td></tr>
+    <tr><td>重装兵种数量</td><td style="color:#fa0">⚠️ 仅1人</td><td>徐晃独占重装，稀缺性过强，建议后续版本适度扩充</td></tr>
+    <tr><td>魔物兵种数量</td><td style="color:#5af">ℹ 专属</td><td>董卓独占，设计意图</td></tr>
+    <tr><td>飞将衰减逻辑代码化</td><td style="color:#5c5">✓ 已实现</td><td>legend.js + combat.js + hero.js 三端联动；场上飞将总数√衰减（不分敌我，天下无双互削机制）</td></tr>
+    <tr><td>黄忠 immuneCounters 字段</td><td style="color:#5c5">✓ 已实现</td><td>data.js (immuneCounters:['骑兵']) + hero.js 构造函数 + attack()克制豁免</td></tr>
+    <tr><td>bonusSkillDmg 管线</td><td style="color:#5c5">✓ 已打通</td><td>data.js 全部13个技能伤害函数改用 hero.skillDamage()，法师/天命协鸣加成生效</td></tr>
+    <tr><td>开局先手轮机制</td><td style="color:#5c5">✓ 已实现</td><td>game.js 记录放置顺序 + combat.js 按倒序开局轮依次出手（最后放的棋最先行动）</td></tr>
+    <tr><td>军师天团最终鸣响</td><td style="color:#5c5">✓ 已实现</td><td>四阵营军师齐聚时全体+20%全属性（legend.js），含UI提示</td></tr>
+  </tbody>
+</table>
+
+<!-- ─── 六、隐藏协鸣管线补漏完成度 ─── -->
+<h2>六、隐藏协鸣管线补漏完成度</h2>
+<p style="color:var(--muted);font-size:12px;margin-bottom:12px">审计日期：2026-07-01 · 发现4项空管道，全部完成补漏 + 2项额外优化。</p>
+
+<h3>6-A 四项核心管道</h3>
+<table>
+  <thead><tr><th>管线</th><th>传说模式</th><th>触发条件</th><th>效果</th><th>实施位置</th><th>状态</th></tr></thead>
+  <tbody>
+    <tr style="background:#0a2a0a">
+      <td><strong>仙人 autoHeal</strong></td>
+      <td>寰宇结义（神话）</td>
+      <td>左慈+华佗 2人</td>
+      <td>每秒回复3%最大血量</td>
+      <td>legend.js: _autoHealPerSec=0.03<br>combat.js: 每tick回血判定</td>
+      <td style="color:#5c5">✅ 已落地</td>
+    </tr>
+    <tr style="background:#0a2a0a">
+      <td><strong>龙族 immuneCC</strong></td>
+      <td>四象归位（宿命）</td>
+      <td>汉献帝-青龙 关羽-玄武</td>
+      <td>tier3: 沉默免疫（被沉默时技能正常释放）</td>
+      <td>legend.js: _immuneCC=true<br>hero.js: 技能判定前豁免</td>
+      <td style="color:#5c5">✅ 已落地</td>
+    </tr>
+    <tr style="background:#0a2a0a">
+      <td><strong>魔剑士 demonSlayer</strong></td>
+      <td>天命所归</td>
+      <td>袁绍（tags: demon_slayer）</td>
+      <td>压制魔王协鸣，全场属性膨胀减半</td>
+      <td>legend.js: _demonSlayer标记<br>synergy.js: 魔王光环×0.5</td>
+      <td style="color:#5c5">✅ 已落地</td>
+    </tr>
+    <tr style="background:#0a2a0a">
+      <td><strong>bonusSkillDmg</strong></td>
+      <td>文武燎原（宿命）+ 天命所归</td>
+      <td>法师协鸣 / 天命加成</td>
+      <td>技能伤害×倍率（方法曾有但未调用）</td>
+      <td>hero.js: skillDamage()<br>data.js: 13个技能函数全部接入</td>
+      <td style="color:#5c5">✅ 已打通</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>6-B 额外优化</h3>
+<table>
+  <thead><tr><th>项目</th><th>改动范围</th><th>说明</th><th>状态</th></tr></thead>
+  <tbody>
+    <tr style="background:#0a2a0a">
+      <td><strong>黄忠 immuneCounters</strong></td>
+      <td>data.js + hero.js (3处)</td>
+      <td>弓兵兵种免疫骑兵克制，英雄维度个人神技（精准神射）而非团体BUFF</td>
+      <td style="color:#5c5">✅</td>
+    </tr>
+    <tr style="background:#0a2a0a">
+      <td><strong>飞将衰减</strong></td>
+      <td>legend.js + combat.js + hero.js (4处)</td>
+      <td>吕布 _allTypeBonus 按场上飞将总数sqrt衰减（不分敌我，2飞将14.1%→3飞将11.5%→最低5%）</td>
+      <td style="color:#5c5">✅</td>
+    </tr>
+    <tr style="background:#0a2a0a">
+      <td><strong>开局先手轮</strong></td>
+      <td>game.js + combat.js (5处)</td>
+      <td>按放置倒序开局依次出手，最后放的棋最先行动</td>
+      <td style="color:#5c5">✅</td>
+    </tr>
+    <tr style="background:#0a2a0a">
+      <td><strong>军师天团最终鸣响</strong></td>
+      <td>legend.js</td>
+      <td>四阵营军师齐聚时全体+20%全属性</td>
+      <td style="color:#5c5">✅</td>
+    </tr>
+  </tbody>
+</table>
+
+<p style="color:var(--muted);font-size:11px;margin-top:20px">本文档为研发数据附件，配合 star-ocean-tribute-report-v3.html 主报告使用 · 版本 v3.1 · 管线补漏全部完成</p>
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三国自走棋 · 完整参数表 v2.0</title>
+<style>
+:root {
+  --bg: #0d1117; --card: #161b22; --border: #30363d;
+  --text: #e6edf3; --muted: #8b949e;
+  --gold: #f0c040; --purple: #a371f7; --blue: #58a6ff;
+  --red: #f85149; --green: #3fb950; --orange: #ff784b;
+  --wei: #4477b2; --shu: #e07040; --wu: #3fb950; --qun: #a371f7; --devil: #f85149;
+  --dragon: #58a6ff; --phoenix: #ff784b; --tortoise: #3fb950; --tiger: #f0c040;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:'Segoe UI','Microsoft YaHei',sans-serif; padding:20px; max-width:1200px; margin:0 auto; }
+h1 { text-align:center; font-size:24px; margin-bottom:4px; }
+h2 { font-size:16px; padding:8px 12px; border-radius:6px; margin:32px 0 12px; }
+h3 { font-size:13px; margin:16px 0 8px; color:var(--muted); }
+table { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:12px; }
+th, td { padding:5px 7px; text-align:left; border-bottom:1px solid var(--border); white-space:nowrap; }
+th { background:#1c2128; color:var(--muted); font-weight:600; position:sticky; top:0; z-index:1; }
+tr:hover { background:rgba(255,255,255,0.03); }
+th:first-child, td:first-child { text-align:center; width:28px; }
+.num { text-align:center; font-variant-numeric:tabular-nums; }
+.cost1 { background:#8899aa33; border-left:3px solid #8899aa; }
+.cost2 { background:#3fb95022; border-left:3px solid #3fb950; }
+.cost3 { background:#58a6ff22; border-left:3px solid #58a6ff; }
+.cost4 { background:#a371f722; border-left:3px solid #a371f7; }
+.cost5 { background:#f0c04022; border-left:3px solid #f0c040; }
+.tag { display:inline-block; padding:0 4px; border-radius:3px; font-size:10px; margin:1px 2px; white-space:nowrap; }
+.tag.tiger { background:#f0c04022; color:#f0c040; }
+.tag.short { background:#f8514922; color:#f85149; }
+.tag.strate { background:#a371f722; color:#a371f7; }
+.tag.emper { background:#f0c04022; color:#f0c040; }
+.tag.devil { background:#f8514922; color:#f85149; }
+.tag.immort { background:#a371f722; color:#a371f7; }
+.tag.fate { background:#ff784b22; color:#ff784b; }
+.tag.magic { background:#a371f722; color:#a371f7; }
+.tag.white { background:#f0c04022; color:#f0c040; }
+.tag.dragon { background:#58a6ff22; color:#58a6ff; }
+.tag.phoenix { background:#ff784b22; color:#ff784b; }
+.tag.tortoise { background:#3fb95022; color:#3fb950; }
+.grid2 { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.grid4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.grid5 { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px; }
+.card h4 { font-size:13px; margin-bottom:6px; }
+.card .val { font-size:22px; font-weight:700; }
+.card .sub { font-size:10px; color:var(--muted); margin-top:2px; }
+.formula { background:#1c2128; border:1px dashed var(--border); border-radius:6px; padding:12px; margin:8px 0; font-size:12px; }
+.formula code { color:var(--gold); font-family:'Cascadia Code','Consolas',monospace; }
+.syn-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; }
+.syn-card h4 { font-size:13px; }
+.syn-card .tiers { font-size:11px; margin-top:6px; line-height:1.8; }
+.syn-card .tiers b { color:var(--gold); }
+.legend-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px; margin-bottom:12px; }
+.legend-card h3 { font-size:14px; margin-bottom:8px; color:var(--gold); }
+.legend-card .desc { font-size:11px; color:var(--muted); margin-bottom:8px; }
+.legend-card table { font-size:11px; }
+.legend-card th { font-size:10px; }
+.footnote { font-size:11px; color:var(--muted); margin-top:8px; line-height:1.6; }
+.hl { color:var(--gold); }
+.warn { color:var(--orange); }
+@media print { body { background:white; color:black; } .card,.syn-card,.formula,.legend-card { background:#f5f5f5; border-color:#ddd; } }
+</style>
+</head>
+<body>
+
+<h1>🏯 三国自走棋 · 完整参数表 v2.0</h1>
+<div style="text-align:center;color:var(--muted);font-size:12px;margin-bottom:24px;">
+48将 · 六职业双轨(协鸣+克制) · 五费金字塔 · 商店Lv10 · 传说模式五层 · 四圣兽 · 神兵因果 · 大事件触发
+</div>
+
+<!-- ═══════════════ 基础数值梯度 ═══════════════ -->
+<h2 style="background:var(--card);color:var(--gold);">📐 一、费用数值梯度</h2>
+<div class="grid5">
+  <div class="card" style="text-align:center;"><div class="val" style="color:#8899aa;">⬜ 1费</div><div class="sub">HP 500~700</div><div class="sub">ATK 35~55</div><div class="sub">DEF 18~35</div><div class="sub">SPD 0.75~1.10</div><div class="sub">Range 1~4</div></div>
+  <div class="card" style="text-align:center;"><div class="val" style="color:#3fb950;">🟢 2费</div><div class="sub">HP 550~850</div><div class="sub">ATK 45~65</div><div class="sub">DEF 22~45</div><div class="sub">SPD 0.75~1.15</div><div class="sub">Range 1~4</div></div>
+  <div class="card" style="text-align:center;"><div class="val" style="color:#58a6ff;">🔵 3费</div><div class="sub">HP 650~950</div><div class="sub">ATK 60~78</div><div class="sub">DEF 28~55</div><div class="sub">SPD 0.80~1.20</div><div class="sub">Range 1~5</div></div>
+  <div class="card" style="text-align:center;"><div class="val" style="color:#a371f7;">🟣 4费</div><div class="sub">HP 700~1100</div><div class="sub">ATK 70~92</div><div class="sub">DEF 30~62</div><div class="sub">SPD 0.82~1.25</div><div class="sub">Range 1~5</div></div>
+  <div class="card" style="text-align:center;"><div class="val" style="color:#f0c040;">🟡 5费</div><div class="sub">HP 900~1200</div><div class="sub">ATK 90~105</div><div class="sub">DEF 38~58</div><div class="sub">SPD 0.95~1.30</div><div class="sub">Range 1~4</div></div>
+</div>
+<div class="formula">
+<strong>设计原则：</strong><br>
+<code>相邻费用 ≈ 1.25× 总战力</code> | 坦克 HP/DEF 偏高、ATK偏低 | 法师 ATK 偏高、HP/DEF 偏低 | 弓手 远程、HP 偏低 | 骑兵 SPD 偏高<br>
+<code>三星 = 1费×3(9张)</code> 合成后 ≈ 3费面板 | <code>三星2费 ≈ 4费面板</code> | <code>三星3费 ≈ 准5费</code>
+</div>
+
+<!-- ═══════════════ 48将全表 ═══════════════ -->
+<h2 style="background:var(--card);color:var(--gold);">📋 二、48将全参数表</h2>
+
+<h3>⬜ 1费英雄（白色·基础牌）— 12张</h3>
+<table>
+<tr><th>#</th><th>武将</th><th>职业</th><th>阵营</th><th>兵种</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPD</th><th>Rng</th><th>隐藏标记</th><th>圣兽</th><th>技能</th></tr>
+<tr class="cost1"><td>1</td><td>关平</td><td>⚔️战士</td><td style="color:var(--shu)">蜀</td><td>⚔️步兵</td><td class="num">620</td><td class="num">50</td><td class="num">20</td><td class="num">1.05</td><td class="num">1</td><td>—</td><td>—</td><td style="font-size:10px;">青龙随侍·与关羽相邻时攻击+15%</td></tr>
+<tr class="cost1"><td>2</td><td>华雄</td><td>⚔️战士</td><td style="color:var(--qun)">群</td><td>🐎骑兵</td><td class="num">650</td><td class="num">48</td><td class="num">28</td><td class="num">0.90</td><td class="num">1</td><td>—</td><td><span class="tag phoenix">🔥凤凰</span></td><td style="font-size:10px;">悍将·血量低于40%时攻击力+35%</td></tr>
+<tr class="cost1"><td>3</td><td>张苞</td><td>🛡️坦克</td><td style="color:var(--shu)">蜀</td><td>🛡️枪兵</td><td class="num">680</td><td class="num">42</td><td class="num">32</td><td class="num">0.85</td><td class="num">1</td><td>—</td><td>—</td><td style="font-size:10px;">虎贲·攻击15%概率眩晕1秒</td></tr>
+<tr class="cost1"><td>4</td><td>周泰</td><td>🛡️坦克</td><td style="color:var(--wu)">吴</td><td>🛡️枪兵</td><td class="num">700</td><td class="num">38</td><td class="num">35</td><td class="num">0.75</td><td class="num">1</td><td>—</td><td>—</td><td style="font-size:10px;">不死·血量低于30%时受到伤害-40%</td></tr>
+<tr class="cost1"><td>5</td><td>吕蒙</td><td>🐎骑兵</td><td style="color:var(--wu)">吴</td><td>🗡️刺客</td><td class="num">550</td><td class="num">52</td><td class="num">20</td><td class="num">1.10</td><td class="num">1</td><td>—</td><td>—</td><td style="font-size:10px;">白衣渡江·开战隐身3秒，破隐攻速+50%×5秒</td></tr>
+<tr class="cost1"><td>6</td><td>曹纯</td><td>🐎骑兵</td><td style="color:var(--wei)">魏</td><td>🐎骑兵</td><td class="num">580</td><td class="num">50</td><td class="num">22</td><td class="num">1.05</td><td class="num">1</td><td>—</td><td>—</td><td style="font-size:10px;">虎豹骑·战斗前8秒攻速+25%</td></tr>
+<tr class="cost1"><td>7</td><td>公孙瓒</td><td>🐎骑兵</td><td style="color:var(--qun)">群</td><td>🐎骑兵</td><td class="num">560</td><td class="num">48</td><td class="num">20</td><td class="num">1.08</td><td class="num">1</td><td>—</td><td>—</td><td style="font-size:10px;">白马义从·冲锋最远敌，造成120%攻击力伤害</td></tr>
+<tr class="cost1"><td>8</td><td>陆绩</td><td>🏹弓手</td><td style="color:var(--wu)">吴</td><td>🏹弓兵</td><td class="num">500</td><td class="num">55</td><td class="num">18</td><td class="num">0.95</td><td class="num">3</td><td>—</td><td>—</td><td style="font-size:10px;">怀橘·每6秒为友方传递15%攻击力增益</td></tr>
+<tr class="cost1"><td>9</td><td>许攸</td><td>🔮法师</td><td style="color:var(--qun)">群</td><td>🧠策士</td><td class="num">480</td><td class="num">48</td><td class="num">18</td><td class="num">0.90</td><td class="num">3</td><td>—</td><td>—</td><td style="font-size:10px;">夜奔·对敌方智力最高者造成攻击力180%法伤</td></tr>
+<tr class="cost1"><td>10</td><td>刘禅</td><td>🔮法师</td><td style="color:var(--shu)">蜀</td><td>🧠策士</td><td class="num">520</td><td class="num">42</td><td class="num">20</td><td class="num">0.85</td><td class="num">3</td><td>—</td><td>—</td><td style="font-size:10px;">惊魂未定·每8秒范围恐惧(1格)，持续1.5秒</td></tr>
+<tr class="cost1"><td>11</td><td>汉献帝</td><td>💚辅助</td><td style="color:var(--qun)">群</td><td>👑皇帝</td><td class="num">480</td><td class="num">25</td><td class="num">20</td><td class="num">0.85</td><td class="num">3</td><td><span class="tag emper">皇帝</span></td><td><span class="tag dragon">🐉龙族</span></td><td style="font-size:10px;">天命所归·在场时全体友方全属性+4%</td></tr>
+<tr class="cost1"><td>12</td><td>华佗</td><td>💚辅助</td><td style="color:var(--qun)">群</td><td>🧠策士</td><td class="num">500</td><td class="num">30</td><td class="num">22</td><td class="num">0.90</td><td class="num">3</td><td>—</td><td>—</td><td style="font-size:10px;">悬壶·每5秒为血量最低友方回复150点</td></tr>
+</table>
+
+<h3>🟢 2费英雄（绿色·进阶牌）— 12张</h3>
+<table>
+<tr><th>#</th><th>武将</th><th>职业</th><th>阵营</th><th>兵种</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPD</th><th>Rng</th><th>隐藏标记</th><th>圣兽</th><th>技能</th></tr>
+<tr class="cost2"><td>1</td><td>张飞</td><td>⚔️战士</td><td style="color:var(--shu)">蜀</td><td>🛡️枪兵</td><td class="num">820</td><td class="num">62</td><td class="num">40</td><td class="num">0.85</td><td class="num">1</td><td><span class="tag tiger">五虎将</span></td><td>—</td><td style="font-size:10px;">怒吼·每10秒范围减攻速30%×3秒</td></tr>
+<tr class="cost2"><td>2</td><td>于禁</td><td>⚔️战士</td><td style="color:var(--wei)">魏</td><td>🛡️枪兵</td><td class="num">780</td><td class="num">55</td><td class="num">42</td><td class="num">0.90</td><td class="num">1</td><td>五子良将</td><td>—</td><td style="font-size:10px;">严整·受到伤害-10%，对刺客额外-15%</td></tr>
+<tr class="cost2"><td>3</td><td>乐进</td><td>⚔️战士</td><td style="color:var(--wei)">魏</td><td>⚔️步兵</td><td class="num">720</td><td class="num">58</td><td class="num">32</td><td class="num">1.10</td><td class="num">1</td><td>五子良将</td><td>—</td><td style="font-size:10px;">先登·首次攻击造成250%伤害</td></tr>
+<tr class="cost2"><td>4</td><td>许褚</td><td>🛡️坦克</td><td style="color:var(--wei)">魏</td><td>⚔️步兵</td><td class="num">850</td><td class="num">48</td><td class="num">45</td><td class="num">0.78</td><td class="num">1</td><td>—</td><td><span class="tag tiger">🐅白虎</span></td><td style="font-size:10px;">虎痴·血量低于50%时防御+50%</td></tr>
+<tr class="cost2"><td>5</td><td>黄盖</td><td>🛡️坦克</td><td style="color:var(--wu)">吴</td><td>🛡️枪兵</td><td class="num">820</td><td class="num">45</td><td class="num">48</td><td class="num">0.75</td><td class="num">1</td><td>—</td><td>—</td><td style="font-size:10px;">苦肉·受到伤害反弹20%给攻击者</td></tr>
+<tr class="cost2"><td>6</td><td>夏侯渊</td><td>🐎骑兵</td><td style="color:var(--wei)">魏</td><td>🐎骑兵</td><td class="num">620</td><td class="num">60</td><td class="num">28</td><td class="num">1.12</td><td class="num">1</td><td>—</td><td>—</td><td style="font-size:10px;">神速·攻击25%概率追加一箭(50%伤害)</td></tr>
+<tr class="cost2"><td>7</td><td>太史慈</td><td>🏹弓手</td><td style="color:var(--wu)">吴</td><td>🏹弓兵</td><td class="num">600</td><td class="num">62</td><td class="num">25</td><td class="num">1.00</td><td class="num">3</td><td>—</td><td>—</td><td style="font-size:10px;">箭无虚发·每3次攻击180%伤害+30%破甲</td></tr>
+<tr class="cost2"><td>8</td><td>郭嘉</td><td>🔮法师</td><td style="color:var(--wei)">魏</td><td>🧠策士</td><td class="num">520</td><td class="num">55</td><td class="num">20</td><td class="num">1.00</td><td class="num">3</td><td><span class="tag strate">军师</span><span class="tag short">短命鬼</span></td><td>—</td><td style="font-size:10px;">遗计·阵亡时全体友方攻击+20%×8秒</td></tr>
+<tr class="cost2"><td>9</td><td>李儒</td><td>🔮法师</td><td style="color:var(--qun)">群</td><td>🧠策士</td><td class="num">550</td><td class="num">52</td><td class="num">22</td><td class="num">0.95</td><td class="num">3</td><td><span class="tag strate">军师</span></td><td>—</td><td style="font-size:10px;">鸩火·攻击带毒灼(15%×4秒)+禁疗40%</td></tr>
+<tr class="cost2"><td>10</td><td>刘备</td><td>💚辅助</td><td style="color:var(--shu)">蜀</td><td>🧠策士</td><td class="num">580</td><td class="num">40</td><td class="num">28</td><td class="num">0.95</td><td class="num">2</td><td><span class="tag emper">皇帝</span></td><td>—</td><td style="font-size:10px;">仁德·每6秒为周围友方回复10%生命</td></tr>
+<tr class="cost2"><td>11</td><td>孙权</td><td>💚辅助</td><td style="color:var(--wu)">吴</td><td>🧠策士</td><td class="num">600</td><td class="num">42</td><td class="num">30</td><td class="num">0.90</td><td class="num">2</td><td>—</td><td>—</td><td style="font-size:10px;">制衡·每5秒回复自身10%生命</td></tr>
+<tr class="cost2"><td>12</td><td>荀彧</td><td>💚辅助</td><td style="color:var(--wei)">魏</td><td>🧠策士</td><td class="num">560</td><td class="num">38</td><td class="num">26</td><td class="num">0.95</td><td class="num">3</td><td><span class="tag strate">军师</span></td><td>—</td><td style="font-size:10px;">王佐·每5秒为最低友方回复200点</td></tr>
+</table>
+
+<h3>🔵 3费英雄（蓝色·精锐牌）— 12张</h3>
+<table>
+<tr><th>#</th><th>武将</th><th>职业</th><th>阵营</th><th>兵种</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPD</th><th>Rng</th><th>隐藏标记</th><th>圣兽</th><th>技能</th></tr>
+<tr class="cost3"><td>1</td><td>关羽</td><td>🐎骑兵</td><td style="color:var(--shu)">蜀</td><td>🐎骑兵</td><td class="num">880</td><td class="num">75</td><td class="num">38</td><td class="num">0.95</td><td class="num">1</td><td><span class="tag tiger">五虎将</span></td><td><span class="tag dragon">🐉龙族</span><span class="tag tortoise">🐢玄武</span></td><td style="font-size:10px;">武圣·攻击附带目标5%最大血量伤害</td></tr>
+<tr class="cost3"><td>2</td><td>赵云</td><td>🐎骑兵</td><td style="color:var(--shu)">蜀</td><td>🛡️枪兵</td><td class="num">820</td><td class="num">72</td><td class="num">40</td><td class="num">1.10</td><td class="num">1</td><td><span class="tag tiger">五虎将</span></td><td><span class="tag dragon">🐉龙族</span></td><td style="font-size:10px;">龙胆·每3次攻击附带15%最大血量伤害</td></tr>
+<tr class="cost3"><td>3</td><td>张郃</td><td>🐎骑兵</td><td style="color:var(--wei)">魏</td><td>🐎骑兵</td><td class="num">780</td><td class="num">68</td><td class="num">36</td><td class="num">1.08</td><td class="num">1</td><td>五子良将</td><td>—</td><td style="font-size:10px;">巧变·攻击15%概率秒杀低于25%血量敌</td></tr>
+<tr class="cost3"><td>4</td><td>姜维</td><td>⚔️战士</td><td style="color:var(--shu)">蜀</td><td>🗡️刺客</td><td class="num">800</td><td class="num">68</td><td class="num">38</td><td class="num">1.05</td><td class="num">1</td><td>—</td><td>—</td><td style="font-size:10px;">继志·每友军阵亡全属性+6%(叠)</td></tr>
+<tr class="cost3"><td>5</td><td>张辽</td><td>⚔️战士</td><td style="color:var(--wei)">魏</td><td>🐎骑兵</td><td class="num">820</td><td class="num">65</td><td class="num">35</td><td class="num">1.12</td><td class="num">1</td><td><span class="tag white">白虎</span> 五子良将</td><td><span class="tag tiger">🐅白虎</span></td><td style="font-size:10px;">威震逍遥津·冲最远敌(90%伤害+减速30%×2s)</td></tr>
+<tr class="cost3"><td>6</td><td>典韦</td><td>🛡️坦克</td><td style="color:var(--wei)">魏</td><td>🛡️枪兵</td><td class="num">950</td><td class="num">62</td><td class="num">52</td><td class="num">0.80</td><td class="num">1</td><td><span class="tag short">短命鬼</span></td><td>—</td><td style="font-size:10px;">古之恶来·每次受击15%概率反击100%伤害</td></tr>
+<tr class="cost3"><td>7</td><td>徐晃</td><td>🛡️坦克</td><td style="color:var(--wei)">魏</td><td style="color:var(--orange);font-weight:700;">⚡重装</td><td class="num">920</td><td class="num">60</td><td class="num">55</td><td class="num">0.82</td><td class="num">1</td><td>五子良将</td><td>—</td><td style="font-size:10px;">长驱直入·<b>无视所有兵种克制</b>，攻击无视25%防御</td></tr>
+<tr class="cost3"><td>8</td><td>周瑜</td><td>💚辅助</td><td style="color:var(--wu)">吴</td><td>🐎骑兵</td><td class="num">680</td><td class="num">58</td><td class="num">32</td><td class="num">1.05</td><td class="num">2</td><td><span class="tag strate">军师</span><span class="tag short">短命鬼</span></td><td><span class="tag phoenix">🔥凤凰</span></td><td style="font-size:10px;">顾曲·每移动一次周围友军攻速+12%×3秒</td></tr>
+<tr class="cost3"><td>9</td><td>庞统</td><td>🔮法师</td><td style="color:var(--shu)">蜀</td><td>🧠策士</td><td class="num">600</td><td class="num">60</td><td class="num">26</td><td class="num">0.95</td><td class="num">3</td><td><span class="tag strate">军师</span><span class="tag short">短命鬼</span></td><td><span class="tag phoenix">🔥凤凰</span></td><td style="font-size:10px;">连环计·技能命中后相邻1名敌传递50%伤害</td></tr>
+<tr class="cost3"><td>10</td><td>程昱</td><td>🔮法师</td><td style="color:var(--wei)">魏</td><td>🏹弓兵</td><td class="num">620</td><td class="num">62</td><td class="num">28</td><td class="num">0.92</td><td class="num">3</td><td>—</td><td>—</td><td style="font-size:10px;">十面埋伏·每8秒全屏55%法伤+减速15%×2秒</td></tr>
+<tr class="cost3"><td>11</td><td>黄忠</td><td>🏹弓手</td><td style="color:var(--shu)">蜀</td><td>🐎骑兵</td><td class="num">650</td><td class="num">78</td><td class="num">28</td><td class="num">0.95</td><td class="num">3</td><td><span class="tag tiger">五虎将</span></td><td>—</td><td style="font-size:10px;">精准神射·暴击率+25% <b>不受骑兵克制</b></td></tr>
+<tr class="cost3"><td>12</td><td>陆逊</td><td>💚辅助</td><td style="color:var(--wu)">吴</td><td>🗡️刺客</td><td class="num">660</td><td class="num">55</td><td class="num">30</td><td class="num">1.00</td><td class="num">2</td><td>—</td><td>—</td><td style="font-size:10px;">火烧连营·敌方后排每5秒受攻击力80%灼烧</td></tr>
+</table>
+
+<h3>🟣 4费英雄（紫色·传说牌）— 8张</h3>
+<table>
+<tr><th>#</th><th>武将</th><th>职业</th><th>阵营</th><th>兵种</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPD</th><th>Rng</th><th>隐藏标记</th><th>圣兽</th><th>技能</th></tr>
+<tr class="cost4"><td>1</td><td>马超</td><td>⚔️战士</td><td style="color:var(--qun)">群</td><td>🐎骑兵</td><td class="num">880</td><td class="num">88</td><td class="num">35</td><td class="num">1.25</td><td class="num">1</td><td><span class="tag tiger">五虎将</span></td><td>—</td><td style="font-size:10px;">锦马超·击杀后攻速+25%(叠3层)</td></tr>
+<tr class="cost4"><td>2</td><td>曹操</td><td>🐎骑兵</td><td style="color:var(--wei)">魏</td><td>🐎骑兵</td><td class="num">850</td><td class="num">82</td><td class="num">42</td><td class="num">1.08</td><td class="num">1</td><td><span class="tag emper">皇帝</span></td><td><span class="tag tortoise">🐢玄武</span></td><td style="font-size:10px;">奸雄·每7秒偷取全体敌8%攻击力×5秒</td></tr>
+<tr class="cost4"><td>3</td><td>诸葛亮</td><td>🔮法师</td><td style="color:var(--shu)">蜀</td><td>🧠策士</td><td class="num">650</td><td class="num">75</td><td class="num">30</td><td class="num">1.00</td><td class="num">4</td><td><span class="tag strate">军师</span></td><td><span class="tag dragon">🐉龙族</span></td><td style="font-size:10px;">八阵图·每8秒全屏80%法伤AOE</td></tr>
+<tr class="cost4"><td>4</td><td>张角</td><td>🔮法师</td><td style="color:var(--qun)">群</td><td>🧠策士</td><td class="num">680</td><td class="num">72</td><td class="num">30</td><td class="num">0.95</td><td class="num">4</td><td><span class="tag fate">天命</span></td><td>—</td><td style="font-size:10px;">黄天当立·每6秒随机3道雷击(各100%法伤)</td></tr>
+<tr class="cost4"><td>5</td><td>司马懿</td><td style="color:var(--gold);font-weight:700;">⚡辅助/法师</td><td style="color:var(--wei)">魏</td><td>🧠策士</td><td class="num">720</td><td class="num">65</td><td class="num">35</td><td class="num">0.95</td><td class="num">2</td><td><span class="tag strate">军师</span></td><td><span class="tag tiger">🐅白虎</span></td><td style="font-size:10px;">狼顾·<b>双职业</b>★远期变身:3层后切法师·反弹累积伤害</td></tr>
+<tr class="cost4"><td>6</td><td>左慈</td><td>💚辅助</td><td style="color:var(--qun)">群</td><td>🧠策士</td><td class="num">700</td><td class="num">55</td><td class="num">32</td><td class="num">1.00</td><td class="num">4</td><td><span class="tag immort">仙人</span></td><td><span class="tag tortoise">🐢玄武</span></td><td style="font-size:10px;">遁甲天书·每10秒化虚2秒(不可选中)+回血18%</td></tr>
+<tr class="cost4"><td>7</td><td>魏延</td><td>🛡️坦克</td><td style="color:var(--shu)">蜀</td><td>🗡️刺客</td><td class="num">900</td><td class="num">78</td><td class="num">48</td><td class="num">0.92</td><td class="num">1</td><td>—</td><td>—</td><td style="font-size:10px;">子午奇袭·每8秒闪到后排嘲讽2秒+防御+50%</td></tr>
+<tr class="cost4"><td>8</td><td>甘宁</td><td>🏹弓手</td><td style="color:var(--wu)">吴</td><td>🏹弓兵</td><td class="num">780</td><td class="num">92</td><td class="num">32</td><td class="num">1.05</td><td class="num">3</td><td>—</td><td>—</td><td style="font-size:10px;">锦帆·每3次攻击对所有相邻敌造成60%伤害</td></tr>
+</table>
+
+<h3>🟡 5费英雄（金色·神话牌）— 4张</h3>
+<table>
+<tr><th>#</th><th>武将</th><th>职业</th><th>阵营</th><th>兵种</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPD</th><th>Rng</th><th>隐藏标记</th><th>圣兽</th><th>技能</th></tr>
+<tr class="cost5"><td>1</td><td>吕布</td><td>🐎骑兵</td><td style="color:var(--qun)">群</td><td>🐎骑兵</td><td class="num">1050</td><td class="num">105</td><td class="num">45</td><td class="num">1.10</td><td class="num">1</td><td>飞将</td><td><span class="tag dragon">🐉龙族</span></td><td style="font-size:10px;">无双·每5秒周围全屏100%伤害+自身无敌1秒</td></tr>
+<tr class="cost5"><td>2</td><td>孙策</td><td>⚔️战士</td><td style="color:var(--wu)">吴</td><td>🐎骑兵</td><td class="num">1000</td><td class="num">95</td><td class="num">42</td><td class="num">1.15</td><td class="num">1</td><td><span class="tag short">短命鬼</span></td><td>—</td><td style="font-size:10px;">霸王·每击杀全属性+12%(叠)，击杀回满血</td></tr>
+<tr class="cost5"><td>3</td><td>董卓</td><td style="color:var(--red);font-weight:700;">👹魔王</td><td style="color:var(--qun)">群</td><td style="color:var(--red)">💀魔物</td><td class="num">1200</td><td class="num">90</td><td class="num">58</td><td class="num">0.95</td><td class="num">1</td><td><span class="tag devil">魔王</span></td><td>—</td><td style="font-size:10px;">魔王降世·<b>独享魔王协鸣</b>：全属性+30%+吸血25%</td></tr>
+<tr class="cost5"><td>4</td><td>袁绍</td><td>⚔️战士</td><td style="color:var(--qun)">群</td><td>🧠策士</td><td class="num">950</td><td class="num">88</td><td class="num">40</td><td class="num">1.05</td><td class="num">1</td><td><span class="tag magic">魔剑士</span></td><td>—</td><td style="font-size:10px;">四世三公·每8秒召唤谋士虚影造成法伤(ATK×120%)</td></tr>
+</table>
+
+<!-- ═══════════════ 协鸣体系 ═══════════════ -->
+<h2 style="background:var(--card);color:var(--gold);">🎯 三、职业协鸣体系（v2.0修订）</h2>
+
+<div class="grid2">
+<div class="syn-card">
+<h4>⚔️ 战士协鸣 — 8人 · 2/4/6/8</h4>
+<div class="tiers">
+<b>2人：</b>战士血量+200<br>
+<b>4人：</b>战士攻击力+25%<br>
+<b>6人：</b>战士获得<b style="color:var(--gold);">范围增伤20%</b>（溅射相邻1格）<br>
+<b>8人：</b>范围增伤30% + <b style="color:var(--gold);">先攻</b>（战斗中率先出手）<br>
+<br><span style="color:var(--green);">⭐ 8人全抓即可满档，无需组件</span>
+</div>
+</div>
+
+<div class="syn-card">
+<h4>🐎 骑兵协鸣 — 9人 · 2/4/6/8</h4>
+<div class="tiers">
+<b>2人：</b>骑兵首次攻击+30%伤害<br>
+<b>4人：</b>骑兵移速+1格，冲锋后攻速+20%×3秒<br>
+<b>6人：</b>骑兵对弓兵伤害额外+25%（冲锋伤害+25%）<br>
+<b>8人：</b>冲锋伤害+35% + <b style="color:var(--gold);">反冲</b>（受击时反击50%伤害）<br>
+<br><span style="color:var(--green);">⭐ 9人满档轻松，8档攻防一体</span>
+</div>
+</div>
+
+<div class="syn-card">
+<h4>🛡️ 坦克协鸣 — 8人 · 2/4/6/8</h4>
+<div class="tiers">
+<b>2人：</b>坦克受到伤害-12%<br>
+<b>4人：</b>坦克开场获得250护盾<br>
+<b>6人：</b>坦克受击10%概率反弹60%伤害<br>
+<b>8人：</b>坦克死亡后为全体友方提供200护盾<br>
+<br><span style="color:var(--muted);">⭐ 4档加成不夸张，全枪兵硬凑可达</span>
+</div>
+</div>
+
+<div class="syn-card">
+<h4>🔮 法师协鸣 — 8人 · 3/6/9</h4>
+<div class="tiers">
+<b>3人：</b>法师技能伤害+25%<br>
+<b>6人：</b>法师技能冷却-30%<br>
+<b>9人：</b>法师技能变为双重施法(50%伤害)<br>
+<br><span style="color:var(--orange);">⚠ 需1个法师组件才能凑9</span>
+</div>
+</div>
+
+<div class="syn-card">
+<h4>💚 辅助协鸣 — 9人 · 3/5/7/9</h4>
+<div class="tiers">
+<b>3人：</b>辅助治疗/护盾效果+25%<br>
+<b>5人：</b>所有友方每5秒回复3%最大生命<br>
+<b>7人：</b>友方死亡时50%概率复活(半血一次)<br>
+<b>9人：</b>辅助存活时全队免控<br>
+<br><span style="color:var(--green);">⭐ 9人自有满档，档位多、节奏灵活</span>
+</div>
+</div>
+
+<div class="syn-card">
+<h4>🏹 弓手协鸣 — 6人 · 2/4/6</h4>
+<div class="tiers">
+<b>弓兵兵种自带射程：</b>基础 range 3（1+2，古战场远程兵种）<br>
+<b>2人：</b>弓手攻击力+20<br>
+<b>4人：</b>弓手攻击力<b style="color:var(--gold);">+40</b> + 射程<b style="color:var(--gold);">+1</b>（range 3→4）<br>
+<b>6人：</b><b style="color:var(--gold);">全屏射程 + 不受到任何反击</b><br>
+<br><span style="color:var(--orange);">⚠ 6人凑满需全抓+2个弓手组件 · 弓兵无狙足类技能，靠基础射程3保安全距离<br>⚠ 4档(range 4)仍可被法师(range 4)对射，6档(全屏)才是绝对安全</span>
+</div>
+</div>
+</div>
+
+<!-- ═══════════════ 阵营协鸣 ═══════════════ -->
+<h2 style="background:var(--card);color:var(--gold);">🏳️ 四、阵营协鸣体系</h2>
+<div class="grid4">
+<div class="syn-card"><h4 style="color:var(--wei);">🔴 魏 · 15人</h4><div class="tiers"><b>2人：</b>魏将攻击+10%<br><b>4人：</b>魏将血量+20%<br><b>6人：</b>魏将开场护盾(15%最大血量)<br><b>8人：</b>魏将每击杀回血10%</div></div>
+<div class="syn-card"><h4 style="color:var(--shu);">🟠 蜀 · 13人</h4><div class="tiers"><b>2人：</b>蜀将暴击率+15%<br><b>4人：</b>蜀将暴击伤害+40%<br><b>6人：</b>蜀将暴击回血5%<br><b>8人：</b>蜀将技能冷却-25%</div></div>
+<div class="syn-card"><h4 style="color:var(--wu);">🟢 吴 · 10人</h4><div class="tiers"><b>2人：</b>吴将攻速+20%<br><b>4人：</b>吴将攻击灼烧(每秒2%最大血×3秒)<br><b>6人：</b>吴将死亡爆炸(20%最大血范围伤害)<br><b>8人：</b>吴将灼烧叠加3层</div></div>
+<div class="syn-card"><h4 style="color:var(--qun);">🟣 群 · 13人</h4><div class="tiers"><b>2人：</b>群雄全属性+8%<br><b>4人：</b>群雄技能冷却-25%<br><b>6人：</b>群雄每回合随机+1临时装备<br><b>8人：</b>群雄受致命伤害时锁血1回合(1次)</div></div>
+</div>
+
+<div style="margin-top:12px;" class="syn-card">
+<h4 style="color:var(--red);">👹 魔王（董卓独享）— 1人协鸣</h4>
+<div class="tiers">
+<b>效果：</b>董卓全属性+30% + 攻击吸血25% + 每击杀召唤1名凉州铁骑(1费傀儡)<br>
+<span style="color:var(--orange);">⚠ 当袁绍(魔剑士)在场时魔王协鸣压制为+15%/+15%，凉州铁骑不生</span>
+</div>
+</div>
+
+<!-- ═══════════════ 兵种克制 ═══════════════ -->
+<h2 style="background:var(--card);color:var(--gold);">⚡ 五、兵种克制链</h2>
+<div style="text-align:center;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:16px;line-height:2.2;">
+🐎<b>骑兵</b> → 🏹弓兵（伤害+25%）<br>
+🏹<b>弓兵</b> → 🗡️刺客（伤害+20%·暴露隐身）<br>
+🛡️<b>枪兵</b> → 🐎骑兵（受骑兵伤害-25%）<br>
+🗡️<b>刺客</b> → ⚔️步兵（伤害+20%·绕后切脆皮）<br>
+⚔️<b>步兵</b> → 🛡️枪兵（伤害+15%·灵活破阵）<br>
+🧠<b>策士</b> → 无克制（中立·法系自由输出）<br>
+⚡<b>重装</b>（徐晃）→ 无视所有克制链<br>
+👑<b>皇帝</b> → 无克制 · 💀<b>魔物</b> → 无克制
+</div>
+<div class="formula">
+<strong>克制加成公式：</strong><code>最终伤害 = 基础伤害 × (1 + 兵种克制加成) × (1 - 目标兵种减伤)</code><br>
+<strong>例外清单：</strong>黄忠(弓手·骑兵兵种)不受骑兵克制 | 徐晃(重装)无视所有克制
+</div>
+
+<!-- ═══════════════ 商店经济 ═══════════════ -->
+<h2 style="background:var(--card);color:var(--gold);">💰 六、商店经济体系（Lv1-10）</h2>
+
+<h3>商店等级刷新率（10级满·Lv10砍1-2费）</h3>
+<table>
+<tr><th>商店Lv</th><th>⬜1费</th><th>🟢2费</th><th>🔵3费</th><th>🟣4费</th><th>🟡5费</th><th>升级费用</th><th>备注</th></tr>
+<tr><td class="num">1</td><td class="num" style="color:#8899aa;">100%</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td>开局</td></tr>
+<tr><td class="num">2</td><td class="num" style="color:#8899aa;">70%</td><td class="num" style="color:#3fb950;">30%</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">4</td><td>—</td></tr>
+<tr><td class="num">3</td><td class="num" style="color:#8899aa;">55%</td><td class="num" style="color:#3fb950;">30%</td><td class="num" style="color:#58a6ff;">15%</td><td class="num">—</td><td class="num">—</td><td class="num">8</td><td>—</td></tr>
+<tr><td class="num">4</td><td class="num" style="color:#8899aa;">40%</td><td class="num" style="color:#3fb950;">30%</td><td class="num" style="color:#58a6ff;">20%</td><td class="num" style="color:#a371f7;">10%</td><td class="num">—</td><td class="num">12</td><td>5费首次出现</td></tr>
+<tr><td class="num">5</td><td class="num" style="color:#8899aa;">30%</td><td class="num" style="color:#3fb950;">30%</td><td class="num" style="color:#58a6ff;">25%</td><td class="num" style="color:#a371f7;">12%</td><td class="num" style="color:#f0c040;">3%</td><td class="num">16</td><td>—</td></tr>
+<tr><td class="num">6</td><td class="num" style="color:#8899aa;">20%</td><td class="num" style="color:#3fb950;">25%</td><td class="num" style="color:#58a6ff;">30%</td><td class="num" style="color:#a371f7;">18%</td><td class="num" style="color:#f0c040;">7%</td><td class="num">20</td><td>—</td></tr>
+<tr><td class="num">7</td><td class="num" style="color:#8899aa;">15%</td><td class="num" style="color:#3fb950;">20%</td><td class="num" style="color:#58a6ff;">30%</td><td class="num" style="color:#a371f7;">25%</td><td class="num" style="color:#f0c040;">10%</td><td class="num">24</td><td>—</td></tr>
+<tr><td class="num">8</td><td class="num" style="color:#8899aa;">10%</td><td class="num" style="color:#3fb950;">15%</td><td class="num" style="color:#58a6ff;">25%</td><td class="num" style="color:#a371f7;">30%</td><td class="num" style="color:#f0c040;">20%</td><td class="num">28</td><td>—</td></tr>
+<tr style="background:rgba(240,192,64,0.05);"><td class="num" style="color:var(--gold);font-weight:700;">9</td><td class="num" style="color:#8899aa;">5%</td><td class="num" style="color:#3fb950;">10%</td><td class="num" style="color:#58a6ff;">20%</td><td class="num" style="color:#a371f7;">35%</td><td class="num" style="color:#f0c040;">30%</td><td class="num">32</td><td style="color:var(--gold);">★ 正常满级</td></tr>
+<tr style="background:rgba(248,81,73,0.08);"><td class="num" style="color:var(--red);font-weight:700;">10</td><td class="num" style="color:var(--red);text-decoration:line-through;">0%</td><td class="num" style="color:var(--red);text-decoration:line-through;">0%</td><td class="num" style="color:#58a6ff;">15%</td><td class="num" style="color:#a371f7;">40%</td><td class="num" style="color:#f0c040;">45%</td><td class="num">—</td><td style="color:var(--orange);">⚠ 科技+1·1-2费绝迹</td></tr>
+</table>
+
+<div class="formula">
+<strong>Lv10 双刃剑设计：</strong><br>
+✅ 5费概率 30%→45%，追吕布/孙策/董卓/袁绍效率翻倍<br>
+❌ 1-2费绝迹：中途卖掉的陆绩/太史慈回不来，弓手线可能断裂<br>
+<span style="color:var(--gold);">→ "+1商店等级"不是纯增益科技，是破釜沉舟选项</span>
+</div>
+
+<h3>经济参数</h3>
+<div class="grid4">
+<div class="card"><h4>💰 基础收入</h4><div class="val">5</div><div class="sub">金币/回合</div></div>
+<div class="card"><h4>💵 利息上限</h4><div class="val">5</div><div class="sub">每10金=1利息(上限50金)</div></div>
+<div class="card"><h4>🔄 刷新费用</h4><div class="val">2</div><div class="sub">金币/次</div></div>
+<div class="card"><h4>🛒 商店格数</h4><div class="val">5</div><div class="sub">每轮固定5格</div></div>
+</div>
+
+<!-- ═══════════════ 传说模式 ═══════════════ -->
+<h2 style="background:var(--card);color:var(--gold);">🎴 七、传说模式 · 五层隐藏协鸣体系</h2>
+<div class="formula" style="margin-bottom:16px;">
+<strong>机制：</strong>轮盘赌转出特定模式 → 该层隐藏协鸣激活 → 不同模式不同套路<br>
+<strong>设计意图：</strong>读过《诸界异宇》的玩家有天然优势——"知识即策略深度"<br>
+<strong>常驻 vs 模式限定：</strong>基础协鸣(职业/阵营)常驻；隐藏协鸣仅在对应模式激活
+</div>
+
+<!-- 起源故事 -->
+<div class="legend-card">
+<h3>🌅 第一层 · 起源故事</h3>
+<div class="desc">三国开端，结义立基。最灵活最易成型的小阵营。</div>
+<table>
+<tr><th>协鸣</th><th>触发条件</th><th>效果</th></tr>
+<tr><td><b>🌿 桃园结义</b></td><td>刘备+关羽+张飞同时在场</td><td>棋盘前排中间「义」字格激活，该格棋子获得大幅强化（不限刘关张，任何放在该格的卡都吃buff）</td></tr>
+<tr><td><b>👨‍👦 虎父无犬子</b></td><td>任意一对父子同场（关羽+关平 / 张飞+张苞 / 刘备+刘禅）</td><td>1对：父子各+10%攻击 | 2对：父子各+15%攻防 | 3对全齐：全场蜀将+20%攻防 + 父子获得「替挡」(父替子挡一次致命伤)</td></tr>
+</table>
+<div class="footnote">※ 虎父无犬子当前为蜀国专属（三组父子全蜀），是对蜀国基础面板偏弱的补偿</div>
+</div>
+
+<!-- 传统演义 -->
+<div class="legend-card">
+<h3>📖 第二层 · 传统演义</h3>
+<div class="desc">民间评书经典，名号永恒。</div>
+<table>
+<tr><th>协鸣</th><th>成员</th><th>触发条件</th><th>效果</th></tr>
+<tr><td><b>🐉 五虎将</b></td><td>关羽·张飞·赵云·黄忠·马超</td><td>5人全齐（跨阵营：蜀4+群1）</td><td>五虎全员攻击力+35%，暴击伤害+50%</td></tr>
+<tr><td><b>⚔️ 五子良将</b></td><td>于禁·乐进·张郃·张辽·徐晃</td><td>5人全齐（全魏）</td><td>五子全员防御+25%，开场10秒内不受负面状态</td></tr>
+<tr><td><b>🧠 军师天团</b></td><td>魏3: 郭嘉·荀彧·司马懿 | 蜀2: 诸葛亮·庞统 | 吴1: 周瑜 | 群1: 李儒</td><td>分阵营小光环 + 6人全光环</td><td>魏3→技能伤害+20% | 蜀2→冷却缩减+15% | 6人全→全场友方技能附带30%真实伤害</td></tr>
+</table>
+<div class="footnote">※ 五虎将唯一跨阵营标记，玩家需打破阵营思维 | 军师魏3最难凑含金量最高</div>
+</div>
+
+<!-- 史实逻辑 -->
+<div class="legend-card">
+<h3>⚔️ 第三层 · 史实逻辑</h3>
+<div class="desc">正史因果，一炮害三贤。</div>
+<table>
+<tr><th>协鸣</th><th>触发条件</th><th>效果</th></tr>
+<tr><td><b>💀 短命鬼（3/5阶梯）</b></td><td>3人小：典韦/郭嘉/周瑜（任3）<br>5人全：+庞统/孙策</td><td>3人→开局8秒攻击+25% | 5人→全队攻击+25% + 短命鬼阵亡爆炸(25%最大血)</td></tr>
+<tr><td><b>🔥 赤壁余烬</b></td><td>周瑜+诸葛亮+黄盖（跨阵营）</td><td>开场敌方全体损失10%当前血量（火系灼烧DEBUFF）</td></tr>
+<tr><td><b>🌊 下邳洪流</b></td><td>曹操+郭嘉+程昱</td><td>战斗开始敌方棋盘前两排降速30%持续8秒</td></tr>
+<tr><td><b>⭐ 七星续命</b></td><td>诸葛亮+赵云（赵云护法）</td><td>诸葛亮血量归零时30%概率复活回50%血（每局一次）</td></tr>
+<tr><td><b>💚 绿豆债</b></td><td>关羽+张辽同阵营</td><td>商店刷新费用-1（经济互助）</td></tr>
+</table>
+</div>
+
+<!-- 神话三国 -->
+<div class="legend-card">
+<h3>🐉 第四层 · 神话三国（《诸界异宇》联动）</h3>
+<div class="desc">前世因果、四圣兽、神兵锁链。读过小说的玩家有天然决策优势。</div>
+
+<h4 style="font-size:12px;color:var(--gold);margin:12px 0 6px;">🐉 四圣兽体系（四象轮转）</h4>
+<table>
+<tr><th>圣兽</th><th>成员</th><th>人数</th><th>被动效果</th><th>单兽全齐光环</th></tr>
+<tr><td><span class="tag dragon">🐉 龙族</span></td><td>赵云·汉献帝·关羽·诸葛亮·吕布</td><td>5</td><td>受到伤害-10%</td><td><b style="color:var(--blue);">龙威(3人)</b>：对非圣兽单位伤害+15%，受非圣兽伤害-5%<br><b style="color:var(--blue);">龙威(5人)</b>：对非圣兽伤害+25%，受非圣兽伤害-15%，全队攻击+15%</td></tr>
+<tr><td><span class="tag phoenix">🔥 凤凰</span></td><td>华雄·周瑜·庞统</td><td>3</td><td>阵亡时50%概率复活(30%血)</td><td><b style="color:var(--orange);">涅槃</b>：阵亡时40%概率复活回40%血(每人每局1次)</td></tr>
+<tr><td><span class="tag tortoise">🐢 玄武</span></td><td>关羽·曹操·左慈</td><td>3</td><td>受击反弹15%伤害</td><td><b style="color:var(--green);">玄甲</b>：受到伤害-15%，每5秒回5%最大血量</td></tr>
+<tr><td><span class="tag tiger">🐅 白虎</span></td><td>许褚·张辽·司马懿</td><td>3</td><td>攻击力+12%</td><td><b style="color:var(--gold);">虎噬</b>：攻击+25%，暴击率+20%</td></tr>
+</table>
+<div class="footnote" style="margin-bottom:8px;">※ 关羽双圣兽标签（龙族+玄武）——青龙偃月刀对龙族+30%伤害，但关羽自己也是龙族，因果缠绕<br>※ 龙族独有<b>两档</b>：3人中光环（低于四象轮转）→ 5人大光环（需含5费吕布，难度≥四象轮转，回报持平或更高）<br>※ 凤凰/玄武/白虎各3人只有一档全齐光环，功能各异：凤凰=生存(复活) / 玄武=防御(减伤+回血) / 白虎=进攻(暴击)</div>
+<table>
+<tr><th>激活条件</th><th>效果</th></tr>
+<tr><td>任意1头圣兽在场</td><td>被动标签效果（见上）</td></tr>
+<tr style="background:rgba(88,166,255,0.05);"><td><b style="color:var(--blue);">龙族3人</b></td><td><b style="color:var(--blue);">龙威(中)</b>：对非圣兽伤害+15%，受非圣兽伤害-5%</td></tr>
+<tr style="background:rgba(240,192,64,0.05);"><td><b style="color:var(--gold);">单头圣兽全齐</b></td><td><b>单兽中型光环</b>（凤凰涅槃/玄武玄甲/白虎虎噬，3人即满）<br><b style="color:var(--blue);">龙族5人</b>：龙威(大) — 对非圣兽伤害+25%，受非圣兽伤害-15%，全队攻击+15%（需5费吕布，难度≥四象轮转）</td></tr>
+<tr><td>2头不同圣兽在场</td><td>小光环：全队全属性+5%</td></tr>
+<tr><td>3头不同圣兽</td><td>中光环：全队全属性+10% + 圣兽成员额外+15%</td></tr>
+<tr><td>4头全齐</td><td><b style="color:var(--gold);">「四象轮转」</b>：全队全属性+15% + 圣兽成员+25% + 每10秒随机圣兽附体(额外buff)</td></tr>
+</table>
+
+<h4 style="font-size:12px;color:var(--gold);margin:16px 0 6px;">⚔️ 神兵因果线（装备锁定效果）</h4>
+<table>
+<tr><th>神兵</th><th>持有者</th><th>效果</th></tr>
+<tr><td>青龙偃月刀</td><td>关羽</td><td>对龙族/水系标签武将 +30%伤害</td></tr>
+<tr><td>丈八蛇矛</td><td>张飞</td><td>攻击附带毒素（每秒2%最大生命）</td></tr>
+<tr><td>青釭剑</td><td>曹操</td><td>与关羽对战时双方攻速+15%（宿命对决）</td></tr>
+<tr><td>方天画戟</td><td>吕布</td><td>三层护盾，每损失30%血量碎一层</td></tr>
+<tr><td>赤兔马</td><td>关羽→水火双属性攻击 / 吕布→仅火属性</td><td>同一装备跨武将效果不同</td></tr>
+<tr><td>九黎焚天刀</td><td>张角→华雄装备时</td><td>凤凰族协鸣计数+1</td></tr>
+</table>
+
+<h4 style="font-size:12px;color:var(--gold);margin:16px 0 6px;">🎭 前世因果线</h4>
+<table>
+<tr><th>名称</th><th>条件</th><th>效果</th></tr>
+<tr><td>斩玄之恩</td><td>曹操+关羽同阵营</td><td>关羽受致命伤时曹操替挡一次（「这一刀，是本相欠你的」）</td></tr>
+<tr><td>焚神之誓</td><td>诸葛亮是场上唯一军师标签</td><td>技能伤害+40%</td></tr>
+<tr><td>青梅论道</td><td>曹操+刘备同场</td><td>曹操攻击+15%，刘备防御+15%（理念不同但互相承认）</td></tr>
+<tr><td>玄武收割者</td><td>曹操+左慈</td><td>每击杀龙族标签单位获得+3金币</td></tr>
+<tr><td>紫微断章</td><td>吕布同时装备方天画戟+赤兔马，且场上无其他飞将</td><td>三星吕布全属性+25%，但每轮结束扣5%当前血量（天命已被截断）</td></tr>
+</table>
+</div>
+
+<!-- 天命所归 -->
+<div class="legend-card">
+<h3>👑 第五层 · 天命所归</h3>
+<div class="desc">权力与天命，谁主沉浮。</div>
+<table>
+<tr><th>协鸣</th><th>成员</th><th>触发条件</th><th>效果</th></tr>
+<tr><td><b>👑 皇帝光环</b></td><td>汉献帝(1费群)·刘备(2费蜀)·曹操(4费魏)</td><td>3人全齐</td><td>皇帝所在阵营所有单位全属性+12%</td></tr>
+<tr><td><b>☀️ 天命标记</b></td><td>张角(4费群)·汉献帝(1费群)</td><td>2人同场</td><td>天命单位技能无法被沉默</td></tr>
+<tr><td><b>👹 魔王 vs ⚔️ 魔剑士</b></td><td>董卓(魔王)·袁绍(魔剑士)</td><td>袁绍在场时</td><td>魔王协鸣被压制：+30%→+15%，凉州铁骑不生。袁绍阵亡后魔王恢复</td></tr>
+</table>
+<div class="footnote">※ 袁绍是唯一能对抗魔王的勇者，「我剑也未尝不利」</div>
+</div>
+
+<!-- 独立标记汇总 -->
+<div class="legend-card">
+<h3>🏷️ 独立标记汇总（不参与协鸣结算的被动标签）</h3>
+<table>
+<tr><th>标记</th><th>持有者</th><th>效果</th></tr>
+<tr><td>☯️ 仙人</td><td>左慈</td><td>每10秒化虚2秒不可选中+回血18%</td></tr>
+<tr><td>🦅 飞将</td><td>吕布</td><td>无视前排嘲讽直接切后排 | 紫微断章条件之一</td></tr>
+<tr><td>⚡ 魔剑士</td><td>袁绍</td><td>战士面板但技能为法术伤害 | 压制魔王协鸣</td></tr>
+<tr><td>👹 魔王</td><td>董卓</td><td>独享魔王协鸣(全属性+30%+吸血25%)</td></tr>
+</table>
+</div>
+
+<!-- ═══════════════ 装备掉落 ═══════════════ -->
+<h2 style="background:var(--card);color:var(--gold);">🎒 八、装备/组件掉落体系</h2>
+<div class="grid2">
+<div class="syn-card">
+<h4>⚔️ 装备掉落轮次</h4>
+<div class="tiers">
+<b>固定轮次：</b>1, 2, 5, 7, 10, 13, 17, 21, 25<br>
+<b>掉落形式：</b>随机3选1装备（基础攻/防/血/速四类）<br>
+<b>卡池大小：</b>12件基础装备<br>
+<b>传说武器：</b>特定轮次低概率掉落（10/17/21/25轮各加1件传说入池）<br>
+<b>神兵锁定：</b>传说模式·神话三国层激活时，特定武将拾取对应装备触发神兵因果线
+</div>
+</div>
+<div class="syn-card">
+<h4>🧩 阵营组件掉落</h4>
+<div class="tiers">
+<b>掉落概率：</b>每轮战斗结束后5%概率掉落1个随机阵营组件<br>
+<b>组件效果：</b>使用后视为场上多1个该阵营单位（仅协鸣计算，不占位）<br>
+<b>上限：</b>每阵营最多获得1个组件<br>
+<b>类型：</b>魏/蜀/吴/群 四种随机
+</div>
+</div>
+<div class="syn-card">
+<h4>🔬 科技选件轮次（含组件）</h4>
+<div class="tiers">
+<b>科技轮次：</b>3, 4, 6, 8, 9, 11, 12, 14, 15, 16, 18, 19, 20, 22, 23, 24<br>
+<b>3选1内容：</b>前2格固定随机科技，第3格 <b style="color:var(--gold);">33.3%概率</b> 出随机阵营/职业组件 · 66.7%概率出第三个科技<br>
+<b>科技池：</b>9种基础科技 + <b style="color:var(--gold);">「商店等级+1」</b>(升至Lv10·1-2费绝迹)<br>
+<span style="color:var(--orange);">⚠ 组件不是保底出，看脸——弓手/法师冲高档的组件是稀缺资源</span>
+</div>
+</div>
+<div class="syn-card">
+<h4>🏹 职业组件（弓/法冲高档用）</h4>
+<div class="tiers">
+<b>弓手组件：</b>用于触发弓手6协鸣（需额外2个）<br>
+<b>法师组件：</b>用于触发法师9协鸣（需额外1个）<br>
+<b>骑兵/战士/坦克/辅助：</b>不需要组件即可满档
+</div>
+</div>
+</div>
+
+<!-- ═══════════════ 回合流程 ═══════════════ -->
+<h2 style="background:var(--card);color:var(--gold);">🔄 九、回合流程 & 战斗参数</h2>
+<div class="grid3">
+<div class="card">
+<h4>⏱️ 回合结构</h4>
+<div class="sub" style="line-height:1.8;">
+1. 收入阶段 → 发金币+利息<br>
+2. 商店阶段 → 买将/刷新/升级<br>
+3. 部署阶段 → 上阵调整站位<br>
+4. 战斗阶段 → 自动对战（同步行动）<br>
+5. 结算阶段 → 扣血/掉落/日志
+</div>
+</div>
+<div class="card">
+<h4>⚔️ 战斗参数</h4>
+<div class="sub" style="line-height:1.8;">
+<b>棋盘：</b>4×7（28格）<br>
+<b>结义位：</b>前排中间格（传说模式激活）<br>
+<b>单局上限：</b>30秒<br>
+<b>伤害公式：</b>ATK - DEF×0.6<br>
+<b>最小伤害：</b>ATK×15%<br>
+<b>基础暴击倍率：</b>150%
+</div>
+</div>
+<div class="card">
+<h4>❤️ 血量系统</h4>
+<div class="sub" style="line-height:1.8;">
+<b>初始血量：</b>100<br>
+<b>基础扣血：</b>存活敌人数×2<br>
+<b>额外扣血：</b>存活敌方星级总和<br>
+<b>1星=+1 | 2星=+3 | 3星=+6</b><br>
+<b>最大单局扣血：</b>20
+</div>
+</div>
+</div>
+
+<!-- ═══════════════ 总览 ═══════════════ -->
+<h2 style="background:var(--card);color:var(--gold);">📊 十、全维度总览</h2>
+<div class="grid4">
+<div class="card" style="text-align:center;"><div class="val">48</div><div class="sub">总武将数</div></div>
+<div class="card" style="text-align:center;"><div class="val">6</div><div class="sub">职业(战士/骑兵/坦克/法师/辅助/弓手)</div></div>
+<div class="card" style="text-align:center;"><div class="val">6+3</div><div class="sub">常规兵种+特殊(重装/皇帝/魔物)</div></div>
+<div class="card" style="text-align:center;"><div class="val">5</div><div class="sub">传说模式层</div></div>
+<div class="card" style="text-align:center;"><div class="val">14</div><div class="sub">圣兽标签(龙5/凤3/玄3/虎3·关羽双标)</div></div>
+<div class="card" style="text-align:center;"><div class="val">6</div><div class="sub">神兵因果</div></div>
+<div class="card" style="text-align:center;"><div class="val">5</div><div class="sub">大事件触发</div></div>
+<div class="card" style="text-align:center;"><div class="val">10</div><div class="sub">最大商店等级(Lv10·砍1-2费)</div></div>
+</div>
+
+<div class="formula" style="margin-top:12px;">
+<strong>代码重构清单：</strong><br>
+• HEROES数组完全重建（38→48将，含圣兽标签soldierType/hiddenTags/sacredBeast/dualClass字段）<br>
+• SYNERGIES大改：cavalry(骑兵2/4/6/8) + archer(2/4/6·4档攻+40射程+1) + mage(3/6/9) + warrior(6档范围增伤/8档先攻) + cavalry(8档反冲)<br>
+• 删除 assassin 职业（降为兵种标签）<br>
+• 新增 TROOP_TYPE 兵种克制计算模块<br>
+• 新增 HIDDEN_TAGS 隐藏标记结算模块（常驻）<br>
+• 新增 LEGEND_MODE 传说模式模块（模式限定协鸣）<br>
+• 新增 SACRED_BEAST 四圣兽结算模块（四象轮转）<br>
+• 新增 DIVINE_WEAPON 神兵因果线模块（装备拾取检测）<br>
+• 新增 COMPONENTS 组件掉落模块<br>
+• ShopSystem 刷新率改为Lv1-10（Lv10砍1-2费）<br>
+• 新增 BOARD_SLOT 棋盘位标记（结义位）
+</div>
+
+<div class="footnote" style="text-align:center;margin-top:32px;">
+参数表 v2.0 · 2026-06-30 · 完整定稿版<br>
+48将数值 · 六职业协鸣(v2.0修订) · 兵种克制 · 商店Lv10 · 传说模式五层 · 四圣兽 · 神兵因果 · 大事件 · 前世因果<br>
+📌 联动IP：《诸界异宇》神话三国篇
+</div>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#14532d"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="0.5"/></filter>
+  </defs>
+  <rect x="1" y="1" width="38" height="38" rx="5" fill="url(#bg)" stroke="#3b82f6" stroke-width="1.5"/>
+  
+  <!-- 卧龙 — 龙族/军师/焚神之誓 -->
+  <text x="20" y="10" text-anchor="middle" font-size="8">🐉</text>
+  <text x="20" y="20" text-anchor="middle" font-size="8">🪄</text>
+  <text x="20" y="30" text-anchor="middle" font-size="7">🔥</text>
+  <text x="20" y="38" text-anchor="middle" font-size="4" fill="#86efac">卧龙</text>
+  <!-- 费用宝石 -->
+  <text x="36" y="10" text-anchor="end" font-size="8" font-family="Arial" fill="#3b82f6" font-weight="bold">◆◆◆</text>
+</svg>

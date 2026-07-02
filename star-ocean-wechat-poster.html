@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>关于星海弈境的一些观察与想法</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 750px;
+    background: #0e0e14;
+    color: #e0ddd5;
+    font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+    font-size: 28px;
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── 封面区 ─── */
+  .cover {
+    width: 750px;
+    background: linear-gradient(160deg, #1a1025 0%, #0e0e14 60%);
+    padding: 80px 60px 60px;
+    border-bottom: 1px solid #2a2535;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '将星棋局';
+    position: absolute; top: 30px; right: 40px;
+    font-size: 22px; color: rgba(180,150,255,0.12);
+    letter-spacing: 4px; font-weight: 900;
+  }
+  .cover-tag {
+    display: inline-block;
+    background: rgba(150,100,220,0.15);
+    border: 1px solid rgba(150,100,220,0.35);
+    color: #b07af0;
+    font-size: 22px; padding: 4px 16px; border-radius: 4px;
+    margin-bottom: 28px; letter-spacing: 1px;
+  }
+  .cover h1 {
+    font-size: 46px; font-weight: 700; color: #f0ece0;
+    line-height: 1.3; margin-bottom: 18px; letter-spacing: 1px;
+  }
+  .cover .sub {
+    font-size: 24px; color: #8a8590; line-height: 1.7;
+  }
+  .cover .sub span { color: #b07af0; }
+
+  /* ─── 通用块 ─── */
+  .section {
+    padding: 60px 60px 50px;
+    border-bottom: 1px solid #1e1c26;
+  }
+  .section:last-child { border-bottom: none; }
+
+  .sec-num {
+    display: inline-block;
+    background: rgba(150,100,220,0.18);
+    color: #b07af0; font-size: 22px;
+    padding: 2px 12px; border-radius: 3px;
+    margin-bottom: 16px; letter-spacing: 1px;
+  }
+  h2 {
+    font-size: 36px; color: #f0ece0; font-weight: 700;
+    margin-bottom: 20px; line-height: 1.3;
+  }
+  p {
+    font-size: 26px; color: #c0bcb2; line-height: 1.85;
+    margin-bottom: 16px;
+  }
+  strong { color: #f0ece0; }
+  em { color: #b07af0; font-style: normal; }
+
+  /* ─── 卡片 ─── */
+  .card {
+    background: #161420;
+    border: 1px solid #2a2535;
+    border-radius: 10px;
+    padding: 32px 36px;
+    margin: 24px 0;
+  }
+  .card-title {
+    font-size: 24px; color: #b07af0;
+    font-weight: 600; margin-bottom: 16px;
+    padding-bottom: 10px; border-bottom: 1px solid #2a2535;
+  }
+
+  /* ─── 表格 ─── */
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 23px; margin: 16px 0;
+  }
+  th {
+    background: #1e1b28; color: #c8c4bc;
+    padding: 12px 14px; text-align: left;
+    font-weight: 600; border-bottom: 1px solid #2a2535;
+  }
+  td {
+    padding: 11px 14px; border-bottom: 1px solid #1c1a24;
+    color: #b0aba2; vertical-align: top;
+    line-height: 1.6;
+  }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { color: #e8e4da; font-weight: 600; }
+
+  /* ─── 要点列表 ─── */
+  .point-list { margin: 16px 0; }
+  .point-item {
+    display: flex; gap: 14px; align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .point-dot {
+    flex-shrink: 0; width: 8px; height: 8px;
+    background: #b07af0; border-radius: 50%;
+    margin-top: 12px;
+  }
+  .point-text { font-size: 26px; color: #c0bcb2; line-height: 1.8; }
+
+  /* ─── 分隔标题 ─── */
+  .block-title {
+    font-size: 28px; color: #e8e4da;
+    font-weight: 700; margin: 28px 0 14px;
+    padding-left: 12px;
+    border-left: 3px solid #b07af0;
+  }
+
+  /* ─── 克制链 ─── */
+  .chain-row {
+    display: flex; align-items: center;
+    gap: 8px; flex-wrap: wrap;
+    margin: 18px 0;
+  }
+  .chain-node {
+    background: #1e1b28; border: 1px solid #3a3548;
+    color: #e0ddd5; font-size: 22px;
+    padding: 6px 18px; border-radius: 6px;
+  }
+  .chain-arrow { color: #b07af0; font-size: 22px; }
+  .chain-note {
+    font-size: 21px; color: #7a7680; margin-top: 8px;
+  }
+
+  /* ─── 高亮行 ─── */
+  .row-special td { color: #e8c96a; }
+  .row-immune td:last-child { color: #7ad07a; }
+
+  /* ─── 注释框 ─── */
+  .note-box {
+    background: #13111c;
+    border-left: 3px solid #4a4555;
+    padding: 18px 22px; margin: 20px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .note-box p {
+    font-size: 22px; color: #7a7680; margin: 0; line-height: 1.75;
+  }
+
+  /* ─── 尾部 ─── */
+  .footer {
+    padding: 50px 60px 70px;
+    background: #0b0b11;
+  }
+  .footer p {
+    font-size: 24px; color: #7a7680; line-height: 1.9;
+  }
+  .footer .sig {
+    margin-top: 36px; font-size: 22px; color: #5a5660;
+    padding-top: 20px; border-top: 1px solid #1e1c26;
+  }
+
+  /* ─── 章节装饰线 ─── */
+  .deco-line {
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, #b07af0 0%, transparent 100%);
+    margin: 28px 0;
+    opacity: 0.3;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════ 封面 ══════ -->
+<div class="cover">
+  <div class="cover-tag">玩家侧观察笔记</div>
+  <h1>关于星海弈境模式的一些观察与想法</h1>
+  <p class="sub">基于三国题材自走棋同人作品「将星棋局」的对照记录<br>
+  <span>致梦幻模拟战运营团队</span></p>
+</div>
+
+<!-- ══════ 写在前面 ══════ -->
+<div class="section">
+  <div class="sec-num">· 前言 ·</div>
+  <h2>写在前面</h2>
+  <p>这是一份来自玩家侧的笔记，不是商业提案，也不是技术分析报告。</p>
+  <p>我们是梦幻模拟战的长期玩家，星海弈境上线后一直在这个模式里消磨时间。这个模式把自走棋和战棋做了结合，思路是对的，我们也确实玩得下去。但玩了几年，有些地方觉得可以再往前走一步。</p>
+  <p>与其只是在贴吧发帖抱怨，不如自己动手做个东西出来，哪怕是个简陋的同人原型，至少能把想法变成看得见的东西。于是用业余时间做了个三国题材的自走棋同人，名字叫「将星棋局」，目前有 <strong>48 张武将、5 层传说模式、10 条常规协鸣加 21 条隐藏协鸣</strong>。</p>
+  <p>这份报告把这些尝试整理出来，供官方团队参考。不指望每条都能用上，但只要有一条对星海弈境的后续优化有参考价值，就不算白写。</p>
+</div>
+
+<!-- ══════ 隐藏协鸣 ══════ -->
+<div class="section">
+  <div class="sec-num">01</div>
+  <h2>隐藏协鸣系统</h2>
+
+  <div class="block-title">设计出发点</div>
+  <p>星海弈境当前的协鸣是"明牌"——这几个同阵营、那几个同职业，效果固定。这本身没问题。但实际玩下来，阵容趋同的问题越来越明显：</p>
+  <div class="card">
+    <div class="card-title">当前 Meta 固化现象</div>
+    <div class="point-list">
+      <div class="point-item"><div class="point-dot"></div><div class="point-text">前期靠<strong>公主联盟</strong>攒经济，后期转 <em>6水兵点亮 + 战略点亮</em> 配5费核心</div></div>
+      <div class="point-item"><div class="point-dot"></div><div class="point-text">或5个<strong>主角堆强1号位</strong>打先手——每局都是这几套在转</div></div>
+      <div class="point-item"><div class="point-dot"></div><div class="point-text">很少有打破常规的对局出现，开局决策几乎完全可预测</div></div>
+    </div>
+  </div>
+
+  <p>这是我们开发隐藏协鸣的直接动因：<strong>在不动基础协鸣的前提下</strong>，用一层"每局不同"的关系网，给阵容选择制造新的决策分支。</p>
+
+  <div class="deco-line"></div>
+  <div class="block-title">同人中的实现方式</div>
+
+  <div class="point-list">
+    <div class="point-item"><div class="point-dot"></div><div class="point-text">每个武将除了阵营和职业外，还携带若干"隐藏标签"，如<em>五虎将</em>、<em>军师</em>、<em>短命鬼</em>等</div></div>
+    <div class="point-item"><div class="point-dot"></div><div class="point-text">隐藏协鸣<strong>不影响基础模式平衡</strong>，只在特定"传说模式层"中才激活</div></div>
+    <div class="point-item"><div class="point-dot"></div><div class="point-text">每局游戏随机选定一个模式层，该层下的隐藏关系才生效；对局中途有概率再次切换</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">五层传说模式</div>
+    <table>
+      <tr><th>模式层</th><th>激活的隐藏协鸣</th></tr>
+      <tr><td>🌅 起源故事</td><td>桃园结义 · 虎父无犬子</td></tr>
+      <tr><td>📖 名将风流</td><td>五虎将 · 五子良将 · 军师天团</td></tr>
+      <tr><td>⚔️ 史实逻辑</td><td>短命鬼 · 赤壁 / 下邳事件链 · 绿豆盟</td></tr>
+      <tr><td>🐉 神话三国</td><td>四圣兽 · 仙人 · 飞将 · 武器因果</td></tr>
+      <tr><td>👑 天命所归</td><td>皇帝 · 天命 · 魔王 vs 魔剑士</td></tr>
+    </table>
+  </div>
+
+  <div class="deco-line"></div>
+  <div class="block-title">具体案例：军师天团</div>
+
+  <p>触发方式不是简单的"凑X个军师"，而是按阵营分档——触发条件本身就是阵容决策：</p>
+  <div class="card">
+    <div class="card-title">军师天团分阵营触发</div>
+    <table>
+      <tr><th>触发方</th><th>条件</th><th>效果</th></tr>
+      <tr><td>吴 · 周瑜</td><td>1人即可</td><td>技伤+30%，水系免疫负面</td></tr>
+      <tr><td>蜀 · 卧龙凤雏</td><td>诸葛+庞统同时在场</td><td>范围+1，冷却-15%</td></tr>
+      <tr><td>魏 · 三军师</td><td>需3名军师上场</td><td>开场首击必暴击</td></tr>
+      <tr><td>群 · 李儒</td><td>1人即可</td><td>灼烧伤害+50%</td></tr>
+      <tr class="row-special"><td>最终鸣响</td><td>四国同时触发</td><td>全体军师全属性+20%</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ══════ 勋章体系 ══════ -->
+<div class="section">
+  <div class="sec-num">02</div>
+  <h2>勋章逐级点亮体系</h2>
+
+  <p>星海弈境已有比较完整的图鉴系统。我们的思路是在图鉴基础上增加一层<strong>勋章收集体系</strong>，让信息查阅变成有目标感的逐级解锁——不是一次性拿完，而是铜章→银章→金章分级触发，跨对局累计。</p>
+
+  <div class="card">
+    <div class="card-title">勋章分级示例</div>
+    <table>
+      <tr><th>勋章</th><th>铜</th><th>银</th><th>金</th></tr>
+      <tr><td>五虎将</td><td>凑齐3人</td><td>凑齐5人</td><td>5人均二星以上</td></tr>
+      <tr><td>军师天团</td><td>触发任意一国</td><td>同时触发两国</td><td>一局触发全部四国</td></tr>
+      <tr><td>圣兽之主</td><td>凑齐任一圣兽</td><td>凑齐三个圣兽</td><td>触发"四象轮转"</td></tr>
+      <tr><td>虎父无犬子</td><td>触发一对父子</td><td>同时触发两对</td><td>子辈击杀超过父辈</td></tr>
+    </table>
+  </div>
+
+  <p>勋章驱动玩家主动探索更多搭配，而不是一套阵容反复刷——这解决的是一个具体问题：<em>"我都在玩什么？"</em></p>
+</div>
+
+<!-- ══════ AI补位 ══════ -->
+<div class="section">
+  <div class="sec-num">03</div>
+  <h2>AI 补位机制</h2>
+
+  <div class="card" style="border-color:#3a2535">
+    <div class="card-title" style="color:#e0706a">问题根源</div>
+    <p style="font-size:25px;color:#b0a8a2">第五期移除扣分机制后，对局全程正向得分——玩家退出零成本。部分玩家刻意把场上棋子清空后退出，对留在局内的玩家来说，无法通过击杀对方获取金币和装备/科技奖励，<strong style="color:#f0ece0">经济循环被打断</strong>。</p>
+  </div>
+
+  <p>我们的处理方式：当某位玩家退出（场上无棋子）时，由 AI 接管该位置，使用该玩家之前的阵容风格自动生成合理阵容继续对抗。<strong>对剩余玩家体验无缝</strong>，不因退出者减少一轮奖励。</p>
+  <p>不是新机制，是针对具体体验断裂点的处理方案。</p>
+</div>
+
+<!-- ══════ 职业×兵种双轨 ══════ -->
+<div class="section">
+  <div class="sec-num">04</div>
+  <h2>职业 × 兵种双轨克制</h2>
+
+  <div class="block-title">兵种克制链</div>
+  <div class="chain-row">
+    <div class="chain-node">🐴 骑兵</div><div class="chain-arrow">▶+25%</div>
+    <div class="chain-node">🏹 弓兵</div><div class="chain-arrow">▶+25%</div>
+    <div class="chain-node">🗡️ 刺客</div><div class="chain-arrow">▶+25%</div>
+    <div class="chain-node">🛡️ 步兵</div><div class="chain-arrow">▶+20%</div>
+    <div class="chain-node">⚔️ 枪兵</div><div class="chain-arrow">▶+25%</div>
+    <div class="chain-node" style="border-color:#b07af0">🐴 骑兵</div>
+  </div>
+  <p class="chain-note">中立：策士（不参与链）· 重装（无视所有克制）· 魔物（特殊规则）</p>
+
+  <div class="deco-line"></div>
+  <div class="block-title">典型异化武将（职业≠兵种方向）</div>
+  <p>同一武将的职业和兵种可以完全不同，形成协鸣+克制两个独立的策略维度：</p>
+
+  <div class="card">
+    <table>
+      <tr><th>武将</th><th>职业</th><th>兵种</th><th>异化方向</th></tr>
+      <tr><td>黄忠 3费</td><td>弓手</td><td>骑兵</td><td style="color:#7ad07a">免疫骑兵克制 ★</td></tr>
+      <tr><td>徐晃 3费</td><td>坦克</td><td>重装</td><td style="color:#7ad07a">无视全部克制 ★</td></tr>
+      <tr><td>赵云 3费</td><td>骑兵</td><td>枪兵</td><td>骑兵协鸣+枪兵克骑</td></tr>
+      <tr><td>魏延 4费</td><td>坦克</td><td>刺客</td><td>前排坦克走刺客路线</td></tr>
+      <tr><td>孙策 5费</td><td>战士</td><td>骑兵</td><td>战士协鸣+骑兵克弓</td></tr>
+      <tr class="row-special"><td>董卓 5费</td><td>魔王</td><td>魔物</td><td>独立规则·魔剑士克制</td></tr>
+    </table>
+  </div>
+
+  <div class="note-box">
+    <p>飞将衰减设计：当场上同时存在超过1个飞将时，所有飞将触发非唯一化衰减（ATK×0.75，技能×0.8）——针对"元帅卡被所有人争抢、第一大哥压制力过强"的局面设计的平衡补丁。</p>
+  </div>
+</div>
+
+<!-- ══════ 其他机制 ══════ -->
+<div class="section">
+  <div class="sec-num">05</div>
+  <h2>其他参考机制</h2>
+
+  <div class="card">
+    <table>
+      <tr><th>机制</th><th>简要说明</th></tr>
+      <tr><td>传说模式随机化</td><td>每局从5个模式层中随机选一个，该层的隐藏协鸣才激活</td></tr>
+      <tr><td>轮盘赌模式切换</td><td>区别于跃迁词条：切换的是<em>整层传说模式</em>，当前阵容的所有隐藏协鸣全部失效，迫使阵容重新适配</td></tr>
+      <tr><td>传说武器</td><td>部分装备携带故事线背景，特定传说模式下触发额外效果</td></tr>
+      <tr><td>开局先手序列</td><td>备战阶段放置棋子的顺序即为战斗开场的先手顺序：最后放置的棋子最先行动，解决5费大佬最后上场却最晚出手的体验问题</td></tr>
+    </table>
+  </div>
+
+  <p>另外：星海弈境游戏内阵容推荐自最初版本上线至今未变，但装备池和跃迁经历了多轮调整。基于历史数据刷新推荐阵容，在技术上是可行的，方案留给官方团队评估。</p>
+</div>
+
+<!-- ══════ 结语 ══════ -->
+<div class="footer">
+  <div class="sec-num" style="margin-bottom:20px">· 结语 ·</div>
+  <p>星海弈境是一个有潜力的模式。我们花时间做同人这件事本身，就是对它的一种认可——不会有人为不感兴趣的东西投入这么多精力。</p>
+  <p style="margin-top:16px">这份报告里的所有内容，都是基于"我们试着做了，有些想法"这个出发点写的。不指望每条都能用上，但如果其中某一条能对官方团队有参考价值，就不算白写。代码完全开源，如果有什么可以参考的，尽管拿去用。</p>
+  <div class="sig">
+    <p>同人原型在线地址：https://0738e1160c95448f8e2e7d20e8810f9c.app.codebuddy.work</p>
+    <p>详细研发数据附件见：dev-data-annex.html</p>
+    <p style="margin-top:12px">2026年7月 · 几位梦战玩家</p>
+  </div>
+</div>
+
+</body>
+</html>

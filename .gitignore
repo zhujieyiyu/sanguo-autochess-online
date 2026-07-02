@@ -1,0 +1,62 @@
+# 依赖目录
+node_modules/
+.pnp
+.pnp.js
+
+# 测试输出
+/coverage
+/playwright-report
+/test-results
+
+# Next.js / Nuxt.js
+.next/
+.nuxt/
+out/
+build/
+dist/
+
+# 环境变量
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 日志
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 编辑器
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 缓存
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+
+# 临时文件
+*.tmp
+*.temp
+*.log
+
+# Python（截图脚本）
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 大文件
+*.zip
+*.tar.gz
+*.rar

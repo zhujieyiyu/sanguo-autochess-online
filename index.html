@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三国自走棋 - Auto Chess</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Konva.js: 专业的 Canvas 2D 交互库，解决原生Canvas事件混乱问题 -->
+    <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+</head>
+<body>
+    <div id="game-container">
+        <!-- 顶部信息栏 -->
+        <div id="top-bar">
+            <div id="round-info">回合 <span id="round-num">1</span></div>
+            <div id="phase-info">⏸️ 准备阶段</div>
+            <div id="battle-timer" style="display:none;">⏱️ <span id="timer-val">60</span>s</div>
+            <div id="prep-timer" style="display:none;">
+                ⏱️ 准备 <span id="prep-timer-sec">30</span>s <div id="prep-timer-bar"><div id="prep-timer-fill"></div></div>
+            </div>
+            <div id="player-hp">❤️ <span id="hp-val">40</span></div>
+            <div id="player-gold">💰 <span id="gold-val">5</span></div>
+            <div id="player-level">🏪 Lv.<span id="level-val">1</span></div>
+            <div id="board-count">上阵: <span id="board-num">0</span>/<span id="board-max">1</span></div>
+            <div id="opponent-info">⚔️ 对手: <span id="opponent-name">--</span> ❤️<span id="opponent-hp">-</span></div>
+            <button id="ready-btn">▶ 准备完毕</button>
+            <button id="codex-btn" title="图鉴（点击查看）">📖 图鉴</button>
+        </div>
+
+        <div id="main-area">
+            <!-- 左侧：传说模式 + 协鸣 + 详情 -->
+            <div id="left-panel">
+                <!-- 传说模式（轮盘赌主模式） -->
+                <div id="legend-mode-panel">
+                    <h3 style="font-size:12px;">🌀 传说模式</h3>
+                    <div id="legend-mode-display">
+                        <div style="color:#484f58;font-size:10px;text-align:center;padding:6px;">轮盘待转...</div>
+                    </div>
+                </div>
+                <div id="synergy-panel">
+                    <h3>🎯 协鸣</h3>
+                    <div id="synergy-list">
+                        <div style="color:#484f58;font-size:11px;text-align:center;padding:10px;">暂无激活协鸣</div>
+                    </div>
+                </div>
+                <!-- 隐藏协鸣 -->
+                <div id="hidden-synergy-panel">
+                    <h3 style="font-size:12px;">📜 隐藏协鸣</h3>
+                    <div id="hidden-synergy-list">
+                        <div style="color:#484f58;font-size:10px;text-align:center;padding:6px;">暂无隐藏协鸣</div>
+                    </div>
+                </div>
+                <!-- 组件库存 -->
+                <div id="component-panel">
+                    <h3 style="font-size:12px;">📦 协鸣组件 <span style="font-size:9px;color:#3fb950;">(被动生效)</span></h3>
+                    <div id="component-list">
+                        <div style="color:#484f58;font-size:10px;text-align:center;padding:4px;">无组件</div>
+                    </div>
+                </div>
+                <!-- 装备背包 -->
+                <div id="weapon-panel">
+                    <h3>🎒 装备背包</h3>
+                    <div id="weapon-list">
+                        <div style="color:#484f58;font-size:11px;text-align:center;padding:10px;">暂无装备<br>（特定轮次掉落）</div>
+                    </div>
+                </div>
+                <!-- 科技升级 -->
+                <div id="tech-panel">
+                    <h3>🔬 科技升级</h3>
+                    <div id="tech-list">
+                        <div style="color:#484f58;font-size:11px;text-align:center;padding:10px;">暂无科技<br>（特定轮次获得）</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 中间：共享棋盘（左5列玩家 / 右5列敌方）-->
+            <div id="board-area">
+                <div id="board-header">
+                    <span id="board-label">🔵 我方</span>
+                    <span id="board-hint">（拖拽棋子到左半棋盘上阵）</span>
+                    <span class="board-spacer"></span>
+                    <span id="enemy-label">🔴 敌方</span>
+                </div>
+                <!-- Konva Stage + 棋盘协鸣面板 -->
+                <div id="board-stage-area">
+                    <div id="player-stage-container"></div>
+                    <div id="board-synergy-panel">
+                        <div id="board-synergy-title">👁️ 对手协鸣</div>
+                        <div id="board-synergy-list">
+                            <div class="bs-empty">上阵武将后显示</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="bench-area">
+                    <div id="bench-label">备战区</div>
+                    <div id="bench-slots"
+                         id="bench-drop-zone"
+                         ondragover="event.preventDefault()"
+                         ondrop="window.game && window.game.onBenchDrop(event)">
+                    </div>
+                </div>
+
+                <!-- 可收起商店浮层 -->
+                <div id="shop-overlay" class="expanded">
+                    <div id="shop-toggle-tab">
+                        <span id="shop-tab-arrow">▼</span> 🏪 商店
+                        <span id="shop-tab-gold">💰<span id="shop-tab-gold-val">5</span></span>
+                    </div>
+                    <div id="shop-panel">
+                        <div id="level-progress-bar">
+                            <div id="level-progress-fill"></div>
+                        </div>
+                        <div id="level-progress-text">Lv.1 → 2 还需1回合</div>
+                        <div id="shop-controls">
+                            <button id="lock-btn">🔓 锁定</button>
+                            <button id="refresh-btn">🔄 刷新(<span id="refresh-cost">2</span>💰)</button>
+                            <button id="level-up-btn">⬆️ 升级(<span id="level-cost">4</span>💰)</button>
+                        </div>
+                        <div id="shop-cards"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：玩家卡片 + 武将详情 + 日志 + AI对手（紧凑型） -->
+            <div id="right-panel">
+                <!-- 玩家自身状态卡片 -->
+                <div id="player-self-card">
+                    <div id="player-self-header">
+                        <span id="ps-name">👤 你</span>
+                        <span id="ps-round">R1</span>
+                    </div>
+                    <div id="player-self-stats">
+                        <span class="ps-stat" id="ps-hp" title="血量">❤️<span id="ps-hp-val">40</span></span>
+                        <span class="ps-stat" id="ps-gold" title="金币">💰<span id="ps-gold-val">5</span></span>
+                        <span class="ps-stat" id="ps-level" title="等级">🏪Lv.<span id="ps-level-val">1</span></span>
+                        <span class="ps-stat" id="ps-board" title="上阵">🛡️<span id="ps-board-num">0</span>/<span id="ps-board-max">1</span></span>
+                    </div>
+                </div>
+
+                <!-- AI对手列表（7组：玩家+7AI=8组对战）-->
+                <div id="ai-roster-panel">
+                    <h3>⚔️ 对手 <span id="ai-alive-count">7</span>/7</h3>
+                    <div id="ai-roster-list"></div>
+                </div>
+
+                <div id="card-detail" class="hidden">
+                    <h3>📋 武将详情</h3>
+                    <div id="detail-header">
+                        <span id="detail-icon">❓</span>
+                        <span id="detail-name">--</span>
+                        <span id="detail-star">★</span>
+                    </div>
+                    <div id="detail-stats">
+                        <div>❤️ <span id="detail-hp">--</span></div>
+                        <div>⚔️ <span id="detail-atk">--</span></div>
+                        <div>🛡️ <span id="detail-def">--</span></div>
+                        <div>🎯 <span id="detail-range">--</span></div>
+                    </div>
+                    <div id="detail-synergies"></div>
+                    <div id="detail-skill">
+                        <div id="detail-skill-name">--</div>
+                        <div id="detail-skill-desc">--</div>
+                    </div>
+                    <div id="detail-equip">
+                        <div id="detail-equip-label">装备（最多4件）</div>
+                        <div id="detail-equip-slots">
+                            <div class="equip-slot" data-idx="0"><span class="es-item">空</span></div>
+                            <div class="equip-slot" data-idx="1"><span class="es-item">空</span></div>
+                            <div class="equip-slot" data-idx="2"><span class="es-item">空</span></div>
+                            <div class="equip-slot" data-idx="3"><span class="es-item">空</span></div>
+                        </div>
+                    </div>
+                    <div id="detail-actions">
+                        <button id="detail-sell-btn">🗑️ 售卖</button>
+                        <button id="detail-recall-btn" style="display:none;">⬅️ 撤回</button>
+                    </div>
+                </div>
+                <div id="log-panel">
+                    <h3>📋 战斗日志</h3>
+                    <div id="battle-log">
+                        <div id="log-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 武器三选一弹窗 -->
+    <div id="weapon-select-overlay" class="hidden">
+        <div id="weapon-select-modal">
+            <h3>🎁 战利品 — 三选一</h3>
+            <div id="weapon-select-cards"></div>
+        </div>
+    </div>
+
+    <!-- 科技三选一弹窗 -->
+    <div id="tech-select-overlay" class="hidden">
+        <div id="tech-select-modal">
+            <h3>🔬 科技研究 — 三选一</h3>
+            <div id="tech-select-cards"></div>
+        </div>
+    </div>
+
+    <!-- 出售确认弹窗 -->
+    <div id="sell-confirm-overlay" class="hidden">
+        <div id="sell-confirm-modal">
+            <h3>💬 确认出售</h3>
+            <p id="sell-confirm-msg">确定要出售 <strong id="sell-hero-name">___</strong> 吗？</p>
+            <p id="sell-confirm-price">💰 售价: <span id="sell-confirm-gold">0</span></p>
+            <div id="sell-confirm-buttons">
+                <button id="sell-cancel-btn">❌ 取消</button>
+                <button id="sell-ok-btn">✅ 确认出售</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 轮盘赌弹窗 -->
+    <div id="roulette-overlay" class="hidden">
+        <div id="roulette-modal">
+            <h3 id="roulette-title">🌀 传说轮盘赌</h3>
+            <div id="roulette-wheel-container">
+                <canvas id="roulette-canvas" width="240" height="240"></canvas>
+                <div id="roulette-pointer">▼</div>
+            </div>
+            <div id="roulette-result" style="display:none;">
+                <div id="roulette-result-icon" style="font-size:36px;">🌟</div>
+                <div id="roulette-result-name" style="font-size:16px;font-weight:bold;color:#FFD700;">起源故事</div>
+                <div id="roulette-result-desc" style="font-size:11px;color:#8b949e;margin-top:4px;">主模式隐藏协鸣效果+10%</div>
+            </div>
+            <button id="roulette-confirm-btn" style="display:none;">确定</button>
+        </div>
+    </div>
+
+    <!-- 游戏结束弹窗 -->
+    <div id="gameover-overlay" class="hidden">
+        <div id="gameover-modal">
+            <div id="gameover-icon"></div>
+            <h3 id="gameover-title"></h3>
+            <p id="gameover-msg"></p>
+            <button id="gameover-restart-btn">🔄 再来一局</button>
+        </div>
+    </div>
+
+    <!-- AI对手情报弹窗（点击对手卡片查看） -->
+    <div id="ai-info-overlay" class="hidden">
+        <div id="ai-info-modal">
+            <div id="ai-info-header">
+                <span id="ai-info-icon-name"></span>
+                <button id="ai-info-close-btn">✕</button>
+            </div>
+            <div id="ai-info-body">
+                <div id="ai-info-style"></div>
+                <div id="ai-info-vitals">
+                    <span id="ai-info-hp"></span>
+                    <span id="ai-info-status"></span>
+                </div>
+                <div class="ai-info-section">
+                    <h4>🔬 已研究科技 (<span id="ai-info-tech-count">0</span>)</h4>
+                    <div id="ai-info-tech-list"><span class="ai-info-empty">暂无科技</span></div>
+                </div>
+                <div class="ai-info-section">
+                    <h4>🎁 已获取武器 (<span id="ai-info-weapon-count">0</span>)</h4>
+                    <div id="ai-info-weapon-list"><span class="ai-info-empty">暂无武器</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图鉴全屏浮层（内嵌渲染，不跳转页面） -->
+    <div id="codex-overlay" class="hidden">
+        <div id="codex-overlay-header">
+            <span>📖 三国武将图鉴</span>
+            <button id="codex-close-btn" title="关闭图鉴 (ESC)">✕</button>
+        </div>
+        <div id="codex-body">
+            <!-- 导航标签 -->
+            <div id="codex-nav">
+                <button class="codex-nav-btn active" data-tab="heroes">⚔️ 武将</button>
+                <button class="codex-nav-btn" data-tab="synergies">🎯 协鸣</button>
+                <button class="codex-nav-btn" data-tab="modes">🎮 模式</button>
+                <button class="codex-nav-btn" data-tab="hidden">🏛️ 传说</button>
+            </div>
+            <!-- 进度条 -->
+            <div id="codex-progress"></div>
+            <!-- 筛选栏 -->
+            <div id="codex-filter"></div>
+            <!-- 内容网格 -->
+            <div id="codex-grid"></div>
+            <!-- 详情弹窗 -->
+            <div id="codex-detail-modal" class="hidden">
+                <div id="codex-detail-card"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/icon-builder.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/synergy.js"></script>
+    <script src="js/legend.js"></script>
+    <script src="js/hero.js"></script>
+    <script src="js/shop.js"></script>
+    <script src="js/combat.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

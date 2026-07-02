@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#1e3a5f"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="0.5"/></filter>
+  </defs>
+  <rect x="1" y="1" width="38" height="38" rx="5" fill="url(#bg)" stroke="#8b7355" stroke-width="1.5"/>
+  <text x="20" y="26" text-anchor="middle" font-size="12" fill="#fff">?</text>
+  <!-- 费用宝石 -->
+  <text x="36" y="10" text-anchor="end" font-size="8" font-family="Arial" fill="#8b7355" font-weight="bold">◆</text>
+</svg>

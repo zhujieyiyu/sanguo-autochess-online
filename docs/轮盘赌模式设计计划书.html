@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三国自走棋 — 变体模式系统 设计计划书</title>
+<style>
+  :root {
+    --bg: #0d1117; --card: #161b22; --border: #30363d;
+    --text: #c9d1d9; --muted: #8b949e; --accent: #58a6ff;
+    --gold: #ffd700; --green: #3fb950; --red: #ff6b6b; --purple: #bc8cff;
+    --orange: #f0883e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, "Microsoft YaHei", sans-serif;
+    line-height: 1.9; max-width: 960px; margin: 0 auto; padding: 40px 24px;
+  }
+  h1 { font-size: 28px; color: var(--gold); text-align: center; margin-bottom: 6px; }
+  .subtitle { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+  h2 { font-size: 22px; color: var(--accent); border-bottom: 2px solid var(--border); padding-bottom: 8px; margin: 48px 0 20px; }
+  h3 { font-size: 17px; color: var(--green); margin: 28px 0 12px; }
+  h4 { font-size: 15px; color: var(--purple); margin: 20px 0 8px; }
+  p { margin-bottom: 14px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px; margin: 16px 0;
+  }
+  .highlight {
+    background: rgba(255,215,0,0.08); border-left: 3px solid var(--gold);
+    padding: 12px 16px; margin: 14px 0; border-radius: 0 6px 6px 0;
+  }
+  .warn {
+    background: rgba(255,107,107,0.08); border-left: 3px solid var(--red);
+    padding: 12px 16px; margin: 14px 0; border-radius: 0 6px 6px 0;
+  }
+  .toc a { color: var(--accent); text-decoration: none; display: block; padding: 3px 0; font-size: 14px; }
+  .toc a:hover { text-decoration: underline; }
+  .toc {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 28px; margin: 24px 0;
+  }
+  table {
+    width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px;
+  }
+  th, td { padding: 8px 12px; border: 1px solid var(--border); text-align: center; }
+  th { background: var(--card); color: var(--accent); font-weight: bold; }
+  .phase-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px; margin: 16px 0;
+  }
+  .phase-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px;
+  }
+  .phase-card h4 { margin: 0 0 8px; }
+  .phase-num {
+    display: inline-block; width: 28px; height: 28px;
+    background: var(--accent); color: #fff; border-radius: 50%;
+    text-align: center; line-height: 28px; font-weight: bold; margin-right: 8px;
+  }
+  .tag-blue { color: var(--accent); }
+  .tag-gold { color: var(--gold); }
+  .tag-red { color: var(--red); }
+  .tag-green { color: var(--green); }
+  .tag-orange { color: var(--orange); }
+  .mode-card {
+    background: var(--card); border: 2px solid var(--border);
+    border-radius: 12px; padding: 24px; margin: 20px 0;
+    transition: border-color 0.3s;
+  }
+  .mode-card:hover { border-color: var(--accent); }
+  .mode-badge {
+    display: inline-block; padding: 3px 12px; border-radius: 12px;
+    font-size: 12px; font-weight: bold; margin-left: 8px;
+  }
+  .badge-ready { background: rgba(63,185,80,0.2); color: var(--green); }
+  .badge-plan { background: rgba(240,136,62,0.2); color: var(--orange); }
+  .badge-idea { background: rgba(139,148,158,0.2); color: var(--muted); }
+</style>
+</head>
+<body>
+
+<h1>🎮 三国自走棋 — 变体模式系统</h1>
+<div class="subtitle">设计计划书 v2.0 · 从"玩家增益"转向"全局规则变体"</div>
+
+<div class="toc">
+  <strong style="color:#ffd700">📑 目录</strong>
+  <a href="#philosophy">一、设计哲学：为什么推翻旧方案</a>
+  <a href="#twin-star">二、首期模式：双星闪耀（Twin Star）</a>
+  <a href="#mode-system">三、变体模式系统架构</a>
+  <a href="#mode-ideas">四、模式目录（持续扩展）</a>
+  <a href="#flow">五、游戏流程改造</a>
+  <a href="#ai-sync">六、AI 同步机制</a>
+  <a href="#balance">七、平衡性考量</a>
+  <a href="#tech">八、技术实现路径</a>
+  <a href="#phases">九、分阶段实施计划</a>
+  <a href="#risks">十、风险与应对</a>
+  <a href="#multiplayer">十一、组局对战 — 远期规划</a>
+</div>
+
+<!-- ====== 一、设计哲学 ====== -->
+<h2 id="philosophy">一、设计哲学：为什么推翻旧方案</h2>
+
+<div class="warn">
+  <strong>❌ 旧方案（v1.0 轮盘赌）的问题：</strong>
+  <ul style="margin-top:8px;">
+    <li>本质是「玩家专属抽奖机」——只有人类玩家能旋转轮盘获得增益</li>
+    <li>AI 最多只能被动地「获得等效补偿」，本质上还是玩家单方面获利</li>
+    <li>背离了「增加新玩法模式」的初衷，变成了「给玩家开挂」</li>
+    <li>没有改变游戏的内在规则，只是在外层叠了一个经济小游戏</li>
+  </ul>
+</div>
+
+<div class="highlight">
+  <strong>✅ v2.0 核心原则：</strong>变体模式的本质是<strong>改变游戏的全局规则</strong>。模式规则对所有玩家（人类 + AI）同时生效、同等适用。玩家不是获得特权，而是和其他所有参与者一起进入一个规则不同的游戏世界。
+</div>
+
+<div class="card">
+  <h4>🎯 设计目标（修订）</h4>
+  <table>
+    <tr><th style="width:140px">维度</th><th>v1.0 轮盘赌</th><th>v2.0 变体模式系统</th></tr>
+    <tr><td>规则范围</td><td>玩家独享</td><td style="color:var(--green)">全局生效，所有玩家平等</td></tr>
+    <tr><td>AI 参与</td><td>被动补偿</td><td style="color:var(--green)">与玩家完全相同的规则</td></tr>
+    <tr><td>玩法变化</td><td>额外小游戏</td><td style="color:var(--green)">核心规则重定义</td></tr>
+    <tr><td>策略深度</td><td>运气决定</td><td style="color:var(--green)">新规则产生新策略</td></tr>
+    <tr><td>扩展性</td><td>单一模式</td><td style="color:var(--green)">可不断新增模式</td></tr>
+  </table>
+</div>
+
+<!-- ====== 二、双星闪耀 ====== -->
+<h2 id="twin-star">二、首期模式：双星闪耀 ⭐⭐</h2>
+
+<div class="mode-card" style="border-color: var(--gold);">
+  <h3 style="margin-top:0;">⭐⭐ 双星闪耀模式 <span class="mode-badge badge-ready">首期实施</span></h3>
+  <p><strong>核心规则：每轮，每个玩家购买的第一个武将卡，将直接升级为二星。</strong></p>
+  <p style="color:var(--muted);font-size:13px;">这条规则对所有玩家（人类 + AI）完全一致。不存在「谁有谁没有」——所有人都在同一个规则下竞争。</p>
+</div>
+
+<h3>2.1 规则详解</h3>
+
+<table>
+  <tr><th>条款</th><th>内容</th></tr>
+  <tr><td>触发时机</td><td>每轮准备阶段的<strong>首次购买</strong>（从商店购买任意英雄卡）</td></tr>
+  <tr><td>触发对象</td><td><strong>所有存活玩家</strong>（人类 + 每个 AI）各自独立计数</td></tr>
+  <tr><td>效果</td><td>该英雄直接升级为二星（即在备战席上立刻获得同一英雄的第二张卡，自动合并）</td></tr>
+  <tr><td>限制</td><td>每轮每个玩家仅首次购买触发。出售该二星英雄不会再次触发。</td></tr>
+  <tr><td>与正常合成的关系</td><td>双星合成为额外机制。正常三张一星合成二星的规则仍然保留。如果玩家已有该英雄一星，双星触发后直接与备战席的一星合并。</td></tr>
+  <tr><td>费用</td><td>无额外费用。玩家只支付该英雄卡的正常商店价格。</td></tr>
+</table>
+
+<h3>2.2 策略意义</h3>
+
+<div class="card">
+  <h4>🎯 对玩家策略的影响</h4>
+  <ul>
+    <li><strong>首购决策权重大增</strong>：每轮第一张卡买什么？不再是随便点，而是关键决策。选得好=二星战力立刻成型；选得差=浪费唯一双星机会。</li>
+    <li><strong>前期速成流派受益</strong>：1-2费英雄快速二星，前期节奏加速，快攻流更强。</li>
+    <li><strong>后期高费英雄更难双星</strong>：高费卡出现晚、价格高，首购双星对低费卡更有利，改变了经济和科技升级的优先级。</li>
+    <li><strong>AI 同步受益</strong>：AI 也会每轮双星首购，AI 阵容成型速度与玩家同步加快。这意味着每轮对手都不容小觑。</li>
+  </ul>
+</div>
+
+<h3>2.3 局内表现示意</h3>
+<table>
+  <tr><th>轮次</th><th>玩家行为</th><th>效果</th><th>AI（示例）</th></tr>
+  <tr><td>第1轮</td><td>买「赵云」(2费)</td><td>赵云 → ⭐⭐赵云</td><td>AI-1 买「张飞」→ ⭐⭐张飞</td></tr>
+  <tr><td>第2轮</td><td>刷新后买「甄姬」(1费)</td><td>甄姬 → ⭐⭐甄姬</td><td>AI-2 买「关羽」→ ⭐⭐关羽</td></tr>
+  <tr><td>第3轮</td><td>买「夏侯惇」(3费)</td><td>夏侯惇 → ⭐⭐夏侯惇</td><td>AI-1 买「曹操」→ ⭐⭐曹操</td></tr>
+</table>
+
+<div class="highlight">
+  <strong>关键洞察</strong>：玩家不是在和「弱智 AI」打，而是在和同样享受双星规则的对手博弈。AI 的二星速度和你一样快，这才是变体模式的魅力——<strong>公平但不同</strong>。
+</div>
+
+<!-- ====== 三、模式系统架构 ====== -->
+<h2 id="mode-system">三、变体模式系统架构</h2>
+
+<h3>3.1 模式即规则</h3>
+<div class="card">
+  <p>每个变体模式定义为<strong>一组全局规则钩子（Rule Hooks）</strong>，在游戏引擎的关键节点上注入模式特定的逻辑。模式与模式之间<strong>互斥</strong>——每局游戏只能选择一个模式。</p>
+</div>
+
+<h3>3.2 规则钩子定义</h3>
+<table>
+  <tr><th>钩子</th><th>触发时机</th><th>双星闪耀示例</th></tr>
+  <tr><td><code>onPlayerBuyHero(player, hero, round)</code></td><td>任意玩家购买英雄时</td><td>该轮首次购买 → 自动升级二星</td></tr>
+  <tr><td><code>onRoundStart(round)</code></td><td>每轮开始</td><td>重置各玩家「本轮已首购」标记</td></tr>
+  <tr><td><code>onBattleStart(playerA, playerB)</code></td><td>战斗开始前</td><td>（双星模式无特殊逻辑）</td></tr>
+  <tr><td><code>onBattleEnd(winner, loser)</code></td><td>战斗结束后</td><td>（双星模式无特殊逻辑）</td></tr>
+  <tr><td><code>onShopRefresh(player)</code></td><td>商店刷新时</td><td>（双星模式无特殊逻辑）</td></tr>
+  <tr><td><code>onBuyUpgrade(player, newLevel)</code></td><td>购买科技升级时</td><td>（双星模式无特殊逻辑）</td></tr>
+  <tr><td><code>onSynergyCheck(player, synergies)</code></td><td>协鸣计算后</td><td>注入隐藏传说协鸣（传说颠覆模式专用）</td></tr>
+</table>
+
+<h3>3.3 模式注册表</h3>
+<div class="code-block" style="background:#000;color:#3fb950;padding:16px;border-radius:8px;font-family:monospace;font-size:12px;line-height:1.5;margin:12px 0;">
+// js/modes.js — 模式注册模块（新增）
+const GAME_MODES = {
+  standard: {
+    id: 'standard',
+    name: '标准模式',
+    icon: '⚔️',
+    description: '经典自走棋体验，纯策略博弈',
+    enabled: true,
+    hooks: {},  // 空钩子 = 原始规则
+  },
+  twinStar: {
+    id: 'twinStar',
+    name: '双星闪耀',
+    icon: '⭐⭐',
+    description: '每轮首次购买的英雄直接升级为二星',
+    enabled: true,
+    hooks: {
+      onPlayerBuyHero(player, hero, round) {
+        if (!player._twinStarUsedThisRound) {
+          player._twinStarUsedThisRound = true;
+          player.upgradeHeroToTwoStar(hero);
+        }
+      },
+      onRoundStart(round) {
+        // 重置所有存活玩家的标记
+        for (const p of getAllAlivePlayers()) {
+          p._twinStarUsedThisRound = false;
+        }
+      }
+    }
+  },
+  // 未来模式在此注册...
+};
+</div>
+
+<!-- ====== 四、模式目录 ====== -->
+<h2 id="mode-ideas">四、模式目录（持续扩展）</h2>
+
+<p style="margin-bottom: 24px;">模式之间<strong>互斥</strong>——每局只能选一个。所有模式规则<strong>对所有存活玩家同时生效</strong>（含 AI）。</p>
+
+<!-- 4.1 经济类 -->
+<h3>💰 经济节奏类</h3>
+
+<div class="mode-card">
+  <h4>🆓 零元刷新模式 <span class="mode-badge badge-plan">二期计划</span></h4>
+  <p><strong>核心规则：</strong>每轮所有金币收入减半（基础收入、利息、连胜连败奖励全部 /2），但<strong>商店刷新免费</strong>。</p>
+  <p style="color:var(--muted);font-size:13px;">「穷，但能挑」——钱不够用，但可以无限翻牌找想要的卡。玩家面临的核心矛盾：看到想要的卡但买不起 vs 忍住刷新继续攒钱。</p>
+  <div class="highlight" style="margin-top:12px;">
+    <strong>策略影响：</strong>高费卡更难凑齐，低费阵容更吃香。科技升级价格不变，但收入减半使得升级更难——是优先升科技还是优先买卡？这是一个更难的选择。AI 同样收入减半 + 免费刷新，经历相同困境。
+  </div>
+</div>
+
+<div class="mode-card">
+  <h4>💸 高价回收模式 <span class="mode-badge badge-idea">构思中</span></h4>
+  <p><strong>核心规则：</strong>出售英雄获得<strong>购买原价的 100%</strong>（标准模式约 50%）。</p>
+  <p style="color:var(--muted);font-size:13px;">鼓励频繁换阵、战术转型。卖卡不亏，试错成本为零。缺点是中期频繁换阵可能导致策略深度下降。</p>
+  <div class="warn" style="margin-top:12px;">
+    ⚠️ <strong>互斥注意：</strong>与「零元刷新」互斥——两者叠加会造成买→卖→刷→买的无限循环，经济系统完全崩溃。
+  </div>
+</div>
+
+<!-- 4.2 协鸣类 -->
+<h3>🎭 协鸣阵营类</h3>
+
+<div class="mode-card">
+  <h4>🧩 协鸣组件开局 <span class="mode-badge badge-plan">二期计划</span></h4>
+  <p><strong>核心规则：</strong>开局时每人获得一个<strong>「万能协鸣组件」</strong>——可以给任意武将新增一个自选协鸣标签（从该武将已有的协鸣中选择一个+1层）。</p>
+  <p style="color:var(--muted);font-size:13px;">全局规则，所有玩家同等获得。</p>
+  <div class="highlight" style="margin-top:12px;">
+    <strong>核心策略博弈：</strong>三协鸣武将（如吕布）本来就能凑三个协鸣，装组件变四个——<strong>边际效益递减</strong>。二协鸣武将（如赵云）只有两个协鸣，装组件变三个——<strong>质变</strong>。玩家面临真正的取舍：「选三协鸣强势卡」vs「选二协鸣弱势卡但靠组件质变补齐」。没有最优解。
+  </div>
+  <p style="color:var(--muted);font-size:13px;">实现注：组件作为特殊装备类型，每位玩家开局自动获得1个。不可交易、不可出售。</p>
+</div>
+
+<div class="mode-card">
+  <h4>👑 天命最高模式 <span class="mode-badge badge-idea">构思中</span></h4>
+  <p><strong>核心规则：</strong>每个协鸣阵营的<strong>最高层级</strong>（满层）效果翻倍或获得额外质变。例如蜀国 4/4 协鸣本来攻击+30%，现在变成+60%。</p>
+  <p style="color:var(--muted);font-size:13px;">全局规则，所有玩家共享相同的满层强化表。</p>
+  <div class="highlight" style="margin-top:12px;">
+    <strong>策略影响：</strong>从「广撒网凑多个小协鸣」变成「集中资源冲一个阵营满层」。玩家需要决定——是赌命冲一个阵营的天命，还是分散投资多个协鸣保底？AI 同样可以追满层，谁先触发天命谁就获得巨大优势。
+  </div>
+  <p style="color:var(--muted);font-size:13px;">需要为每个协鸣阵营定义「天命效果」。工作量较大，建议在第一个模式上线后再做。</p>
+</div>
+
+<div class="mode-card">
+  <h4>🎯 定向协鸣模式 <span class="mode-badge badge-idea">构思中</span></h4>
+  <p><strong>核心规则：</strong>游戏开始时随机选定一个协鸣阵营（如「蜀」），该阵营所有英雄费用 -1（最低 1 费）。所有玩家共享同一个受益阵营，形成围绕该阵营的集体博弈。</p>
+  <p style="color:var(--muted);font-size:13px;">所有玩家看到的是同一个 buff 阵营，策略围绕「抢该阵营英雄还是反制该阵营」展开。与「天命最高」可叠加形成「天命+定向」变体。</p>
+</div>
+
+<!-- 4.3 传说叙事类 -->
+<h3>📜 传说叙事类</h3>
+
+<div class="mode-card">
+  <h4>🏛️ 传说体系颠覆 <span class="mode-badge badge-plan">二期重点</span></h4>
+  <p><strong>核心规则：</strong>在标准阵营/职业协鸣之外，激活一套隐藏的<strong>「演义叙事协鸣」</strong>——基于《三国演义》与原创小说《诸界异宇》中的神话重构，涵盖武器前世、人物因果、神话政治、历史战役四大维度。所有隐藏协鸣对<strong>全体存活玩家同等生效</strong>，包括 AI。</p>
+  <p style="color:var(--muted);font-size:13px;">隐藏协鸣在满足条件时自动激活，不占用常规协鸣槽位。UI 中显示为特殊金色边框。每局游戏从中激活约 15-18 个传说协鸣（按赛季轮换）。</p>
+
+  <!-- 4.3.1 信息差设计 -->
+  <h4 style="margin-top: 24px;">4.3.1 核心设计：信息差作为合法的策略维度</h4>
+  <div class="highlight">
+    <strong>信息差 ≠ 不公平。</strong>传说体系的命名方式公开暗示触发条件——「斩玄之恩」暗示曹操与关羽的前世因果，「赤兔双主」暗示吕布与关羽都与赤兔马有渊源。但<strong>具体效果数值</strong>和<strong>精确触发条件</strong>需要玩家通过试错、社区讨论或阅读《诸界异宇》来掌握。
+  </div>
+
+  <div class="card" style="margin-top: 12px;">
+    <h4>🎯 信息差的三层梯度</h4>
+    <table style="font-size:13px;">
+      <tr><th>层级</th><th>玩家类型</th><th>掌握程度</th><th>游戏影响</th></tr>
+      <tr><td>L1 盲猜层</td><td>纯新人</td><td>看到名字，凭直觉凑组合</td><td>偶尔碰巧触发，惊喜感最强</td></tr>
+      <tr><td>L2 社区层</td><td>攻略型玩家</td><td>从社区/百科查到所有触发条件</td><td>知道「怎么触发」但未必理解「为什么」</td></tr>
+      <tr><td>L3 原著层</td><td>《诸界异宇》读者</td><td>理解每对组合背后的前世因果和叙事逻辑</td><td>能预判对手阵容、提前布局克制链、在选秀阶段就规划整局路线</td></tr>
+    </table>
+  </div>
+
+  <p style="font-size:13px; color:var(--muted);">L3 对 L2 的优势不是「更强」，而是<strong>「更早」</strong>——同样看到商店里有关羽+张辽，L3 读者立刻想到绿豆债组合并评估是否值得投资，L2 玩家需要切出去查攻略（时间窗口损失）。这种优势在高端对局中可能决定一轮胜负，但不会让 L3 玩家稳赢——因为自走棋的随机性和标准协鸣的权重仍然主导游戏。</p>
+
+  <!-- 4.3.2 A线：武器前世谱系 -->
+  <h4 style="margin-top: 28px;">4.3.2 A线：武器前世谱系（Weapon Resonance）</h4>
+  <p style="font-size:13px; color:var(--muted);">源自《诸界异宇》中「每把神兵都是一段被删改的神话史」的世界观——三国的每一把名武器都是被天庭/圣兽体系处刑或镇压的神祇遗骸。以下隐藏协鸣为<strong>装备驱动型</strong>：英雄+特定装备激活。</p>
+
+  <table style="font-size:13px;">
+    <tr><th style="width:11%">协鸣名</th><th style="width:22%">条件</th><th style="width:35%">效果</th><th style="width:32%">书中原型</th></tr>
+    <tr>
+      <td>⚔️ 剐龙台遗恨</td>
+      <td>关羽装备「青龙偃月刀」</td>
+      <td>关羽对「龙族」「水神」标签单位 +30% 伤害</td>
+      <td>瑶池玄龟被剐龙台天刑处死，遗骨铸刀——这把刀的本质是被处刑的水系神祇的复仇意志</td>
+    </tr>
+    <tr>
+      <td>🐍 相柳遗志</td>
+      <td>张飞装备「丈八蛇矛」</td>
+      <td>张飞攻击附带毒素，每秒2%目标最大生命，持续3秒</td>
+      <td>涿郡寒潭底被天庭镇压的相柳遗躯化矛——被压迫者的遗骸</td>
+    </tr>
+    <tr>
+      <td>🐉 三龙护体</td>
+      <td>吕布装备「方天画戟」</td>
+      <td>获得三层龙魂护盾（每层=15%最大生命），每损失30%血量碎一层，每碎一层+10%攻击</td>
+      <td>方天画戟由赤龙/黄龙/金龙三龙凭依——辕门射戟中金龙受伤未愈</td>
+    </tr>
+    <tr>
+      <td>🔥 九黎焚天</td>
+      <td>华雄装备「九黎焚天刀」</td>
+      <td>华雄攻击附加灼烧（每秒3%目标当前生命），且协鸣计数中「凤凰族」+1</td>
+      <td>张角与凤凰族交易锻造，刀背嵌七颗凤凰灵珠——凤凰族操控华雄为代理人</td>
+    </tr>
+    <tr>
+      <td>🐎 赤兔双主</td>
+      <td>关羽 或 吕布装备「赤兔马」</td>
+      <td>关羽骑赤兔→水火双属性（物法混伤）；吕布骑赤兔→仅火属性但移速额外+20%</td>
+      <td>赤兔=赤龙凭依，水火双精龙魂。曹操将赤兔转赠关羽后激活了水火相济的命格雏形，吕布仅继承了火之精</td>
+    </tr>
+    <tr>
+      <td>⚰️ 监斩之刃</td>
+      <td>曹操装备「青釭剑」</td>
+      <td>曹操攻击 +15%，与关羽对战时双方攻速额外 +15%（宿命共鸣）</td>
+      <td>青釭剑的前世 = 剐龙台上监斩玄龟的那把刀，曹操前世用它执行了关羽前世的死刑——剑身血纹在关羽面前自动震颤</td>
+    </tr>
+  </table>
+
+  <div class="highlight" style="margin-top: 12px;">
+    <strong>兵器线的信息差价值：</strong>普通玩家看到「青龙偃月刀」会直觉给关羽——没错。但 L3 读者知道这把刀对龙族/水神有克制，当对手走「龙族协鸣」阵容时，L3 读者会优先抢关羽+青龙刀作为反制手段。而 L2 玩家可能到被克死了才去查攻略。
+  </div>
+
+  <!-- 4.3.2 B线：前世因果 -->
+  <h4 style="margin-top: 28px;">4.3.3 B线：前世因果（Past-Life Karma）</h4>
+  <p style="font-size:13px; color:var(--muted);">源自《诸界异宇》的核心叙事手法——三国英雄的行为不是「性格决定命运」，而是「前世因果的现世投射」。以下隐藏协鸣为<strong>人物组合型</strong>。</p>
+
+  <table style="font-size:13px;">
+    <tr><th style="width:11%">协鸣名</th><th style="width:22%">条件</th><th style="width:35%">效果</th><th style="width:32%">书中原型</th></tr>
+    <tr>
+      <td>🫂 斩玄之恩</td>
+      <td>曹操 + 关羽同时在场</td>
+      <td>关羽受到致命伤害时，若曹操存活，曹操替关羽挡一次（转移伤害的50%）。触发后该协鸣本局失效</td>
+      <td>曹操前世=剐龙台监斩天官，执行时故意留了「半刀」未斩尽，给了玄龟一线生机。关羽今生「降汉不降曹」是对此的精确复现——承情不受恩</td>
+    </tr>
+    <tr>
+      <td>🫘 绿豆债</td>
+      <td>关羽 + 张辽同时在场</td>
+      <td>每轮商店刷新费用 -1（仅对持有此协鸣的玩家有效）</td>
+      <td>关羽卖绿豆欠张辽三百斛→土山劝降时张辽那句「你还欠我绿豆钱」→前世债务化为今生羁绊</td>
+    </tr>
+    <tr>
+      <td>🔥 焚神之誓</td>
+      <td>诸葛亮是场上<strong>唯一</strong>「军师」标签英雄</td>
+      <td>诸葛亮技能伤害 +40%，但每轮结束时扣 3% 当前生命（誓言的代价——孤独地燃尽自己）</td>
+      <td>17岁诸葛亮目睹彭城屠杀后立誓：「终此一生，必以凡躯为炉，炼一把焚尽诸神的火！」</td>
+    </tr>
+    <tr>
+      <td>🐢 玄武收割者</td>
+      <td>曹操 + 左慈同时在场</td>
+      <td>每击杀一个「龙族」标签的敌方单位，获得 +3 金币（一局上限 30 金币）</td>
+      <td>左慈验印揭示：玄武族借曹操之手收割龙气以愈合祖龟伤口。曹操自认为在驱龙，实则是替玄武拔龙鳞</td>
+    </tr>
+    <tr>
+      <td>💀 天官半刀</td>
+      <td>曹操阵亡时，若关羽在场</td>
+      <td>关羽立即获得「复仇」buff——攻击 +25%、攻速 +25%，持续至战斗结束</td>
+      <td>前世天官留半刀之恩，今生以「为曹操复仇」来了断因果——玄龟最终以报恩的方式完成闭环</td>
+    </tr>
+  </table>
+
+  <div class="highlight" style="margin-top: 12px;">
+    <strong>前世因果线的信息差价值：</strong>最核心的是「斩玄之恩」——L3 读者知道可以故意让关羽站前排卖血，触发曹操挡刀，实现一次免费的生命转移。这个组合的强度来自<strong>战术时机判断</strong>而非数值碾压，正是信息差设计的理想形态。
+  </div>
+
+  <!-- 4.3.4 C线：神话政治学 -->
+  <h4 style="margin-top: 28px;">4.3.4 C线：神话政治学（Mythopolitics）</h4>
+  <p style="font-size:13px; color:var(--muted);">源自《诸界异宇》中青梅煮酒被重写为神魔政治哲学对撞的设定——每个三国君主的神话立场不是「阵营选择」，而是「世界观选择」。</p>
+
+  <table style="font-size:13px;">
+    <tr><th style="width:11%">协鸣名</th><th style="width:22%">条件</th><th style="width:35%">效果</th><th style="width:32%">书中原型</th></tr>
+    <tr>
+      <td>🍷 青梅论道</td>
+      <td>曹操 + 刘备同时在场（可不同阵营）</td>
+      <td>曹操获得 +15% 攻击（借神魔之力以制神魔）；刘备获得 +15% 防御（人道制衡天道）。两人对战无克制关系</td>
+      <td>青梅煮酒不是试探，是两种神魔政治哲学的正面对撞——曹操的工具理性 vs 刘备的共存主义</td>
+    </tr>
+    <tr>
+      <td>💫 紫微断章</td>
+      <td>吕布同时装备「方天画戟」+「赤兔马」且场上无其他「飞将」标签</td>
+      <td>三星吕布获得「紫微天命」：全属性 +25%，但每轮结束扣 5% 当前生命（天命已被四圣兽截断的代价）</td>
+      <td>吕布本有三龙护体可激活紫微天命、统一天下——但四圣兽不允许新的帝星出现，虓虎衔紫本吞吴，奈何虎伥截天途</td>
+    </tr>
+    <tr>
+      <td>🐲 卧龙蛰渊</td>
+      <td>诸葛亮在第10轮之前一直未上阵（仅在备战席或未购买）</td>
+      <td>第10轮后首次上阵时，诸葛亮获得 +50% 技能伤害和一层护盾（可吸收200伤害），持续3轮</td>
+      <td>「卧龙蛰渊待时枯」——诸葛亮选择蛰伏等待时机，时机一到，便是焚神之火</td>
+    </tr>
+    <tr>
+      <td>🍑 望梅止渴</td>
+      <td>曹操+任意「麒麟」标签英雄</td>
+      <td>战斗开始全体友方 +10% 移速和 +10% 攻速，持续8秒</td>
+      <td>曹操行军中观星见麒麟之光，以《阴符策》配合军士集体愿力，勾动麒麟残余生发之息使枯枝抽芽——不是骗术，是以众生之信撬动圣兽余威</td>
+    </tr>
+    <tr>
+      <td>🌊 下邳洪流</td>
+      <td>曹操 + 郭嘉 + 程昱同时在场</td>
+      <td>战斗开始，敌方棋盘前两排降速 30%、降防 10%，持续 8 秒</td>
+      <td>水淹下邳的四方博弈——龙族水龙魂印+曹操逆鳞夺气之阵+玄武族稀释龙气+吕布三龙最后的抵抗</td>
+    </tr>
+  </table>
+
+  <!-- 4.3.5 D线：大事件 -->
+  <h4 style="margin-top: 28px;">4.3.5 D线：历史战役（Historic Events）</h4>
+  <p style="font-size:13px; color:var(--muted);">将著名战役转化为条件触发型的全局效果。</p>
+
+  <table style="font-size:13px;">
+    <tr><th style="width:11%">协鸣名</th><th style="width:22%">条件</th><th style="width:35%">效果</th><th style="width:32%">书中原型</th></tr>
+    <tr>
+      <td>🔥 赤壁余烬</td>
+      <td>周瑜 + 黄盖 + 诸葛亮（3/3）</td>
+      <td>战斗开始，敌方全体损失 10% 当前生命 + 防御 -15%（持续 10 秒）</td>
+      <td>周瑜火攻+诸葛亮借东风+黄盖苦肉计——三方缺一不可</td>
+    </tr>
+    <tr>
+      <td>⭐ 七星续命</td>
+      <td>诸葛亮 + 赵云同时在场</td>
+      <td>诸葛亮血量归零时，有 30% 概率复活并回复 50% 血量（每局限一次）</td>
+      <td>诸葛亮七星灯续命，赵云护法。魏延闯入踏灭主灯导致失败——所以只有30%成功率</td>
+    </tr>
+    <tr>
+      <td>🐯 许田惊虎</td>
+      <td>刘备 + 关羽 + 汉献帝同时在场</td>
+      <td>有「皇帝」标签的友方英雄获得一层不可驱散的护盾（吸收300伤害）</td>
+      <td>许田猎场刘备阻止关羽射杀曹操——「看虎！」那声嘶吼保全了献帝的最后体面</td>
+    </tr>
+    <tr>
+      <td>🦅 五丈原落星</td>
+      <td>诸葛亮阵亡，且司马懿在场</td>
+      <td>司马懿获得 +20% 全属性，持续至本局结束（「天命归于冢虎」）</td>
+      <td>诸葛亮陨落五丈原，司马懿最大的对手消失——从此无敌手</td>
+    </tr>
+  </table>
+
+  <!-- 4.3.6 E线：演义叙事 -->
+  <h4 style="margin-top: 28px;">4.3.6 E线：演义叙事（Romance Canon）</h4>
+  <p style="font-size:13px; color:var(--muted);">基于《三国演义》本身的经典组合，对所有三国文化爱好者开放的知识门槛（非《诸界异宇》专属）。</p>
+
+  <table style="font-size:13px;">
+    <tr><th style="width:11%">协鸣名</th><th style="width:22%">条件</th><th style="width:35%">效果</th><th style="width:32%">设计意图</th></tr>
+    <tr>
+      <td>🌸 桃园结义</td>
+      <td>刘备 + 关羽 + 张飞（3/3）</td>
+      <td>三人同时在场，全体蜀国 +15% 吸血</td>
+      <td>低费三人组前期即可触发，鼓励桃园开局</td>
+    </tr>
+    <tr>
+      <td>🐯 五虎上将</td>
+      <td>关/张/赵/马/黄 中任意3人（3/5）</td>
+      <td>3人：攻击+20%；5人满配：额外全体破甲</td>
+      <td>分阶激励，5费马超/黄忠的权衡</td>
+    </tr>
+    <tr>
+      <td>🛡️ 五子良将</td>
+      <td>张辽/于禁/张郃/乐进/徐晃（3/5）</td>
+      <td>3人：魏国全体防御+20%；5人：额外护盾</td>
+      <td>与五虎对称，魏国肉盾流新维度</td>
+    </tr>
+    <tr>
+      <td>📜 军师天团</td>
+      <td>诸葛/司马/周瑜/陆逊/荀彧（2/5）</td>
+      <td>2人：技能冷却-20%；4人：-40%</td>
+      <td>跨阵营高费组合，经济支撑需求高</td>
+    </tr>
+    <tr>
+      <td>💀 短命鬼小队</td>
+      <td>郭嘉/周瑜/庞统/典韦/孙策（2/5）</td>
+      <td>阵亡时给存活队友 +25% 攻击（整场战斗）</td>
+      <td>负面叙事→正向机制，送死流战术</td>
+    </tr>
+    <tr>
+      <td>👨‍👦 虎父无犬子</td>
+      <td>关羽+关平 / 张飞+张苞 / 孙权+孙策 任一组</td>
+      <td>父子同阵双方 +20% 全属性</td>
+      <td>双卡小组合，灵活不占位</td>
+    </tr>
+  </table>
+
+  <!-- 4.3.7 赛季轮换 -->
+  <h4 style="margin-top: 28px;">4.3.7 赛季轮换设计</h4>
+  <p style="font-size:13px; color:var(--muted);">每局同时激活 15-18 个隐藏协鸣已足够提供策略变化。全部 25 个协鸣如果同时激活会导致信息过载。采用赛季轮换制：</p>
+
+  <table style="font-size:13px;">
+    <tr><th>赛季</th><th>激活线</th><th>协鸣数</th><th>主题</th></tr>
+    <tr><td>S1「神话兵冢」</td><td>A线（兵器谱）+ B线（前世因果）+ E线（演义叙事）</td><td>17</td><td>让新玩家从最直观的「武器+人物」开始理解传说体系</td></tr>
+    <tr><td>S2「天命棋局」</td><td>C线（神话政治）+ D线（大事件）+ E线（演义叙事）</td><td>15</td><td>引入更高概念的神魔博弈，让 L3 读者优势充分发挥</td></tr>
+    <tr><td>S3「众生因果」</td><td>全部五线激活（或开发新线）</td><td>25</td><td>完整版，适合已经熟悉传说体系的玩家群体</td></tr>
+  </table>
+
+  <p style="font-size:13px; color:var(--muted);">轮换机制另有隐藏价值——「绿豆债」在 S1 激活但在 S2 不激活，S2 入坑的新玩家会从 S1 前辈口中听说「关羽+张辽曾经有个超强组合」，产生社区讨论和期待回流。</p>
+
+  <!-- 4.3.8 图鉴系统 -->
+  <h4 style="margin-top: 28px;">4.3.8 图鉴系统（Codex）</h4>
+
+  <div class="card">
+    <h4>📖 三国图鉴 — 设计理念</h4>
+    <p style="font-size:13px;">
+      图鉴不是「帮助文档」，而是<strong>成就展示与收集系统</strong>。每一项图鉴的解锁都需要玩家在游戏中达成特定条件——不是看一遍就打开，而是<strong>真正玩到那个深度才会点亮</strong>。跨局持久化，解锁后永久可见。
+    </p>
+    <p style="font-size:13px; margin-top: 6px;">
+      主界面新增「📖 图鉴」入口，内部按三大类分页展示：武将、协鸣、模式。未解锁项显示为灰色剪影+名称，已解锁显示完整信息和稀有度徽章。
+    </p>
+  </div>
+
+  <!-- 武将图鉴 -->
+  <div class="card" style="margin-top: 12px;">
+    <h4>⚔️ 武将图鉴 — 三星解锁</h4>
+    <p style="font-size:13px;">
+      <strong>解锁条件：</strong>在任意一场战斗中，将该武将升至<strong>三星</strong>。<br>
+      <strong>解锁后展示：</strong>完整属性面板、技能说明、所属协鸣、特殊标签（如龙族/凤凰等）、三星解锁日期。
+    </p>
+    
+    <table style="font-size:12px; margin-top: 10px;">
+      <tr><th>稀有度</th><th>武将</th><th>三星难度</th><th>说明</th></tr>
+      <tr>
+        <td>⬜ 普通</td>
+        <td>1费武将（刘备、于禁、许褚等 9 张）</td>
+        <td>⭐⭐</td>
+        <td>商店前期大量出货，正常游玩 3-5 局可三星。适合新手入门解锁。</td>
+      </tr>
+      <tr>
+        <td>🟩 稀有</td>
+        <td>2费武将（华雄、张辽、孙策等 10 张）</td>
+        <td>⭐⭐⭐</td>
+        <td>中期商店主力，合理运营 5-8 局可凑齐。需要掌握经济节奏。</td>
+      </tr>
+      <tr>
+        <td>🟦 史诗</td>
+        <td>3费武将（周瑜、典韦、庞统等 8 张）</td>
+        <td>⭐⭐⭐⭐</td>
+        <td>需要专门围绕该武将运营，10+局。考验阵容规划能力。</td>
+      </tr>
+      <tr>
+        <td>🟪 传说</td>
+        <td>4费武将（曹操、左慈、姜维等 6 张）</td>
+        <td>⭐⭐⭐⭐⭐</td>
+        <td>高费卡池小，需要连胜经济支撑或运气爆棚。15+局。</td>
+      </tr>
+      <tr>
+        <td>🟨 神话</td>
+        <td>5费武将（吕布、司马懿、诸葛亮 3 张）</td>
+        <td>⭐⭐⭐⭐⭐⭐</td>
+        <td>三星 5 费几乎需要完美运营+绝佳运气。全图鉴收集者的终极挑战。</td>
+      </tr>
+    </table>
+
+    <div class="highlight" style="margin-top: 10px; font-size: 12px;">
+      <strong>💡 设计意图：</strong>三星解锁让玩家不只是「见过」这张卡，而是「真正投入资源培养过」。1 费容易收集激励新手，5 费的极限难度给硬核玩家长期目标。全 38 武将三星 = 白金成就。
+    </div>
+  </div>
+
+  <!-- 协鸣图鉴 -->
+  <div class="card" style="margin-top: 12px;">
+    <h4>🔗 协鸣图鉴 — 最高级点亮</h4>
+    <p style="font-size:13px;">
+      <strong>解锁条件：</strong>在一场战斗中，将某个协鸣（阵营/职业/传说隐藏）升至<strong>最高层级并获胜</strong>。<br>
+      <strong>解锁后展示：</strong>协鸣完整层级效果表、所需人数、最高层级达成日期、所用阵容快照。
+    </p>
+
+    <table style="font-size:12px; margin-top: 10px;">
+      <tr><th>稀有度</th><th>协鸣类型</th><th>示例</th><th>难度</th></tr>
+      <tr>
+        <td>🟩 稀有</td>
+        <td>2层协鸣满级</td>
+        <td>弓手 2/2、刺客 2/2、辅助 2/3</td>
+        <td>低 — 2 人即可触发，顺手凑出</td>
+      </tr>
+      <tr>
+        <td>🟦 史诗</td>
+        <td>3层协鸣满级</td>
+        <td>蜀 3/3、魏 3/4、战士 3/5</td>
+        <td>中 — 需要定向搜卡，阵容构建基本功</td>
+      </tr>
+      <tr>
+        <td>🟪 传说</td>
+        <td>4层协鸣满级</td>
+        <td>魏 4/4、蜀 4/4、吴 4/4、法师 4/4</td>
+        <td>高 — 全阵容围绕一个阵营构建，后期运营</td>
+      </tr>
+      <tr>
+        <td>🟨 神话</td>
+        <td>5层协鸣满级</td>
+        <td>战士 5/5、坦克 4/4（凑满需多张同职业高费）</td>
+        <td>极高 — 需要刷出多位同职业英雄</td>
+      </tr>
+      <tr>
+        <td>🏆 隐藏</td>
+        <td>传说协鸣</td>
+        <td>剐龙台遗恨、斩玄之恩、紫微断章等</td>
+        <td>特殊 — 触发即解锁，单条解锁难度取决于特定组合的凑齐难度</td>
+      </tr>
+    </table>
+
+    <p style="font-size:12px; color:var(--orange); margin-top:8px;">
+      💡 传说协鸣的图鉴沿用原「灰色问号卡 → 首次触发点亮」机制，但升格为「隐藏」稀有度。未触发的隐藏协鸣在图鉴中显示为「？？？」只显示所属线（兵器谱/前世因果/神话政治/历史战役/演义叙事）。
+    </p>
+  </div>
+
+  <!-- 模式图鉴 -->
+  <div class="card" style="margin-top: 12px;">
+    <h4>🎮 模式图鉴 — 胜利跃迁解锁</h4>
+    <p style="font-size:13px;">
+      <strong>核心概念：</strong>每个游戏模式在首次通关后激活图鉴条目。更深入的模式知识通过累计胜场逐级解锁——形成「跃迁」感，从「试过一次」到「精通此道」。
+    </p>
+
+    <table style="font-size:12px; margin-top: 10px;">
+      <tr><th>稀有度</th><th>解锁条件</th><th>解锁内容</th></tr>
+      <tr>
+        <td>⬜ 普通</td>
+        <td>进入该模式 1 次</td>
+        <td>模式名称、图标、一句话描述。图鉴中最基础的一层，纯好奇驱动。</td>
+      </tr>
+      <tr>
+        <td>🟩 稀有</td>
+        <td>在该模式下<strong>获胜 1 次</strong></td>
+        <td>完整规则说明、策略提示、该模式下的推荐阵容。玩家通过而非浏览获取知识。</td>
+      </tr>
+      <tr>
+        <td>🟦 史诗</td>
+        <td>在该模式下<strong>累计获胜 3 次</strong></td>
+        <td>解锁「进阶策略」：反制技巧、数据统计（该模式下的最佳协鸣胜率）。深度玩家专属。</td>
+      </tr>
+      <tr>
+        <td>🟪 传说</td>
+        <td>在该模式下<strong>累计获胜 10 次</strong></td>
+        <td>解锁该模式的「传奇玩家徽章」+ 专属结算动画。最核心的成就驱动力。</td>
+      </tr>
+      <tr>
+        <td>🏆 隐藏</td>
+        <td>传说颠覆模式下触发<strong>全部 25 个隐藏协鸣</strong></td>
+        <td>解锁「诸界异宇」专属称号。终极收藏成就，展示你是真正的三界通晓者。</td>
+      </tr>
+    </table>
+
+    <div class="highlight" style="margin-top: 10px; font-size: 12px;">
+      <strong>🎯 稀有度体系总结：</strong>
+    </div>
+    <table style="font-size:12px; margin-top: 8px;">
+      <tr><th>等级</th><th>标志色</th><th>武将线</th><th>协鸣线</th><th>模式线</th></tr>
+      <tr><td>⬜ 普通</td><td style="color:#aaa">灰</td><td>三星1费</td><td>—</td><td>首次进入模式</td></tr>
+      <tr><td>🟩 稀有</td><td style="color:#3fb950">绿</td><td>三星2费</td><td>2层满级</td><td>获胜1次</td></tr>
+      <tr><td>🟦 史诗</td><td style="color:#58a6ff">蓝</td><td>三星3费</td><td>3层满级</td><td>获胜3次</td></tr>
+      <tr><td>🟪 传说</td><td style="color:#bc8cff">紫</td><td>三星4费</td><td>4层满级</td><td>获胜10次</td></tr>
+      <tr><td>🟨 神话</td><td style="color:#d2991d">金</td><td>三星5费</td><td>5层满级</td><td>—</td></tr>
+      <tr><td>🏆 隐藏</td><td style="color:#ff6b6b">虹</td><td>—</td><td>传说协鸣触发</td><td>全隐藏协鸣</td></tr>
+    </table>
+  </div>
+
+  <!-- 跨维度组合 -->
+  <div class="card" style="margin-top: 12px;">
+    <h4>🔮 跨维度隐藏成就</h4>
+    <p style="font-size:13px;">以下成就跨图鉴类型组合触发，不在常规分类中显示（纯隐藏，不预告条件）：</p>
+    <ul style="font-size:12px;">
+      <li><strong>四象归一</strong> 🏆：同时拥有龙族·凤凰·玄武·白虎四标签武将三星图鉴（关羽+华雄/周瑜/庞统+曹操/左慈+许褚/张辽/司马懿）</li>
+      <li><strong>双星制霸</strong> 🟪：双星闪耀模式下累计首购双星 50 次</li>
+      <li><strong>焚神者</strong> 🟪：诸葛亮在图鉴已解锁时，在传说颠覆模式中触发「焚神之誓」并赢得该局</li>
+      <li><strong>紫微终章</strong> 🏆：吕布触发「紫微断章」后，在该局中因扣血效果阵亡但仍获胜（天命已断，胜负未定）</li>
+      <li><strong>剐龙台上</strong> 🟦：在同一局中同时触发「剐龙台遗恨」和「斩玄之恩」</li>
+      <li><strong>全图鉴大师</strong> 🏆：解锁全部 38 武将图鉴 + 10 协鸣图鉴 + 全部模式图鉴 + 25 隐藏协鸣</li>
+    </ul>
+  </div>
+
+  <div class="warn" style="margin-top:12px;">
+    ⚠️ <strong>持久化方案：</strong>图鉴数据全部存储在 localStorage 中（JSON 结构），按赛季 key 隔离（如 <code>codex_s1_heroes</code>、<code>codex_s1_synergies</code>、<code>codex_s1_modes</code>）。赛季轮换后旧数据归档，新赛季重新开始但保留「历史图鉴」只读查看页。玩家头像旁显示「已完成 X/38 武将 · Y/10 协鸣 · Z/N 模式」进度条。
+  </div>
+
+  <!-- 4.3.9 平衡 -->
+  <h4 style="margin-top: 28px;">4.3.9 平衡性守则</h4>
+  <table style="font-size:13px;">
+    <tr><th>守则</th><th>说明</th></tr>
+    <tr><td>效果上限</td><td>单一隐藏协鸣的效果 ≤ 同费标准协鸣的 80-120%。「紫微断章」的全属性+25% 对标的是三星核心 carry 的标准协鸣增伤（通常 20-30%）</td></tr>
+    <tr><td>机会成本</td><td>凑隐藏协鸣需要占用英雄位/装备位，这些资源本可用于凑标准协鸣。隐藏协鸣的强度 = 标准协鸣可替代方案的 90-110%</td></tr>
+    <tr><td>反制存在</td><td>每个强势隐藏协鸣都有克制手段。「斩玄之恩」的曹操挡刀很强，但 AOE 伤害可以同时打两人；「紫微断章」的吕布很强，但扣血意味着他怕持久战</td></tr>
+    <tr><td>AI 可用</td><td>AI 玩家在阵容构建时会评估隐藏协鸣的触发条件，但不以隐藏协鸣为主要优化目标（AI 优先标准协鸣）</td></tr>
+    <tr><td>不可叠加</td><td>同一类别的两个隐藏协鸣效果不叠加（取最高值）。防止「兵器+前世因果+神话政治」三线堆叠出数值怪物</td></tr>
+  </table>
+
+  <div class="warn" style="margin-top:12px;">
+    ⚠️ <strong>最大风险：</strong>25 个隐藏协鸣中必有某个组合在特定版本过于强势。应对策略——传说协鸣效果存储在单独的数据文件（js/legend_synergies.js）中，<strong>支持热更新数值调整而不影响核心游戏逻辑</strong>。版本平衡只需修改这个文件。
+  </div>
+</div>
+
+<div class="highlight" style="margin-top: 16px;">
+  <strong>扩展潜力：</strong>S4+ 可追加「薪火相传」（诸葛亮+姜维）、「宛城遗恨」（曹操+典韦）、「手足同心」（夏侯惇+夏侯渊）、「洛神赋」（曹植+甄姬）、「出师表」（诸葛亮+刘禅）、「合肥战神」（张辽+孙权）等新组合。每次追加都是新内容，同时也是《诸界异宇》小说世界观的二次传播。
+</div>
+
+<!-- 4.4 战斗类 -->
+<h3>⚔️ 战斗节奏类</h3>
+
+<div class="mode-card">
+  <h4>🔄 镜像对决模式 <span class="mode-badge badge-idea">构思中</span></h4>
+  <p><strong>核心规则：</strong>每轮战斗的双方自动获得彼此的阵容镜像增益——即你的前排获得对方前排同位置的 10% 属性加成。鼓励观察对手阵容并针对性布阵。</p>
+  <p style="color:var(--muted);font-size:13px;">全局规则，双方均生效。</p>
+</div>
+
+<div class="mode-card">
+  <h4>⚡ 闪电战模式 <span class="mode-badge badge-idea">构思中</span></h4>
+  <p><strong>核心规则：</strong>回合上限从 30 轮缩减到 20 轮，每轮收入增长速度翻倍。</p>
+  <p style="color:var(--muted);font-size:13px;">全局缩短，无差别加速。</p>
+</div>
+
+<!-- 4.5 远期构想 -->
+<h3>🔮 远期构想（多人对战异则）</h3>
+
+<div class="mode-card" style="border-style: dashed;">
+  <h4>🎲 八人异则大乱斗 <span class="mode-badge badge-idea">远期构想</span></h4>
+  <p><strong>核心规则：</strong>8人对战中，每位玩家在开局时被随机分配一个<strong>不同的</strong>模式规则（从模式库中抽取）。张三享受双星闪耀，李四承担零元刷新……</p>
+  <p>每轮公告板显示所有存活玩家的当前规则，玩家不仅要考虑自己的规则如何利用，还要根据对手的规则调整策略。</p>
+  <div class="warn" style="margin-top:12px;">
+    ⚠️ <strong>巨大挑战：</strong>不同模式之间天然不平衡（双星 vs 零元刷新强度完全不同）。需要设计「规则预算系统」——每个模式对应一个强度分，所有分发的规则总强度分接近。这是游戏设计中的高难度课题，暂标记为远期构想。
+  </div>
+</div>
+
+<!-- ====== 五、游戏流程 ====== -->
+<h2 id="flow">五、游戏流程改造</h2>
+
+<h3>5.1 模式选择</h3>
+<p>游戏开始前显示模式选择弹窗。与旧方案一致，但模式列表从两个扩展到多个：</p>
+<div class="card">
+  <h4>🎮 选择游戏模式</h4>
+  <p style="margin:8px 0"><strong>[ ⚔️ 标准模式 ]</strong> — 经典自走棋体验，纯策略博弈</p>
+  <p style="margin:8px 0"><strong>[ ⭐⭐ 双星闪耀 ]</strong> — 每轮首购英雄直接二星（首期实施）</p>
+  <p style="margin:8px 0"><strong>[ 🧩 协鸣组件 ]</strong> — 开局获得万能协鸣组件（二期）</p>
+  <p style="margin:8px 0"><strong>[ 🆓 零元刷新 ]</strong> — 收入减半，刷新免费（二期）</p>
+  <p style="margin:8px 0; color:var(--muted)"><strong>[ 👑 天命最高 ]</strong> — 协鸣满层效果翻倍（构思中）</p>
+  <p style="margin:8px 0; color:var(--muted)"><strong>[ 💸 高价回收 ]</strong> — 卖出原价返还（构思中）</p>
+  <p style="margin:8px 0; color:var(--muted)"><strong>[ 🎯 定向协鸣 ]</strong> — 随机阵营 buff（构思中）</p>
+  <p style="margin:8px 0; color:var(--muted)"><strong>[ 🏛️ 传说颠覆 ]</strong> — 演义隐藏协鸣激活（构思中）</p>
+  <p style="margin:8px 0; color:var(--muted)"><strong>[ ⚡ 闪电战 ]</strong> — 20轮加速（构思中）</p>
+  <p style="color:var(--muted);font-size:12px; margin-top:16px;">模式之间互斥，选择后不可中途切换。所有玩家（含 AI）共享同一模式规则。</p>
+</div>
+
+<h3>5.2 双星模式下的回合流程</h3>
+<div class="phase-grid">
+  <div class="phase-card">
+    <h4><span class="phase-num">1</span> 获得金币</h4>
+    <p>与标准模式一致。基础收入+利息+科技加成。</p>
+  </div>
+  <div class="phase-card">
+    <h4><span class="phase-num">2</span> 商店购买</h4>
+    <p>与标准模式一致。购买/刷新/升级。<strong>首次购买触发双星。</strong></p>
+  </div>
+  <div class="phase-card">
+    <h4><span class="phase-num">3</span> 部署棋子</h4>
+    <p>与标准模式一致。拖拽上阵/换位。注意阵容中多了二星英雄。</p>
+  </div>
+  <div class="phase-card">
+    <h4><span class="phase-num">4</span> 装备管理</h4>
+    <p>与标准模式一致。装备到棋子。</p>
+  </div>
+  <div class="phase-card">
+    <h4><span class="phase-num">5</span> 准备完毕 → 战斗</h4>
+    <p>与标准模式一致。自动战斗+奖励。AI 同样拥有本轮双星英雄。</p>
+  </div>
+</div>
+
+<div class="highlight">
+  <strong>流程变化极小</strong>：双星模式不增加额外阶段，不打断现有流程。规则注入在购买行为上自动执行，玩家不需要额外操作。这是好的设计——<strong>最小侵入，最大变化</strong>。
+</div>
+
+<!-- ====== 六、AI 同步 ====== -->
+<h2 id="ai-sync">六、AI 同步机制</h2>
+
+<div class="card">
+  <h4>🎯 核心原则：AI 与玩家在变体模式中遵循完全相同的规则</h4>
+  <p>不以"让 AI 更弱"来讨好玩家，也不以"给 AI 额外补偿"来制造难度。AI 就是另一个在同样规则下做决策的玩家。</p>
+</div>
+
+<h3>6.1 双星模式下的 AI 行为</h3>
+<table>
+  <tr><th>环节</th><th>AI 行为</th><th>与玩家的异同</th></tr>
+  <tr><td>每轮首购</td><td>AI 的首次购买同样触发双星。AI 购买决策基于其内部策略（阵容需求/经济状况），不因双星规则改变 AI 策略。</td><td>规则相同，策略不同</td></tr>
+  <tr><td>双星触发</td><td>AI 购买的英雄立即升级二星，操作方法：AI 英雄对象自动标记升级 + 战力刷新。</td><td>效果完全相同</td></tr>
+  <tr><td>出售行为</td><td>AI 不会因为双星就囤积英雄。AI 的出售逻辑不变（经济/阵容优化）。</td><td>无差异</td></tr>
+  <tr><td>科技升级</td><td>AI 科技升级逻辑不变。双星使低费英雄更快成型，AI 可能更倾向于低费阵容。</td><td>策略自然演化</td></tr>
+</table>
+
+<h3>6.2 技术实现：AI 的购买钩子</h3>
+<div class="code-block" style="background:#000;color:#3fb950;padding:16px;border-radius:8px;font-family:monospace;font-size:12px;line-height:1.5;margin:12px 0;">
+// AI 购买行为在 game.js 中通过统一的 buyHero 入口执行
+function buyHero(player, heroKey) {
+    // 1. 扣除金币
+    player.gold -= getHeroCost(heroKey);
+    // 2. 添加英雄
+    player.bench.push(new Hero(heroKey));
+
+    // 3. 模式钩子触发（对玩家和 AI 完全相同）
+    const mode = getCurrentMode();
+    if (mode.hooks.onPlayerBuyHero) {
+        mode.hooks.onPlayerBuyHero(player, heroKey, currentRound);
+    }
+
+    // 4. 刷新 UI
+    updateUI();
+}
+</div>
+
+<!-- ====== 七、平衡性 ====== -->
+<h2 id="balance">七、平衡性考量</h2>
+
+<h3>7.1 双星模式的平衡分析</h3>
+<table>
+  <tr><th>维度</th><th>标准模式</th><th>双星模式</th><th>影响</th></tr>
+  <tr><td>前期节奏</td><td>第2-3轮开始有首位二星</td><td>第1轮就有二星英雄</td><td style="color:var(--orange)">节奏加速约1-2轮</td></tr>
+  <tr><td>低费英雄价值</td><td>过渡/凑协鸣</td><td>更早二星 = 更早发挥战力</td><td style="color:var(--orange)">低费阵容更强</td></tr>
+  <tr><td>高费英雄价值</td><td>后期核心</td><td>首次购买即二星，但高费出现晚</td><td style="color:var(--green)">高费仍强但不再绝对统治</td></tr>
+  <tr><td>经济策略</td><td>攒钱吃利息 vs 刷新找卡</td><td>首购确定性降低刷新需求</td><td style="color:var(--green)">经济更宽松，策略更多样</td></tr>
+  <tr><td>AI 强度</td><td>固定策略</td><td>AI 同样双星，阵容成型快</td><td style="color:var(--orange)">AI 前期更强</td></tr>
+</table>
+
+<h3>7.2 潜在平衡风险</h3>
+<table>
+  <tr><th>风险</th><th>严重性</th><th>应对</th></tr>
+  <tr>
+    <td>双星使1费英雄过早三连星</td>
+    <td style="color:#ffd700">中</td>
+    <td>双星首购升级不计算在三连星进度中。即：你仍然需要三个一星才能合成二星（正常合成路径），双星是额外路径。</td>
+  </tr>
+  <tr>
+    <td>某些英雄二星过于强力</td>
+    <td style="color:#ffd700">中</td>
+    <td>所有玩家同样受益，不存在单向碾压。观察数据，必要时调整个别英雄的二星属性。</td>
+  </tr>
+  <tr>
+    <td>模式选择导致分流</td>
+    <td style="color:#3fb950">低</td>
+    <td>单机游戏不存在分流问题。模式选择只影响当前对局。</td>
+  </tr>
+</table>
+
+<!-- ====== 八、技术实现 ====== -->
+<h2 id="tech">八、技术实现路径</h2>
+
+<h3>8.1 模块架构</h3>
+<div class="card">
+  <h4>新增文件</h4>
+  <ul>
+    <li><strong>js/modes.js</strong> — ModeSystem 类：模式注册、模式选择、钩子调度</li>
+  </ul>
+</div>
+<div class="card">
+  <h4>修改文件</h4>
+  <ul>
+    <li><strong>index.html</strong> — 新增多模式选择弹窗</li>
+    <li><strong>js/game.js</strong> — 注入 currentMode + 钩子调用点（buyHero / nextRound 等）</li>
+    <li><strong>js/shop.js</strong> — 购买逻辑接入钩子（onPlayerBuyHero）</li>
+    <li><strong>js/data.js</strong> — 新增 GAME_MODES 常量定义或保持 modes.js 自包含</li>
+    <li><strong>css/style.css</strong> — 多模式选择弹窗样式</li>
+  </ul>
+</div>
+
+<h3>8.2 核心数据结构</h3>
+<div class="code-block" style="background:#000;color:#3fb950;padding:16px;border-radius:8px;font-family:monospace;font-size:12px;line-height:1.5;margin:12px 0;">
+// js/modes.js
+class ModeSystem {
+  constructor() {
+    this.modes = {};  // id -> modeDef
+  }
+
+  register(modeDef) {
+    this.modes[modeDef.id] = modeDef;
+  }
+
+  getActive() {
+    return this.activeMode || this.modes['standard'];
+  }
+
+  select(modeId) {
+    this.activeMode = this.modes[modeId];
+  }
+
+  // 触发钩子。如果模式未定义该钩子，静默跳过。
+  trigger(hookName, ...args) {
+    const mode = this.getActive();
+    if (mode.hooks && mode.hooks[hookName]) {
+      mode.hooks[hookName](...args);
+    }
+  }
+}
+
+// 全局单例
+const modeSystem = new ModeSystem();
+
+// 注册标准模式
+modeSystem.register({
+  id: 'standard',
+  name: '标准模式',
+  icon: '⚔️',
+  description: '经典自走棋体验',
+  hooks: {}
+});
+
+// 注册双星闪耀模式
+modeSystem.register({
+  id: 'twinStar',
+  name: '双星闪耀',
+  icon: '⭐⭐',
+  description: '每轮首次购买的英雄直接升级为二星',
+  hooks: {
+    onPlayerBuyHero(player, heroKey, round) {
+      if (!player._twinStarUsed) {
+        player._twinStarUsed = true;
+        player._upgradeToTwoStar(heroKey);
+      }
+    },
+    onRoundStart(round) {
+      for (const p of game.getAllAlivePlayers()) {
+        p._twinStarUsed = false;
+      }
+    }
+  }
+});
+</div>
+
+<h3>8.3 钩子注入点</h3>
+<table>
+  <tr><th>注入位置</th><th>文件</th><th>调用</th></tr>
+  <tr><td>英雄购买完成</td><td>js/shop.js</td><td><code>modeSystem.trigger('onPlayerBuyHero', player, heroKey, round)</code></td></tr>
+  <tr><td>新回合开始</td><td>js/game.js</td><td><code>modeSystem.trigger('onRoundStart', round)</code></td></tr>
+  <tr><td>战斗开始前</td><td>js/game.js</td><td><code>modeSystem.trigger('onBattleStart', p1, p2)</code></td></tr>
+  <tr><td>战斗结束后</td><td>js/game.js</td><td><code>modeSystem.trigger('onBattleEnd', winner, loser)</code></td></tr>
+  <tr><td>商店刷新</td><td>js/shop.js</td><td><code>modeSystem.trigger('onShopRefresh', player)</code></td></tr>
+  <tr><td>科技升级</td><td>js/shop.js</td><td><code>modeSystem.trigger('onBuyUpgrade', player, newLevel)</code></td></tr>
+  <tr><td>协鸣结算</td><td>js/game.js</td><td><code>modeSystem.trigger('onSynergyCheck', player, synergies)</code></td></tr>
+</table>
+
+<h3>8.4 传说颠覆模式数据结构</h3>
+<div class="code-block" style="background:#000;color:#3fb950;padding:16px;border-radius:8px;font-family:monospace;font-size:12px;line-height:1.5;margin:12px 0;">
+// js/legend_synergies.js — 传说协鸣定义（传说颠覆模式专用）
+// 每条协鸣按「线」分组，支持赛季轮换激活
+
+const LEGEND_LINES = {
+  weapon: {
+    name: '兵器谱',
+    synergies: [
+      {
+        id: 'dragonguillotine_karma',
+        name: '剐龙台遗恨',
+        icon: '⚔️',
+        category: 'weapon',  // 装备驱动型
+        requiredHero: 'guanyu',
+        requiredEquip: ['green_dragon_blade'],
+        check(hero, equipMap) {
+          return hero.id === 'guanyu' && equipMap.has('green_dragon_blade');
+        },
+        effect: {
+          type: 'damage_modifier',
+          vsTags: ['dragon', 'water_god'],
+          value: 0.30
+        }
+      },
+      {
+        id: 'three_dragons_bodyguard',
+        name: '三龙护体',
+        icon: '🐉',
+        category: 'weapon',
+        requiredHero: 'lvbu',
+        requiredEquip: ['fangtian_halberd'],
+        check(hero, equipMap) {
+          return hero.id === 'lvbu' && equipMap.has('fangtian_halberd');
+        },
+        effect: {
+          type: 'layered_shield',
+          layers: 3,
+          shieldPerLayer: 0.15,  // 15% max HP
+          attackPerBreak: 0.10,
+          hpTriggerPerLayer: 0.30  // break at 30% hp loss
+        }
+      },
+      {
+        id: 'red_hare_dual_master',
+        name: '赤兔双主',
+        icon: '🐎',
+        category: 'weapon',
+        requiredHero: ['guanyu', 'lvbu'],
+        requiredEquip: ['red_hare'],
+        effect: {
+          type: 'conditional',
+          variants: {
+            guanyu: { damageType: 'hybrid' },   // 水火双属性
+            lvbu:    { damageType: 'fire', moveSpeed: 0.20 }
+          }
+        }
+      }
+      // ... 相柳遗志、九黎焚天、监斩之刃 等
+    ]
+  },
+
+  karma: {
+    name: '前世因果',
+    synergies: [
+      {
+        id: 'grace_of_half_blade',
+        name: '斩玄之恩',
+        icon: '🫂',
+        category: 'hero_pair',
+        required: ['caocao', 'guanyu'],
+        oncePerGame: true,  // 触发后永久失效
+        check(player) {
+          return player.hasHeroOnBoard('caocao') && player.hasHeroOnBoard('guanyu');
+        },
+        effect: {
+          type: 'lethal_protection',
+          protector: 'caocao',
+          protected: 'guanyu',
+          transferRatio: 0.50,  // 转移 50% 伤害
+          consumeOnUse: true    // 一次性
+        }
+      },
+      {
+        id: 'bean_debt',
+        name: '绿豆债',
+        icon: '🫘',
+        category: 'hero_pair',
+        required: ['guanyu', 'zhangliao'],
+        effect: {
+          type: 'economy',
+          shopRefreshDiscount: 1  // 刷新费用 -1
+        }
+      },
+      {
+        id: 'burn_gods_oath',
+        name: '焚神之誓',
+        icon: '🔥',
+        category: 'solo',
+        required: ['zhugeliang'],
+        conditional: 'isOnlyStrategist',
+        check(player) {
+          const strategists = player.board.filter(h => h.tags.includes('strategist'));
+          return strategists.length === 1 && strategists[0].id === 'zhugeliang';
+        },
+        effect: {
+          type: 'ability_power_boost',
+          value: 0.40,
+          drawback: { type: 'hp_drain', perRound: 0.03 }  // 每轮扣3%
+        }
+      }
+      // ... 玄武收割者、天官半刀 等
+    ]
+  },
+
+  mythopolitics: {
+    name: '神话政治',
+    synergies: [
+      {
+        id: 'plum_wine_debate',
+        name: '青梅论道',
+        icon: '🍷',
+        category: 'hero_pair',
+        required: ['caocao', 'liubei'],
+        effect: {
+          type: 'dual_buff',
+          caocao: { attack: 0.15 },
+          liubei: { defense: 0.15 },
+          noCounter: true  // 互不对克
+        }
+      },
+      {
+        id: 'purple_emperor_broken',
+        name: '紫微断章',
+        icon: '💫',
+        category: 'equip_solo',
+        required: ['lvbu'],
+        requiredEquip: ['fangtian_halberd', 'red_hare'],
+        minStars: 3,
+        noOtherFlyingGeneral: true,
+        effect: {
+          type: 'all_stats_boost',
+          value: 0.25,
+          drawback: { type: 'hp_drain_per_round', value: 0.05 }
+        }
+      }
+      // ... 卧龙蛰渊、望梅止渴、下邳洪流 等
+    ]
+  },
+
+  events: {
+    name: '历史战役',
+    synergies: [
+      {
+        id: 'red_cliff_embers',
+        name: '赤壁余烬',
+        icon: '🔥',
+        category: 'trio',
+        required: ['zhouyu', 'huanggai', 'zhugeliang'],
+        effect: {
+          type: 'battle_start_debuff',
+          target: 'all_enemies',
+          currentHpLoss: 0.10,
+          defenseDown: 0.15,
+          duration: 10  // 秒
+        }
+      },
+      {
+        id: 'seven_stars_life_extension',
+        name: '七星续命',
+        icon: '⭐',
+        category: 'hero_pair',
+        required: ['zhugeliang', 'zhaoyun'],
+        effect: {
+          type: 'resurrection',
+          target: 'zhugeliang',
+          probability: 0.30,  // 魏延踏灭主灯=70%失败率
+          hpRestore: 0.50,
+          oncePerGame: true
+        }
+      }
+    ]
+  },
+
+  romance: {
+    name: '演义叙事',
+    synergies: [
+      {
+        id: 'peach_garden_oath',
+        name: '桃园结义',
+        icon: '🌸',
+        category: 'trio',
+        required: ['liubei', 'guanyu', 'zhangfei'],
+        effect: {
+          type: 'lifesteal',
+          target: 'faction_shu',
+          value: 0.15
+        }
+      }
+      // ... 五虎上将、五子良将、军师天团 等
+    ]
+  }
+};
+
+// 赛季轮换表
+const SEASON_ROTATION = {
+  s1: { active: ['weapon', 'karma', 'romance'], count: 17 },
+  s2: { active: ['mythopolitics', 'events', 'romance'], count: 15 },
+  s3: { active: ['weapon', 'karma', 'mythopolitics', 'events', 'romance'], count: 25 }
+};
+
+// 协鸣检查（每轮战斗开始前调用）
+function checkAllLegendSynergies(player) {
+  const active = [];
+  const season = getCurrentSeason();
+  const lines = SEASON_ROTATION[season]?.active || ['romance'];
+
+  for (const lineKey of lines) {
+    const line = LEGEND_LINES[lineKey];
+    for (const syn of line.synergies) {
+      if (syn.check ? syn.check(player) : player.hasHeroes(syn.required)) {
+        // 装备驱动型额外检查
+        if (syn.requiredEquip && !syn.requiredEquip.every(e => player.hasEquipOnHero(syn.requiredHero, e))) {
+          continue;
+        }
+        active.push(syn);
+      }
+    }
+  }
+  return active;
+}
+
+// 图鉴系统持久化（三大分类）
+const CODEX_KEYS = {
+  heroes: 'codex_s1_heroes',      // { 'zhao_yun': { unlocked: true, date: '2026-07-01', games_to_3star: 4 } }
+  synergies: 'codex_s1_synergies',// { 'shu': { unlocked: true, tier: 4, date: '2026-07-02', comp_snapshot: [...] } }
+  modes: 'codex_s1_modes',        // { 'double_star': { wins: 5, tier: 'epic', unlocked_at: [...] } }
+  hidden: 'codex_s1_hidden'       // { 'execution_ledge': true, 'zhiwei_broken': false, ... }
+};
+
+const codex = {
+  // 武将三星解锁
+  markHero3Star(heroId, gameCount) {
+    const heroes = JSON.parse(localStorage.getItem(CODEX_KEYS.heroes) || '{}');
+    if (!heroes[heroId]) {
+      heroes[heroId] = { unlocked: true, date: new Date().toISOString(), games_to_3star: gameCount };
+      localStorage.setItem(CODEX_KEYS.heroes, JSON.stringify(heroes));
+      return { rarity: getHeroRarity(heroId), newly_unlocked: true };
+    }
+    return { rarity: getHeroRarity(heroId), newly_unlocked: false };
+  },
+  
+  // 协鸣最高级解锁（需获胜）
+  markSynergyMaxed(synergyId, tier, won, compSnapshot) {
+    if (!won) return null; // 必须获胜才计入
+    const synergies = JSON.parse(localStorage.getItem(CODEX_KEYS.synergies) || '{}');
+    if (!synergies[synergyId] || synergies[synergyId].tier < tier) {
+      synergies[synergyId] = { unlocked: true, tier, date: new Date().toISOString(), comp_snapshot: compSnapshot };
+      localStorage.setItem(CODEX_KEYS.synergies, JSON.stringify(synergies));
+      return { rarity: getSynergyRarity(synergyId, tier), newly_unlocked: true };
+    }
+    return null;
+  },
+
+  // 模式胜场跃迁
+  addModeWin(modeId) {
+    const modes = JSON.parse(localStorage.getItem(CODEX_KEYS.modes) || '{}');
+    if (!modes[modeId]) modes[modeId] = { wins: 0, tiers: [] };
+    modes[modeId].wins++;
+    
+    const milestones = [{ at: 1, tier: 'rare' }, { at: 3, tier: 'epic' }, { at: 10, tier: 'legend' }];
+    for (const m of milestones) {
+      if (modes[modeId].wins === m.at) {
+        modes[modeId].tiers.push(m.tier);
+        localStorage.setItem(CODEX_KEYS.modes, JSON.stringify(modes));
+        return { rarity: m.tier, milestone: m.at, newly_unlocked: true };
+      }
+    }
+    localStorage.setItem(CODEX_KEYS.modes, JSON.stringify(modes));
+    return null;
+  },
+
+  // 隐藏协鸣触发
+  markHiddenDiscovered(hiddenId) { /* 同原逻辑 */ },
+
+  // 总进度
+  getProgress() {
+    const h = JSON.parse(localStorage.getItem(CODEX_KEYS.heroes) || '{}');
+    const s = JSON.parse(localStorage.getItem(CODEX_KEYS.synergies) || '{}');
+    const m = JSON.parse(localStorage.getItem(CODEX_KEYS.modes) || '{}');
+    return {
+      heroes: `${Object.keys(h).length}/38`,
+      synergies: `${Object.keys(s).length}/10`,
+      modes: Object.entries(m).map(([id, data]) => `${id}: ${data.wins}胜`).join(', ')
+    };
+  }
+};
+</div>
+
+<!-- ====== 九、分阶段计划 ====== -->
+<h2 id="phases">九、分阶段实施计划</h2>
+
+<h3>⭐⭐ 双星闪耀模式</h3>
+<div class="phase-grid">
+  <div class="phase-card">
+    <h4><span class="phase-num">P1</span> 模式系统框架</h4>
+    <p style="font-size:13px;color:var(--muted)">预估：1天</p>
+    <ul style="font-size:13px;">
+      <li>创建 js/modes.js（ModeSystem 类）</li>
+      <li>注册标准模式 + 双星模式</li>
+      <li>在 game.js 注入 modeSystem</li>
+      <li>实现 onPlayerBuyHero / onRoundStart 钩子</li>
+    </ul>
+  </div>
+  <div class="phase-card">
+    <h4><span class="phase-num">P2</span> 双星升级逻辑</h4>
+    <p style="font-size:13px;color:var(--muted)">预估：0.5天</p>
+    <ul style="font-size:13px;">
+      <li>实现 _upgradeToTwoStar 方法</li>
+      <li>处理已有同英雄一星时的合并</li>
+      <li>处理备战席满的情况</li>
+      <li>确保不影响正常三合一二星逻辑</li>
+    </ul>
+  </div>
+  <div class="phase-card">
+    <h4><span class="phase-num">P3</span> 模式选择UI + 集成</h4>
+    <p style="font-size:13px;color:var(--muted)">预估：0.5天</p>
+    <ul style="font-size:13px;">
+      <li>多模式选择弹窗</li>
+      <li>回合流程注入钩子调用</li>
+      <li>AI 玩家的双星同步</li>
+      <li>测试：人类 + AI 均正确触发</li>
+    </ul>
+  </div>
+  <div class="phase-card">
+    <h4><span class="phase-num">P4</span> 平衡测试</h4>
+    <p style="font-size:13px;color:var(--muted)">预估：0.5天</p>
+    <ul style="font-size:13px;">
+      <li>多局对战中观察双星模式数据</li>
+      <li>必要时调整限制条件</li>
+      <li>验证 AI 强度是否合理</li>
+    </ul>
+  </div>
+</div>
+
+<h3>后续模式扩展</h3>
+<p>双星模式落地后，后续模式按优先级推进：</p>
+<table>
+  <tr><th>优先级</th><th>模式</th><th>原因</th><th>估计工时</th></tr>
+  <tr><td style="color:var(--green)">P0</td><td>⭐⭐ 双星闪耀</td><td>已承诺首期</td><td>2天</td></tr>
+  <tr><td style="color:var(--green)">P1</td><td>🧩 协鸣组件开局</td><td>策略深度最高、实现简单、用户最佳评价</td><td>1天</td></tr>
+  <tr><td style="color:var(--orange)">P1</td><td>🆓 零元刷新</td><td>简单粗暴、体验差异大、实现成本低</td><td>0.5天</td></tr>
+  <tr><td style="color:var(--orange)">P2</td><td>🏛️ 传说颠覆</td><td>叙事深度最高，三国题材杀手锏；需要新钩子 onSynergyCheck</td><td>2-3天</td></tr>
+  <tr><td style="color:var(--orange)">P2</td><td>👑 天命最高</td><td>核心创意好但工作量大（需为每个阵营设计天命）</td><td>2-3天</td></tr>
+  <tr><td style="color:var(--muted)">P3</td><td>🎯 定向协鸣</td><td>实现简单，适合作为快速填充</td><td>0.5天</td></tr>
+  <tr><td style="color:var(--muted)">P3</td><td>💸 高价回收</td><td>与零元刷新互斥，择一先上</td><td>0.5天</td></tr>
+  <tr><td style="color:var(--muted)">远期</td><td>🎲 八人异则</td><td>需要规则预算系统，设计挑战大</td><td>不确定</td></tr>
+</table>
+
+<!-- ====== 十、风险 ====== -->
+<h2 id="risks">十、风险与应对</h2>
+
+<table>
+  <tr><th>风险</th><th>严重性</th><th>应对</th></tr>
+  <tr>
+    <td>双星模式下 AI 行为不合理（例如 AI 买完即卖破坏经济）</td>
+    <td style="color:var(--red)">高</td>
+    <td>AI 购买逻辑不受模式影响。模式仅改变购买后的结果，不改变 AI 的决策逻辑。测试验证 AI 经济数据是否正常。</td>
+  </tr>
+  <tr>
+    <td>模式钩子在多处调用导致性能问题</td>
+    <td style="color:#3fb950">低</td>
+    <td>钩子是同步函数调用，每个钩子执行时间 < 1ms。仅在关键节点注入，不会造成可感知的性能影响。</td>
+  </tr>
+  <tr>
+    <td>新增模式与已有协鸣/装备系统产生意料之外的交互</td>
+    <td style="color:#ffd700">中</td>
+    <td>每个新模式上线前进行全量回归测试。出现冲突时优先保证现有系统的正确性。</td>
+  </tr>
+  <tr>
+    <td>未来模式数量增多后，模式选择 UI 过于拥挤</td>
+    <td style="color:#3fb950">低</td>
+    <td>预留分类/折叠 UI。未来可改为「精选模式 + 更多」布局。当前仅2-3个模式不构成问题。</td>
+  </tr>
+</table>
+
+<!-- ====== 十一、组局对战远期规划 ====== -->
+<h2 id="multiplayer">十一、组局对战 — 远期规划</h2>
+
+<div class="warn" style="margin-bottom: 24px;">
+  ⚠️ <strong>前置条件：</strong>本章为远期规划，非当前迭代目标。必须先在单机版完成所有变体模式、传说协鸣、图鉴系统的实现与充分测试，确保无明显 bug，再启动组局对战开发。单机版是整个项目的地基——地基不稳，多人化只会放大问题。
+</div>
+
+<h3>11.1 核心变化：从本地到服务器</h3>
+
+<table>
+  <tr><th>维度</th><th>单机版（当前）</th><th>组局版（远期）</th></tr>
+  <tr><td>游戏逻辑</td><td>浏览器内 Game 类全权管理</td><td>服务端运行权威 Game 实例，客户端仅渲染和发指令</td></tr>
+  <tr><td>AI 对手</td><td>本地模拟 7 个 AI</td><td>真人替代 AI，不足时机器人补位</td></tr>
+  <tr><td>战斗结算</td><td>客户端即时计算</td><td>服务器结算后广播，战斗动画客户端本地重放</td></tr>
+  <tr><td>数据存储</td><td>localStorage（图鉴）</td><td>数据库（玩家档案、ELO、战绩、赛季）</td></tr>
+  <tr><td>变体模式</td><td>玩家自选</td><td>房主选定，全局同步</td></tr>
+  <tr><td>传说协鸣</td><td>单机图鉴发现</td><td>同局 8 人共享赛季协鸣池，触发后图鉴跨局留存</td></tr>
+</table>
+
+<div class="highlight">
+  <strong>设计原则：</strong>客户端只负责渲染和发送操作指令，服务器是唯一真相源。战斗确定性（给定阵容→确定结果）保证了服务器模拟战斗的可行性，无需帧同步。
+</div>
+
+<h3>11.2 新增基础设施</h3>
+
+<div class="card">
+  <h4>🖥️ 服务端架构</h4>
+  <table>
+    <tr><th>组件</th><th>职责</th><th>技术选型方向</th></tr>
+    <tr><td>游戏服务器</td><td>房间管理、回合推进、战斗模拟、状态同步</td><td>Node.js（复用现有 JS 逻辑）</td></tr>
+    <tr><td>WebSocket 层</td><td>实时双向通信</td><td>Socket.IO / ws</td></tr>
+    <tr><td>数据库</td><td>玩家档案、ELO 排名、战绩记录</td><td>SQLite(起步) → PostgreSQL(规模)</td></tr>
+    <tr><td>匹配服务</td><td>快速匹配、好友邀请、房间密码</td><td>轻量内存队列</td></tr>
+  </table>
+  <p style="font-size:12px;color:var(--muted);margin-top:8px;">💡 Node.js 优先——战斗逻辑、数据配置（data.js）、协鸣系统（modes.js/legend_synergies.js）可大量复用，避免两套语言维护同一份游戏规则。</p>
+</div>
+
+<h3>11.3 房间/组局流程</h3>
+
+<div class="card">
+  <div style="font-family:monospace;font-size:13px;line-height:2.2;background:#0d1117;padding:16px;border-radius:8px;">
+    创建房间 → 选模式(标准/双星/传说...)
+    <br>　├─ 私密(分享码) → 分享到群 → 等待加入
+    <br>　└─ 公开(匹配) → 匹配队列 → 人满开局
+    <br>　　│
+    <br>　　等待阶段：
+    <br>　　├─ 房主：开始游戏 / 踢人 / 改模式
+    <br>　　├─ 成员：就绪 / 取消就绪
+    <br>　　├─ 人数不足 → AI 机器人自动填充（复用现有 AI）
+    <br>　　└─ 8人全部就绪 → 5秒倒计时 → 开局
+    <br>
+    <br>房间配置项：
+    <br>　├─ 人数：2/4/8 人
+    <br>　├─ 观战：仅房主 / 所有人（仅影响私人房间）
+    <br>　└─ 准备阶段时长：30s / 45s / 60s
+  </div>
+</div>
+
+<h3>11.4 回合同步机制</h3>
+
+<pre style="background:#0d1117;color:#c9d1d9;padding:16px;border-radius:8px;font-size:13px;line-height:1.8;margin:12px 0;">
+每轮流程（服务器推进）：
+
+服务端发金币 → 准备阶段(统一倒计时 30s) → 战斗阶段(观看 30s) → 下一轮
+                      │                          │
+                 ┌────┴────┐               ┌────┴────┐
+              玩家操作→服务器         服务器模拟4对战斗
+              服务器校验→广播          广播结果+阵容快照
+                 │                     客户端本地重放动画
+            ┌────┴────┐
+         全员「准备完毕」
+         跳过剩余倒计时
+</pre>
+
+<h3>11.5 防作弊</h3>
+<table>
+  <tr><th>攻击面</th><th>对策</th></tr>
+  <tr><td>改金币/改属性</td><td>服务器是经济/属性的唯一管理者，客户端只读</td></tr>
+  <tr><td>跳轮次/提前结束准备</td><td>回合由服务器时钟推进</td></tr>
+  <tr><td>买非法英雄/装备</td><td>服务器校验商店池 + 费用 + 背包合法性</td></tr>
+  <tr><td>修改战斗结果</td><td>战斗服务器模拟，客户端无权改变结果</td></tr>
+  <tr><td>重放/回滚</td><td>每轮阵容快照存服务器，客户端断线重连后拉完整快照</td></tr>
+</table>
+<p style="font-size:12px;color:var(--muted);">💡 自走棋是回合制操作校验，不需要帧同步——防作弊成本远低于动作/射击游戏。</p>
+
+<h3>11.6 断线重连</h3>
+<table>
+  <tr><th>场景</th><th>处理方式</th></tr>
+  <tr><td>准备阶段断线</td><td>阵容冻结不动，商店不刷新，倒计时照走。重连后服务器推送完整游戏快照</td></tr>
+  <tr><td>战斗阶段断线</td><td>不影响——战斗结果服务器已确定。重连后直接看结算</td></tr>
+  <tr><td>连续 3 轮不重连</td><td>视为弃权，HP 立即归零，当前对局自动接管为 AI</td></tr>
+</table>
+
+<h3>11.7 观战系统</h3>
+<p>8 人分 4 组对战，存活玩家可以观看任意一组的战斗。被淘汰的玩家进入纯观战模式——只能观战，不能操作。增加「全屏观战」和「迷你观战切换条」两种模式。</p>
+
+<h3>11.8 评分与赛季</h3>
+<table>
+  <tr><th>项目</th><th>设计</th></tr>
+  <tr><td>ELO 分</td><td>第1名 +N、第2-3名 +小量、第4-6名 小扣、第7-8名 -N。中途退出额外扣分</td></tr>
+  <tr><td>匹配池</td><td>ELO ±200 范围内优先匹配，超时放宽</td></tr>
+  <tr><td>赛季</td><td>月度赛季，赛季重置 ELO（软重置）、轮换传说协鸣赛季池、发放赛季奖励（称号/头像框/边框）</td></tr>
+</table>
+
+<h3>11.9 对现有代码的影响评估</h3>
+<table>
+  <tr><th>模块</th><th>影响</th><th>说明</th></tr>
+  <tr><td style="color:var(--red)">js/game.js</td><td style="color:var(--red)">🔴 重写</td><td>核心逻辑迁移服务端，客户端变轻量渲染+指令层</td></tr>
+  <tr><td style="color:var(--green)">js/data.js</td><td style="color:var(--green)">🟢 复用</td><td>英雄/装备/协鸣数据服务端+客户端共用同一份</td></tr>
+  <tr><td style="color:var(--orange)">js/combat.js</td><td style="color:var(--orange)">🟡 移植</td><td>战斗逻辑搬服务端，客户端保留动画播放</td></tr>
+  <tr><td style="color:var(--orange)">js/renderer.js</td><td style="color:var(--orange)">🟡 改造</td><td>增加多人UI（血量条、对手面板、观战切换）</td></tr>
+  <tr><td style="color:var(--orange)">js/shop.js</td><td style="color:var(--orange)">🟡 改造</td><td>操作通过 WebSocket 发送，服务器返回确认</td></tr>
+  <tr><td style="color:var(--green)">js/modes.js</td><td style="color:var(--green)">🟢 复用</td><td>模式系统本身不依赖单机/多人</td></tr>
+  <tr><td style="color:var(--green)">js/legend_synergies.js</td><td style="color:var(--green)">🟢 复用</td><td>传说协鸣数据/检查逻辑可搬服务端</td></tr>
+  <tr><td style="color:var(--red)">UI 层(HTML/CSS)</td><td style="color:var(--red)">🔴 大改</td><td>需要大厅界面、房间界面、多人棋盘面板</td></tr>
+  <tr><td>新增</td><td>🔴</td><td>WebSocket 客户端、游戏服务器、数据库 schema、匹配服务</td></tr>
+</table>
+
+<h3>11.10 远期实施路线</h3>
+<table>
+  <tr><th>阶段</th><th>内容</th><th>工时</th><th>前置</th></tr>
+  <tr><td style="color:var(--muted)">M0</td><td>单机版所有模式+图鉴完成且无 bug</td><td>（当前）</td><td>—</td></tr>
+  <tr><td style="color:var(--muted)">M1</td><td>服务端最小原型：房间 CRUD + WebSocket 通信</td><td>3-5天</td><td>M0 ✅</td></tr>
+  <tr><td style="color:var(--muted)">M2</td><td>游戏状态同步：回合推进、商店同步、阵容同步</td><td>3-4天</td><td>M1</td></tr>
+  <tr><td style="color:var(--muted)">M3</td><td>战斗系统服务端化 + 观战</td><td>2-3天</td><td>M2</td></tr>
+  <tr><td style="color:var(--muted)">M4</td><td>断线重连、防作弊校验、AI 补位</td><td>2天</td><td>M3</td></tr>
+  <tr><td style="color:var(--muted)">M5</td><td>UI 重做（大厅/房间/多人棋盘/观战）</td><td>3-5天</td><td>M3</td></tr>
+  <tr><td style="color:var(--muted)">M6</td><td>匹配/ELO/赛季框架</td><td>2-3天</td><td>M5</td></tr>
+</table>
+<p style="font-size:13px;color:var(--muted);">总计约 15-22 天（单人全职）。技术债最重的模块是 game.js 的拆分——当前单文件 46KB，服务端化之前应先做模块解耦。</p>
+
+<div class="highlight" style="margin-top:24px;">
+  <strong>给单机版的前瞻建议：</strong>在 P0（双星闪耀模式系统）实施时，就按「客户端只发指令、Game 类返回结果」的模式重构 game.js。这会让未来的服务端迁移工作量减半——不需要「先把耦合代码拆开再搬」，而是「直接把已经解耦的模块搬到服务端」。
+</div>
+
+<p style="text-align:center;margin-top:40px;color:var(--muted);font-size:13px;">
+  —— 变体模式系统 设计计划书 v2.4 · 2026-06-29 · 新增组局对战远期规划 ——
+</p>
+
+</body>
+</html>

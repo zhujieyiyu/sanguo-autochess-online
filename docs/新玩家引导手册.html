@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三国自走棋 — 新玩家引导手册</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --gold: #ffd700;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Microsoft YaHei", sans-serif;
+    line-height: 1.8;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+  h1 {
+    font-size: 28px;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 40px;
+  }
+  h2 {
+    font-size: 22px;
+    color: var(--accent);
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 8px;
+    margin: 40px 0 16px;
+  }
+  h3 {
+    font-size: 17px;
+    color: #3fb950;
+    margin: 24px 0 10px;
+  }
+  p { margin-bottom: 12px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+  }
+  .card h4 {
+    color: var(--gold);
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  .tip {
+    background: rgba(88,166,255,0.1);
+    border-left: 3px solid var(--accent);
+    padding: 10px 16px;
+    margin: 12px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+  }
+  .warn {
+    background: rgba(255,107,107,0.1);
+    border-left: 3px solid #ff6b6b;
+    padding: 10px 16px;
+    margin: 12px 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+  }
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 20px;
+    font-size: 14px;
+  }
+  .flow-step {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    text-align: center;
+    min-width: 90px;
+  }
+  .flow-arrow { color: var(--muted); font-size: 18px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  th {
+    background: var(--card);
+    color: var(--accent);
+    font-weight: bold;
+  }
+  .cost-1 { color: #8b949e; }
+  .cost-2 { color: #3fb950; }
+  .cost-3 { color: #58a6ff; }
+  .cost-4 { color: #bc8cff; }
+  .cost-5 { color: #ffd700; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  .badge-blue { background: rgba(29,78,216,0.3); color: #58a6ff; }
+  .badge-red { background: rgba(220,38,38,0.3); color: #ff6b6b; }
+  .badge-green { background: rgba(63,185,80,0.3); color: #3fb950; }
+  .badge-gold { background: rgba(255,215,0,0.2); color: #ffd700; }
+  .toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 28px;
+    margin: 24px 0;
+  }
+  .toc a {
+    color: var(--accent);
+    text-decoration: none;
+    display: block;
+    padding: 4px 0;
+    font-size: 14px;
+  }
+  .toc a:hover { text-decoration: underline; }
+  .layout-diagram {
+    font-family: "Courier New", monospace;
+    background: #000;
+    color: #3fb950;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre;
+    margin: 12px 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>🐉 三国自走棋</h1>
+<div class="subtitle">新玩家引导手册 v1.0 — 从零开始，征服三国</div>
+
+<div class="toc">
+  <strong style="color:#ffd700">📑 目录</strong>
+  <a href="#overview">一、游戏概述</a>
+  <a href="#layout">二、界面布局</a>
+  <a href="#flow">三、一回合流程</a>
+  <a href="#buy">四、商店购买</a>
+  <a href="#deploy">五、部署棋子</a>
+  <a href="#merge">六、合星升级</a>
+  <a href="#equip">七、装备系统</a>
+  <a href="#synergy">八、协鸣系统</a>
+  <a href="#tech">九、科技升级</a>
+  <a href="#battle">十、战斗流程</a>
+  <a href="#ai">十一、AI对手</a>
+  <a href="#economy">十二、经济系统</a>
+  <a href="#tips">十三、新手技巧</a>
+</div>
+
+<!-- ====== 一、游戏概述 ====== -->
+<h2 id="overview">一、游戏概述</h2>
+<p>
+  <strong>三国自走棋</strong>是一款融合三国题材的<strong>自动战斗策略游戏</strong>。
+  你在每回合中购买武将棋子、部署到棋盘上、搭配协鸣阵容，然后与AI对手自动战斗。
+  战斗中棋子自主走位攻击，你只需在准备阶段运筹帷幄。
+</p>
+
+<div class="card">
+  <h4>🎯 核心目标</h4>
+  <p>击败全部7组AI对手，成为最后的赢家。你拥有<strong>40点生命值</strong>，每轮落败会根据对方存活棋子和轮次扣血，血量归零则游戏结束。</p>
+</div>
+
+<!-- ====== 二、界面布局 ====== -->
+<h2 id="layout">二、界面布局</h2>
+<div class="layout-diagram">┌──────────┬──────────────────────────┬──────────┐
+│ 🎯 协鸣   │   🔵 我方 │ 🔴 敌方       │ 📋 武将  │
+│          │                          │    详情  │
+│ 🎒 装备   │    ╔══ 共享棋盘 ══╗     │          │
+│    背包   │    ║ 10列 × 5行 ║     │ 🏪 商店  │
+│          │    ╚══════════════╝     │  (浮层)  │
+│ 🔬 科技   │                          │          │
+│    升级   │  ┌── 备战区（8格）──┐   │ 📋 日志  │
+│          │  │ 赵云 关羽 张飞 .. │   │          │
+│ ⚔️ AI    │  └─────────────────┘   │ ⚔️ AI    │
+│    对手   │                          │    对手  │
+└──────────┴──────────────────────────┴──────────┘</div>
+
+<table>
+  <tr><th>区域</th><th>功能</th></tr>
+  <tr><td>🎯 协鸣面板</td><td>显示当前激活的阵容协鸣效果</td></tr>
+  <tr><td>🎒 装备背包</td><td>存放未装备的武器/物品，点击可装备到选中棋子</td></tr>
+  <tr><td>🔬 科技升级</td><td>已习得的永久全局加成列表</td></tr>
+  <tr><td>📋 武将详情</td><td>点击棋子后显示属性/技能/装备槽/售卖按钮</td></tr>
+  <tr><td>🏪 商店</td><td>购买武将、刷新、升级商店等级（可折叠）</td></tr>
+  <tr><td>📋 战斗日志</td><td>战斗过程实时文字播报</td></tr>
+  <tr><td>⚔️ AI对手</td><td>7组对手存活状态、当前对战高亮</td></tr>
+</table>
+
+<!-- ====== 三、回合流程 ====== -->
+<h2 id="flow">三、一回合流程</h2>
+<div class="flow">
+  <div class="flow-step">💰 获得金币</div><div class="flow-arrow">→</div>
+  <div class="flow-step">🛒 购买棋子</div><div class="flow-arrow">→</div>
+  <div class="flow-step">📍 部署上阵</div><div class="flow-arrow">→</div>
+  <div class="flow-step">🗡️ 装备武器</div><div class="flow-arrow">→</div>
+  <div class="flow-step">▶ 准备完毕</div><div class="flow-arrow">→</div>
+  <div class="flow-step">⚔️ 自动战斗</div><div class="flow-arrow">→</div>
+  <div class="flow-step">🎁 奖励/下一轮</div>
+</div>
+
+<div class="tip">💡 <strong>时间不限</strong>：准备阶段没有时间限制，你可以慢慢思考每一步决策。</div>
+
+<!-- ====== 四、商店购买 ====== -->
+<h2 id="buy">四、商店购买</h2>
+<p>商店位于棋盘下方浮层中（点击标签展开/收起），每轮展示 <strong>5张武将卡</strong>。</p>
+
+<h3>卡牌费用与品质</h3>
+<table>
+  <tr><th>费用</th><th>品质颜色</th><th>典型英雄</th><th>特点</th></tr>
+  <tr><td class="cost-1">1费 (白)</td><td style="color:#8b949e">■</td><td>赵云、黄忠、许褚、孙权</td><td>基础属性，容易合成</td></tr>
+  <tr><td class="cost-2">2费 (绿)</td><td style="color:#3fb950">■</td><td>关羽、张飞、典韦、莲花</td><td>核心战力，性价比高</td></tr>
+  <tr><td class="cost-3">3费 (蓝)</td><td style="color:#58a6ff">■</td><td>诸葛亮、司马懿、周瑜、吕蒙</td><td>AOE或控制，战术支点</td></tr>
+  <tr><td class="cost-4">4费 (紫)</td><td style="color:#bc8cff">■</td><td>廉颇、张郃、马超</td><td>强力单体，后期核心</td></tr>
+  <tr><td class="cost-5">5费 (金)</td><td style="color:#ffd700">■</td><td>吕布、孙策、典勇</td><td>终极战力，一张定乾坤</td></tr>
+</table>
+
+<h3>商店操作</h3>
+<div class="card">
+  <h4>🔄 刷新 (2💰)</h4>
+  <p>重新随机5张卡牌。科技"市场优惠"可降低刷新费用至1💰。</p>
+</div>
+<div class="card">
+  <h4>⬆️ 升级商店 (等级×4 💰)</h4>
+  <p>提升商店等级Lv，高费卡出现概率提高。也可等待自动升级（每Lv-1回合自动升一级）。</p>
+</div>
+<div class="card">
+  <h4>🔓 锁定</h4>
+  <p>锁定商店后，下一轮不会自动刷新。适合"这轮钱不够、下轮再来"的情况。</p>
+</div>
+
+<h3>商店等级概率表</h3>
+<table>
+  <tr><th>Lv</th><th>1费</th><th>2费</th><th>3费</th><th>4费</th><th>5费</th></tr>
+  <tr><td>1</td><td>70%</td><td>30%</td><td>-</td><td>-</td><td>-</td></tr>
+  <tr><td>3</td><td>35%</td><td>35%</td><td>20%</td><td>10%</td><td>-</td></tr>
+  <tr><td>5</td><td>10%</td><td>20%</td><td>35%</td><td>25%</td><td>10%</td></tr>
+  <tr><td>7</td><td>-</td><td>10%</td><td>25%</td><td>40%</td><td>25%</td></tr>
+  <tr><td>8</td><td>-</td><td>5%</td><td>20%</td><td>40%</td><td>35%</td></tr>
+</table>
+
+<!-- ====== 五、部署 ====== -->
+<h2 id="deploy">五、部署棋子</h2>
+
+<h3>两种方式</h3>
+<div class="card">
+  <h4>🖱️ 拖拽上阵</h4>
+  <p>从备战区拖拽棋子到棋盘上（仅限左侧5列蓝色区域），松手即放置。</p>
+</div>
+<div class="card">
+  <h4>🖱️ 点击上阵</h4>
+  <p>先点击备战区棋子选中，再点击棋盘空格放置。</p>
+</div>
+
+<h3>棋子在棋盘内的操作</h3>
+<ul>
+  <li><strong>拖拽移动</strong>：直接拖动棋盘上的棋子换位，两个棋子交换会触发位置互换。</li>
+  <li><strong>拖回备战区</strong>：将棋子拖出棋盘边界即撤回。</li>
+  <li><strong>单击查看</strong>：点击棋子查看详细属性（右侧详情面板）。</li>
+  <li><strong>双击出售</strong>：双击棋子弹出确认框，确认后售出。</li>
+</ul>
+
+<div class="tip">💡 <strong>上阵上限</strong>：可上阵棋子数 = 商店等级（最多8个）。等级越高能上越多棋子。</div>
+<div class="warn">⚠️ <strong>战斗开始后</strong>：棋盘锁定，不能移动棋子。请在准备完毕前确认阵型。</div>
+
+<!-- ====== 六、合星 ====== -->
+<h2 id="merge">六、合星升级</h2>
+<p>
+  合星是游戏最核心的成长机制：<strong>3张同名同星棋子 → 自动合成1张高星棋子</strong>。
+</p>
+
+<h3>合星效果</h3>
+<table>
+  <tr><th>星级</th><th>倍率</th><th>需要</th><th>效果</th></tr>
+  <tr><td>★</td><td>×1</td><td>1张</td><td>基础属性</td></tr>
+  <tr><td>★★</td><td>×2</td><td>3张★</td><td>属性翻倍（基础HP×2, ATK×2, DEF×2）</td></tr>
+  <tr><td>★★★</td><td>×4</td><td>3张★★（=9张★）</td><td>属性×4，超强战斗力</td></tr>
+</table>
+
+<div class="tip">💡 <strong>自动合星</strong>：购买同名棋子时会自动检测备战区+棋盘上的同名同星棋子，满足3张自动合成。</div>
+<div class="tip">💡 <strong>装备保留</strong>：合星时消耗棋子的装备会自动退回背包，不会丢失。</div>
+
+<!-- ====== 七、装备 ====== -->
+<h2 id="equip">七、装备系统</h2>
+<p>
+  每个武将拥有 <strong>4个自由装备槽</strong>，不限装备类型。
+  想给一个武将装4匹赤兔马提高攻速也完全可以——完全自由的搭配策略。
+</p>
+
+<h3>装备列表</h3>
+<table>
+  <tr><th>图标</th><th>名称</th><th>费用</th><th>效果</th></tr>
+  <tr><td>🗡️</td><td>青龙刀</td><td class="cost-1">1</td><td>攻击力+15</td></tr>
+  <tr><td>🛡️</td><td>玄武甲</td><td class="cost-1">1</td><td>防御力+15</td></tr>
+  <tr><td>⛑️</td><td>麒麟盔</td><td class="cost-1">1</td><td>最大血量+200</td></tr>
+  <tr><td>🪄</td><td>智慧法杖</td><td class="cost-2">2</td><td>技能伤害+30%</td></tr>
+  <tr><td>👟</td><td>闪电靴</td><td class="cost-2">2</td><td>攻速+0.2</td></tr>
+  <tr><td>💍</td><td>暴击戒指</td><td class="cost-2">2</td><td>暴击率+15%</td></tr>
+  <tr><td>🏹</td><td>穿云弓</td><td class="cost-3">3</td><td>攻击距离+1</td></tr>
+  <tr><td>🪖</td><td>藤甲</td><td class="cost-3">3</td><td>防御力+25</td></tr>
+  <tr><td>🐎</td><td>赤兔马</td><td class="cost-3">3</td><td>攻速+0.3</td></tr>
+  <tr><td>🦄</td><td>的卢</td><td class="cost-3">3</td><td>血量+200, 防御+10</td></tr>
+  <tr><td>🔮</td><td>护身符</td><td class="cost-3">3</td><td>获得100点护盾</td></tr>
+  <tr><td>📜</td><td>太平要术</td><td class="cost-3">3</td><td>技能伤害+25%, 攻击+10</td></tr>
+  <tr><td>🔱</td><td>方天画戟</td><td class="cost-4">4</td><td>攻击力+30</td></tr>
+  <tr><td>🦾</td><td>黄金铠</td><td class="cost-4">4</td><td>防御+20, 血量+150</td></tr>
+  <tr><td>💨</td><td>绝影</td><td class="cost-4">4</td><td>攻速+0.25, 暴击+10%</td></tr>
+  <tr><td>🏆</td><td>传国玉玺</td><td class="cost-5">5</td><td>攻+15, 防+10, 血+100 (全能)</td></tr>
+</table>
+
+<div class="tip">💡 <strong>装备策略自由</strong>：可以把4件全攻装给吕布秒天秒地，也可以4件全防装给廉颇制造不破铁壁。</div>
+
+<!-- ====== 八、协鸣 ====== -->
+<h2 id="synergy">八、协鸣系统</h2>
+<p>
+  每个武将拥有 <strong>1个阵营协鸣</strong>（魏/蜀/吴）和 <strong>1个职业协鸣</strong>（战士/法师/坦克/刺客/弓手/辅助）。
+  上阵多个相同协鸣的武将将激活强大的协鸣Buff。
+</p>
+
+<h3>3大阵营协鸣</h3>
+<table>
+  <tr><th>阵营</th><th>图标</th><th>2人</th><th>4人</th><th>6人</th></tr>
+  <tr><td>魏</td><td>🏛️</td><td>魏将攻击+10%</td><td>魏将攻击+25%, 血量+20%</td><td>获得15%血量护盾</td></tr>
+  <tr><td>蜀</td><td>🌲</td><td>蜀将暴击率+15%</td><td>暴击伤害+40%</td><td>暴击回复5%血量</td></tr>
+  <tr><td>吴</td><td>🌊</td><td>吴将攻速+20%</td><td>普攻附带灼烧</td><td>死亡时爆炸伤害</td></tr>
+</table>
+
+<h3>6大职业协鸣</h3>
+<table>
+  <tr><th>职业</th><th>图标</th><th>Tier 1</th><th>Tier 2</th></tr>
+  <tr><td>战士</td><td>⚔️</td><td>2人：血量+15%</td><td>4人：攻击力+30%</td></tr>
+  <tr><td>法师</td><td>🔮</td><td>2人：技能伤害+20%</td><td>4人：技能冷却-30%</td></tr>
+  <tr><td>坦克</td><td>🛡️</td><td>2人：受伤-15%</td><td>4人：嘲讽周围敌人</td></tr>
+  <tr><td>刺客</td><td>🗡️</td><td>2人：暴击率+25%</td><td>3人：击杀后隐身2秒</td></tr>
+  <tr><td>弓手</td><td>🏹</td><td>2人：攻击距离+1</td><td>4人：20%双倍射击</td></tr>
+  <tr><td>辅助</td><td>💚</td><td>2人：治疗+30%</td><td>3人：每秒回1%血</td></tr>
+</table>
+
+<div class="tip">💡 同一个武将有阵营+职业两个协鸣标签。比如赵云是<span class="badge badge-green">蜀</span> + <span class="badge badge-red">战士</span>，可以同时激活蜀国协鸣和战士协鸣。</div>
+
+<!-- ====== 九、科技 ====== -->
+<h2 id="tech">九、科技升级</h2>
+<p>在特定轮次（第3/4/6/8/9/11/12...回合）结束后可以从3个随机科技中选择1个。科技是<strong>永久全局加成</strong>，一旦习得永久生效。</p>
+
+<table>
+  <tr><th>图标</th><th>科技</th><th>效果</th></tr>
+  <tr><td>⚔️</td><td>锋锐锻造</td><td>全体英雄攻击力+10%</td></tr>
+  <tr><td>❤️</td><td>坚韧不屈</td><td>全体英雄最大血量+15%</td></tr>
+  <tr><td>🛡️</td><td>铁壁堡垒</td><td>全体英雄防御力+15%</td></tr>
+  <tr><td>💨</td><td>疾风步法</td><td>全体英雄攻速+10%</td></tr>
+  <tr><td>💰</td><td>开源节流</td><td>每回合额外+2金币</td></tr>
+  <tr><td>💢</td><td>致命一击</td><td>全体英雄暴击率+10%</td></tr>
+  <tr><td>🔭</td><td>鹰眼训练</td><td>全体近战英雄攻击距离+1</td></tr>
+  <tr><td>💚</td><td>复苏之风</td><td>每回合开始全体回复5%血量</td></tr>
+  <tr><td>🏷️</td><td>市场优惠</td><td>商店刷新费用-1</td></tr>
+</table>
+
+<!-- ====== 十、战斗 ====== -->
+<h2 id="battle">十、战斗流程</h2>
+<p>点击「▶ 准备完毕」按钮开始战斗：</p>
+<ol>
+  <li><strong>自动布阵</strong>：AI对手根据其风格标签生成对应协鸣偏好的棋子阵容。</li>
+  <li><strong>实时对战</strong>：双方棋子每0.5秒行动一次，自动寻敌、移动、攻击、释放技能。</li>
+  <li><strong>攻击动画</strong>：前冲→闪光→伤害数字→后撤，过程可视。</li>
+  <li><strong>判定胜负</strong>：一方棋子全灭则战斗结束。</li>
+</ol>
+
+<h3>伤害计算</h3>
+<p>落败方受到的伤害 = <strong>回合数 + 三角数(对方存活人数)</strong></p>
+<p>三角数 = 1+2+…+n = n×(n+1)/2，对方存活越多扣血越狠。</p>
+<p>例：第5回合，对手3人存活 → 5 + 6 = 11点伤害。</p>
+
+<div class="warn">⚠️ <strong>注意</strong>：每轮战斗后棋子血量自动回满，不用手动治疗。</div>
+
+<!-- ====== 十一、AI对手 ====== -->
+<h2 id="ai">十一、AI对手</h2>
+<p>游戏中有7组AI对手，各有独特的策略风格：</p>
+
+<table>
+  <tr><th>对手</th><th>风格</th><th>协鸣偏好</th></tr>
+  <tr><td>⚔️ 激进派</td><td>偏爱刺客/战士，攻击压制</td><td>刺客</td></tr>
+  <tr><td>💪 强人卡</td><td>追求高星英雄，数据碾压</td><td>战士</td></tr>
+  <tr><td>🛡️ 装备流</td><td>堆叠装备，坦克肉盾</td><td>坦克</td></tr>
+  <tr><td>🏹 远程党</td><td>偏好射手，远程协同压制</td><td>弓手</td></tr>
+  <tr><td>🔬 科技派</td><td>辅助治疗，科技加成</td><td>辅助</td></tr>
+  <tr><td>🎲 运气党</td><td>随机应变，混搭流派</td><td>蜀</td></tr>
+  <tr><td>⚖️ 均衡派</td><td>均衡发展，攻守兼备</td><td>魏</td></tr>
+</table>
+
+<p>每轮对战一个AI，按顺序循环。AI也会获得装备和科技，AI之间每轮后台模拟对战，败者同样扣血淘汰。</p>
+
+<!-- ====== 十二、经济 ====== -->
+<h2 id="economy">十二、经济系统</h2>
+
+<h3>金币来源</h3>
+<ul>
+  <li>每回合基础收入：5💰</li>
+  <li>利息收入：现有金币的50%（向下取整）</li>
+  <li>科技加成：开源节流 +2💰/回合</li>
+  <li>售卖棋子：cost × 3^(星数-1)</li>
+</ul>
+
+<h3>金币用途</h3>
+<ul>
+  <li>购买武将卡（1-5💰按费用）</li>
+  <li>刷新商店（2💰，科技可减为1💰）</li>
+  <li>手动升级商店（等级×4💰）</li>
+</ul>
+
+<div class="tip">💡 <strong>理财策略</strong>：金币越多利息越多，有时候"存钱吃利息"比"无脑刷新"更明智。</div>
+
+<!-- ====== 十三、技巧 ====== -->
+<h2 id="tips">十三、新手技巧</h2>
+
+<div class="card">
+  <h4>🎯 前期策略（1-4回合）</h4>
+  <ul>
+    <li>优先凑2人协鸣（2魏/2蜀/2吴/2战士），低门槛高回报</li>
+    <li>不要急着刷新，省钱升级商店等级</li>
+    <li>备战区最多8格，注意不要溢出</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h4>🔥 中期策略（5-10回合）</h4>
+  <ul>
+    <li>确定主力阵容方向（比如走蜀国战士流、魏国坦克流）</li>
+    <li>保留核心低费卡等待合成三星</li>
+    <li>装备优先给主力输出棋子</li>
+    <li>商店等级升到Lv5+，提高高费卡概率</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h4>⚡ 后期策略（11回合+）</h4>
+  <ul>
+    <li>追求4人/6人大协鸣成型</li>
+    <li>高费5星棋子（吕布/孙策）一张顶多张低费</li>
+    <li>装备集中给高星棋子最大化收益</li>
+    <li>科技加成不可忽略，选对科技可能翻盘</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h4>🧠 通用技巧</h4>
+  <ul>
+    <li><strong>前排坦克+后排输出</strong>：经典阵型，坦克在前吸收伤害，弓手/法师在后输出</li>
+    <li><strong>灵活买卖</strong>：不需要的棋子双击出售回收金币，不要囤积</li>
+    <li><strong>关注对手</strong>：AI面板显示每个对手的血量和淘汰状态，优先关注低血对手</li>
+  </ul>
+</div>
+
+<p style="text-align:center;margin-top:40px;color:var(--muted);font-size:13px;">
+  —— 祝你在三国自走棋中运筹帷幄、百战百胜！🐉
+</p>
+
+</body>
+</html>

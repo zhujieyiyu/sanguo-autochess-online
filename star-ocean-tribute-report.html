@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>星海弈境致敬报告 — 三国自走棋创新机制全解析</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+    background: #0d1117; color: #c9d1d9; line-height: 1.8;
+    max-width: 900px; margin: 0 auto; padding: 40px 24px 80px;
+  }
+  h1 {
+    font-size: 28px; color: #ffd700; text-align: center;
+    border-bottom: 2px solid #30363d; padding-bottom: 20px; margin-bottom: 12px;
+  }
+  .subtitle { text-align: center; color: #8b949e; font-size: 14px; margin-bottom: 40px; }
+  h2 {
+    font-size: 22px; color: #58a6ff; margin: 48px 0 16px;
+    padding-left: 12px; border-left: 4px solid #58a6ff;
+  }
+  h3 {
+    font-size: 18px; color: #f0883e; margin: 28px 0 12px;
+  }
+  p { margin: 10px 0; }
+  ul, ol { margin: 10px 0 10px 24px; }
+  li { margin: 4px 0; }
+  strong { color: #ffd700; }
+  em { color: #8b949e; font-style: normal; }
+  .card {
+    background: #161b22; border: 1px solid #30363d;
+    border-radius: 12px; padding: 24px; margin: 20px 0;
+  }
+  .card h3 { margin-top: 0; color: #ffd700; }
+  table {
+    width: 100%; border-collapse: collapse; margin: 16px 0;
+    font-size: 14px;
+  }
+  th {
+    background: #21262d; color: #ffd700; padding: 10px 12px;
+    text-align: left; border-bottom: 2px solid #30363d;
+  }
+  td {
+    padding: 8px 12px; border-bottom: 1px solid #21262d;
+    vertical-align: top;
+  }
+  tr:hover td { background: #161b22; }
+  .highlight {
+    background: linear-gradient(135deg, #1a2332, #0d1117);
+    border-left: 4px solid #3fb950; padding: 16px 20px;
+    border-radius: 0 8px 8px 0; margin: 16px 0;
+  }
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 12px; margin: 2px; font-weight: bold;
+  }
+  .tag-wei { background: rgba(65,105,225,0.2); color: #4169E1; }
+  .tag-shu { background: rgba(255,99,71,0.2); color: #FF6347; }
+  .tag-wu  { background: rgba(50,205,50,0.2); color: #32CD32; }
+  .tag-qun { background: rgba(218,165,32,0.2); color: #DAA520; }
+  .signature {
+    text-align: right; margin-top: 60px; padding-top: 20px;
+    border-top: 1px solid #30363d; color: #8b949e;
+  }
+  .toc { font-size: 14px; color: #8b949e; margin-bottom: 32px; }
+  .toc a { color: #58a6ff; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<h1>星海弈境致敬报告</h1>
+<p class="subtitle">三国自走棋同人作品「将星棋局」创新机制全解析 · 致梦幻模拟战运营团队（紫龙官方）</p>
+
+<div class="highlight">
+  <strong>敬启者：</strong><br>
+  我是一名梦幻模拟战的深度玩家，尤其沉迷于「星海弈境」模式。星海弈境将传统自走棋与战棋的策略深度完美融合，是我接触过最精妙的策略对战设计之一。出于对星海的热爱，我以三国题材为背景开发了一款致敬性质的自走棋同人作品「将星棋局」，在借鉴星海核心框架的基础上尝试了一系列机制创新。现将这些设计思路整理成报告，向紫龙官方表达敬意与感谢，也希望能为星海弈境未来的进阶发展提供一些灵感。
+</div>
+
+<div class="toc">
+  <strong>目录</strong><br>
+  一、整体架构概览 · 二、职业兵种双规制 · 三、传说模式与隐藏协鸣 · 四、轮盘赌激发机制 · 五、AI内战系统 · 六、商店经济与等级体系 · 七、科技装备与组件系统 · 八、创新总结与建议
+</div>
+
+<!-- ═══════════ 一 ═══════════ -->
+<h2>一、整体架构概览</h2>
+
+<div class="card">
+  <h3>游戏定位</h3>
+  <p>「将星棋局」是一款三国题材的 PvE 自走棋，玩家操控棋盘上的武将阵容，对抗7组风格各异的 AI 对手。核心循环：<strong>准备阶段</strong>（备战布阵/商店购买/科技升级）→ <strong>战斗阶段</strong>（自动战斗/协鸣生效/动画演出）→ <strong>结算阶段</strong>（金币收入/装备掉落/科技奖励）→ 下一回合。</p>
+
+  <table>
+    <tr><th>项目</th><th>数据</th></tr>
+    <tr><td>武将总数</td><td>38 张（1-5 费）</td></tr>
+    <tr><td>阵营数量</td><td>4 个（<span class="tag tag-wei">魏</span> <span class="tag tag-shu">蜀</span> <span class="tag tag-wu">吴</span> <span class="tag tag-qun">群</span>）</td></tr>
+    <tr><td>职业数量</td><td>6 个（战士/骑兵/坦克/法师/弓手/辅助）</td></tr>
+    <tr><td>兵种类型</td><td>8 种（骑兵/弓兵/刺客/步兵/枪兵/策士/重装/魔物）</td></tr>
+    <tr><td>常规协鸣</td><td>10 条（4阵营 + 6职业 + 魔王）</td></tr>
+    <tr><td>隐藏协鸣</td><td>21 条（分布在5层传说模式下）</td></tr>
+    <tr><td>科技选项</td><td>10 项永久加成</td></tr>
+    <tr><td>装备道具</td><td>28 件（含传说武器与阵营/职业组件）</td></tr>
+    <tr><td>商店等级</td><td>1-9 级（科技可提升至10级）</td></tr>
+    <tr><td>AI 对手</td><td>7 组（各具战术风格）</td></tr>
+    <tr><td>回合上限</td><td>25 回合</td></tr>
+  </table>
+</div>
+
+<!-- ═══════════ 二 ═══════════ -->
+<h2>二、职业兵种双规制 — 核心差异化设计</h2>
+
+<div class="highlight">
+  <strong>设计思路：</strong>传统自走棋中，英雄的"定位"往往是单一的。星海弈境的精妙之处在于将"职业"与"兵种"分离为两个独立维度，让每个武将在阵容搭配中扮演多重角色。本作品将这一设计发扬光大，形成了 <strong>职业 × 兵种</strong> 的双轨制体系。
+</div>
+
+<h3>2.1 职业系统（协鸣触发维度）</h3>
+<p>每个武将拥有 6 大职业之一，职业用于触发<strong>协鸣加成</strong>。场上同职业武将数量达到阈值后激活梯队效果：</p>
+
+<table>
+  <tr><th>职业</th><th>2级阈值</th><th>4级阈值</th><th>6级阈值</th><th>8/9级阈值</th></tr>
+  <tr>
+    <td><strong>⚔️ 战士</strong></td>
+    <td>2人：攻+10 防+5</td><td>4人：攻+20 防+10</td><td>6人：攻+30 防+15 +范围增伤20%</td><td>8人：攻+40 防+20 +先攻</td>
+  </tr>
+  <tr>
+    <td><strong>🐎 骑兵</strong></td><td>2人：攻+10 速+10%</td><td>4人：攻+20 速+15%</td><td>6人：攻+30 速+20% +冲锋+25%</td><td>8人：攻+40 +反冲</td>
+  </tr>
+  <tr>
+    <td><strong>🛡️ 坦克</strong></td><td>2人：减伤10%</td><td>4人：减伤20%</td><td>6人：减伤30% +嘲讽</td><td>8人：减伤40% +额外减伤</td>
+  </tr>
+  <tr>
+    <td><strong>🔮 法师</strong></td><td colspan="2">3人：技能伤害+25%</td><td colspan="2">6人：+50% +冷却-20% | 9人：+80% +双重施法</td>
+  </tr>
+  <tr>
+    <td><strong>🏹 弓手</strong></td><td>2人：攻+20</td><td>4人：攻+40 射程+1</td><td>6人：攻+60 全屏射程+免疫反击</td><td>—</td>
+  </tr>
+  <tr>
+    <td><strong>💚 辅助</strong></td><td>3人：治疗+30%</td><td>5人：每秒回复1%</td><td>7人：全属性+15%</td><td>9人：复活1次</td>
+  </tr>
+</table>
+
+<h3>2.2 兵种克制链（战场博弈维度）</h3>
+<p>每个武将还独立拥有<strong>兵种类型</strong>，兵种不参与协鸣计算，而是驱动战场上的<strong>克制关系</strong>。这是一个完全独立于职业的第二维度：</p>
+
+<div class="card" style="text-align: center; font-size: 16px;">
+  <div style="margin: 12px 0;">
+    🐎 <strong>骑兵</strong> —克制→ 🏹 <strong>弓兵</strong> —克制→ 🗡️ <strong>刺客</strong> —克制→ ⚔️ <strong>步兵</strong> —克制→ 🛡️ <strong>枪兵</strong> —克制→ 🐎 <strong>骑兵</strong>
+  </div>
+  <p style="color: #8b949e; font-size: 14px;">克制方对被克制方造成 <strong>+20%~25%</strong> 额外伤害</p>
+  <p style="color: #8b949e; font-size: 14px;">🪄 策士 / 🏰 重装 / 👹 魔物：不参与克制链</p>
+</div>
+
+<h3>2.3 双规制实战意义</h3>
+<ul>
+  <li><strong>阵容深度翻倍：</strong>一个骑兵职业的英雄可能是弓兵兵种，形成"关兴杀关羽"的有趣克制反转。</li>
+  <li><strong>拼图式组队：</strong>玩家需要同时考虑"凑齐4战士的协鸣加成"和"避免被对手兵种克制"，双重约束迫使更高策略深度。</li>
+  <li><strong>克制链的动态博弈：</strong>面对7组AI各异的兵种构成，玩家需要在每轮战斗前调整站位和阵容，而非一套阵容打到底。</li>
+</ul>
+
+<div class="highlight">
+  <strong>对星海弈境的启示：</strong>如果星海的英雄也能引入"兵种"第二维度（如枪兵/剑士/弓手/魔法/飞行），在当前魔幻题材下会诞生非常丰富的克制链玩法。同时兵种克制的视觉表现（对克/被克浮动箭头）是极佳的 UX 优化点。</div>
+
+<!-- ═══════════ 三 ═══════════ -->
+<h2>三、传说模式与隐藏协鸣 — Rogue-lite 式策略变量</h2>
+
+<div class="highlight">
+  <strong>设计思路：</strong>传统自走棋的协鸣系统是"确定的"——同一个阵容永远提供相同的加成。本作品引入<strong>隐藏协鸣</strong>机制，每局游戏随机选定一个"传说模式层"，该层下隐藏的历史/神话关系被激活，让同一套三国阵容衍生出完全不同的战术可能性。这是一个 Rogue-lite 思想的巧妙嫁接。
+</div>
+
+<h3>3.1 五层传说模式</h3>
+
+<table>
+  <tr><th>模式</th><th>主题</th><th>激活的隐藏协鸣</th><th>设计理念</th></tr>
+  <tr>
+    <td><strong>🌅 起源故事</strong></td>
+    <td>三国演义经典叙事</td>
+    <td>桃园结义（刘关张）、虎父无犬子（关平+关羽/张苞+张飞）</td>
+    <td>最温和、最符合直觉的隐藏协鸣，新手友好</td>
+  </tr>
+  <tr>
+    <td><strong>📖 传统演义</strong></td>
+    <td>小说经典群像</td>
+    <td>五虎将（关张赵马黄）、五子良将（张辽/乐进/于禁/张郃/徐晃）、军师（计策协同）</td>
+    <td>跨阵营收集玩法，「五虎+五子」双线竞争</td>
+  </tr>
+  <tr>
+    <td><strong>⚔️ 史实逻辑</strong></td>
+    <td>真实历史关联</td>
+    <td>短命鬼（英年早逝群）、赤壁/下邳事件链、七星续命、绿豆盟</td>
+    <td>高门槛高回报，玩法与历史知识正相关</td>
+  </tr>
+  <tr>
+    <td><strong>🐉 神话三国</strong></td>
+    <td>神兽与超自然</td>
+    <td>四圣兽（青龙/凤凰/玄武/白虎）、兵器谱、前世因果、紫微断章、青梅煮酒</td>
+    <td>最高随机性+最高上限，神兽凑齐可触发「四象轮转」终极协鸣</td>
+  </tr>
+  <tr>
+    <td><strong>👑 天命所归</strong></td>
+    <td>王权与命运</td>
+    <td>皇帝（曹操/刘备/汉献帝）、天命、魔王 vs 魔剑士</td>
+    <td>政治线，魔王是全场光环+双刃剑设计</td>
+  </tr>
+</table>
+
+<h3>3.2 隐藏协鸣的触发机制</h3>
+<p>隐藏协鸣与常规协鸣完全独立运行：</p>
+<ol>
+  <li>每个武将除了阵营和职业外，还携带若干 <strong>tags</strong>（隐藏标签），如 <code>five_tigers</code>、<code>dragon</code>、<code>emperor</code>、<code>tactician</code> 等。</li>
+  <li><strong>只有当前选定传说模式层的 tags 才会被激活计算。</strong> 例如，若轮盘选中「神话三国」，则「五虎将」标签完全被屏蔽，「龙族」标签才生效。</li>
+  <li>同一武将可以同时参与多个隐藏协鸣。例如关羽同时触发「五虎将」「龙族」「玄武」三个隐藏线（如果对应模式层被激活）。</li>
+  <li>隐藏协鸣与常规协鸣效果叠加，但通过独立的加成计算避免重复叠加。</li>
+</ol>
+
+<h3>3.3 传说武器系统</h3>
+<p>部分装备携带<strong>传说属性</strong>，在特定隐藏模式下产生额外效果：</p>
+<ul>
+  <li><strong>青龙偃月刀</strong>：攻击+25 暴击+10%，对龙族额外+30%伤害（关羽专属）</li>
+  <li><strong>九黎焚天刀</strong>：凤凰族协鸣计数+1（华雄掌刀，张角与凤凰族交易锻造）</li>
+  <li><strong>青釭剑</strong>：与关羽对战时双方攻速+15%（剐龙台监斩之刃）</li>
+</ul>
+
+<div class="highlight">
+  <strong>对星海弈境的启示：</strong>隐藏协鸣将 Rogue-lite 的"每局不同"体验引入自走棋。星海的英雄如果也能拥有隐藏标签（比如"兰斯阵营老兵"、"波赞鲁追随者"），在某些局被激活而另一些局沉寂，将极大地提升重复可玩性。同时传说装备的"故事性描述"为装备赋予了情感联结，这是战棋游戏长期被忽视的叙事潜力。</div>
+
+<!-- ═══════════ 四 ═══════════ -->
+<h2>四、轮盘赌激发机制 — 概率化策略转折</h2>
+
+<div class="highlight">
+  <strong>设计思路：</strong>如果传说模式由玩家自由选择，最优解会很快收敛，失去惊喜感。本作品设计了<strong>轮盘赌（Roulette）</strong>机制——每5回合一次随机选定主模式，第6轮（首次重转）仅 40% 概率触发，为玩家保留策略发展的弹性。这是从"确定性"到"管理随机性"的设计跃迁。
+</div>
+
+<h3>4.1 轮盘赌的时序设计</h3>
+
+<table>
+  <tr><th>回合</th><th>事件</th><th>概率</th><th>设计意图</th></tr>
+  <tr>
+    <td><strong>开局</strong></td>
+    <td>首次轮盘赌确定初始模式</td>
+    <td>100%（5模式等概率）</td>
+    <td>为整局定调，但不设"常规模式"安全选项（未来考虑加入）</td>
+  </tr>
+  <tr>
+    <td><strong>第6轮</strong></td>
+    <td>首次重转机会</td>
+    <td>40% 触发 / 60% 走科技三选一</td>
+    <td>概率化设计：不强制改变模式，让玩家有机会稳定发展积累的策略</td>
+  </tr>
+  <tr>
+    <td><strong>第11轮起</strong></td>
+    <td>此后每5轮触发</td>
+    <td>100%</td>
+    <td>后期模式切换频率加快，避免单模式策略疲劳</td>
+  </tr>
+</table>
+
+<h3>4.2 为什么不是 100% 第六轮触发？</h3>
+<ul>
+  <li><strong>策略连续性：</strong>玩家在前5轮积累的协鸣搭配、商店投资、组件装备都围绕当前模式构建。第六轮强行切换可能打乱全部布局，造成挫败感。</li>
+  <li><strong>40% 是"风险与机遇"的黄金分割：</strong>提供足够的新鲜感但不至于让每次游戏都变成"模式赌博"，玩家可以选择性地为"可能切换"预留阵容弹性。</li>
+  <li><strong>未触发≠损失：</strong>60% 概率走常规科技三选一，确保不亏资源，是"惊喜 or 稳定"的二选一。</li>
+</ul>
+
+<div class="highlight">
+  <strong>对星海弈境的启示：</strong>星海的科技/装备系统完全可以引入类似的"概率化策略转折"，比如每5回合有概率触发一次"传说挑战"（击败特殊敌人获得稀有奖励），而非必定触发。概率化让每次重玩都是独特体验，同时避免了"最优决策树"被玩家穷举。</div>
+
+<!-- ═══════════ 五 ═══════════ -->
+<h2>五、AI 内战系统 — 多人异步竞技模拟</h2>
+
+<div class="highlight">
+  <strong>设计思路：</strong>PvE 自走棋的最大挑战是让 AI 对手"像真人一样策略多变"。本作品用 <strong>7 组风格化 AI + 组间自动内战</strong> 模拟了一个微缩的多人竞技生态，玩家每次对战的对手是"从内部竞争中筛选出的强者"。
+</div>
+
+<h3>5.1 七组 AI 对手档案</h3>
+
+<table>
+  <tr><th>AI</th><th>风格</th><th>偏好的核心协鸣</th><th>战术特征</th></tr>
+  <tr><td>🐎 <strong>冲锋派</strong></td><td>骑兵突击/速度压制</td><td>cavalry（骑兵）</td><td>高机动、高攻速，弱于枪兵阵容</td></tr>
+  <tr><td>💪 <strong>强人卡</strong></td><td>高星英雄/数据碾压</td><td>warrior（战士）</td><td>单体强度优先，追求三星</td></tr>
+  <tr><td>🛡️ <strong>装备流</strong></td><td>堆叠装备/坦克肉盾</td><td>tank（坦克）</td><td>高防高血，慢节奏消耗战</td></tr>
+  <tr><td>🏹 <strong>远程党</strong></td><td>远程协同压制</td><td>archer（弓手）</td><td>高输出脆皮，怕近身冲锋</td></tr>
+  <tr><td>🔬 <strong>科技派</strong></td><td>辅助治疗/科技加成</td><td>support（辅助）</td><td>续航型，依赖科技树</td></tr>
+  <tr><td>🎲 <strong>运气党</strong></td><td>随机应变/混搭</td><td>shu（蜀）</td><td>不可预测，阵容多变</td></tr>
+  <tr><td>⚖️ <strong>均衡派</strong></td><td>攻守兼备/全面发展</td><td>wei（魏）</td><td>全能型，无明显短板</td></tr>
+</table>
+
+<h3>5.2 每轮的组间内战模拟</h3>
+<ol>
+  <li>玩家与随机匹配的 AI 对手进行主战（有完整战斗动画）。</li>
+  <li><strong>其他6组 AI 同时进行组间自动内战</strong>（后台快速模拟，无动画渲染）。</li>
+  <li>AI 内战的胜负影响 AI 的血量（AI HP），AI 被淘汰后不再参与轮换。</li>
+  <li>AI 内战中败方的损失血量 = 胜方存活棋子数 × 固定系数。</li>
+  <li>玩家可以在右侧面板实时查看<strong>所有 AI 的存活状态和血量</strong>，了解竞争态势。</li>
+</ol>
+
+<div class="highlight">
+  <strong>对星海弈境的启示：</strong>这是一个被低估但极具潜力的设计。如果星海能实现"AI 内战模拟"，即使纯 PvE 模式下也能创造出"联赛积分榜"的竞技感。更进一步，可以将 AI 内战的结果可视化（简单的对战记录），让玩家感觉自己是"8人大逃杀"中的一员而非孤立的打怪者。</div>
+
+<!-- ═══════════ 六 ═══════════ -->
+<h2>六、商店经济与等级体系</h2>
+
+<h3>6.1 分阶升级 · 取代固定花费</h3>
+<p>区别于传统自走棋"攒够一大笔金币一次性升级"的模式，本作品设计了<strong>分次渐进式升级</strong>：</p>
+
+<table>
+  <tr><th>目标等级</th><th>单次花费</th><th>需要购买次数</th><th>总花费</th><th>设计意图</th></tr>
+  <tr><td>Lv.1 → 2</td><td>2 💰</td><td>1 次</td><td>2</td><td>快速起步，尽早解锁2费</td></tr>
+  <tr><td>Lv.2 → 3</td><td>3 💰</td><td>2 次</td><td>6</td><td>逐步加高门槛</td></tr>
+  <tr><td>Lv.3 → 4</td><td>4 💰</td><td>3 次</td><td>12</td><td>金币管理 vs 即时战力抉择</td></tr>
+  <tr><td>Lv.4 → 6</td><td>6 💰</td><td>4/5/6 次</td><td>24→36</td><td>中期主要金币消耗点</td></tr>
+  <tr><td>Lv.7 → 9</td><td>8 💰</td><td>7/8/9 次</td><td>56→72</td><td>后期等级投资的重量感</td></tr>
+  <tr><td>Lv.10</td><td colspan="2">仅通过科技「商店等级+1」</td><td>—</td><td>科技=最终突破，1-2费绝迹</td></tr>
+</table>
+
+<h3>6.2 创新点：分批消费降低心理门槛</h3>
+<ul>
+  <li><strong>2金币/次</strong> 的低客单价让玩家在第一轮就能体验"升级"的快感。</li>
+  <li>进度条视觉反馈（进度条填充+购买次数计数）让每次小额消费都有即时满足感。</li>
+  <li>避免了"攒8~12金币却升不起级"的负面体验。</li>
+  <li>商店等级10的特殊规则（屏蔽1-2费）为后期阵容的精炼提供了独特价值。</li>
+</ul>
+
+<div class="highlight">
+  <strong>对星海弈境的启示：</strong>"分次渐进升级"是一个经过玩家心理验证的好设计。星海如果采用类似的分阶 + 进度条模式，可以显著降低玩家对升级花费的焦虑感，尤其是在移动端，小额操作比一次性大额操作更符合触屏交互直觉。</div>
+
+<!-- ═══════════ 七 ═══════════ -->
+<h2>七、科技装备与组件系统</h2>
+
+<h3>7.1 十项科技 · 永久战略投资</h3>
+<table>
+  <tr><th>科技</th><th>效果</th><th>战略定位</th></tr>
+  <tr><td>⚔️ 锋锐锻造</td><td>全体攻击+10%</td><td>进攻型通用 buff</td></tr>
+  <tr><td>❤️ 坚韧不屈</td><td>全体血量+15%</td><td>防御型通用 buff</td></tr>
+  <tr><td>🛡️ 铁壁堡垒</td><td>全体防御+15%</td><td>坦克阵容强化</td></tr>
+  <tr><td>💨 疾风步法</td><td>全体攻速+10%</td><td>骑兵/弓手阵容强化</td></tr>
+  <tr><td>💰 开源节流</td><td>每回合+2金币</td><td>经济型，越早拿收益越大</td></tr>
+  <tr><td>💢 致命一击</td><td>全体暴击+10%</td><td>爆发型阵容强化</td></tr>
+  <tr><td>🔭 鹰眼训练</td><td>近战攻击距离+1</td><td>突破射程限制</td></tr>
+  <tr><td>💚 复苏之风</td><td>每回合回复5%血</td><td>续航型</td></tr>
+  <tr><td>🏷️ 市场优惠</td><td>刷新费用-1</td><td>商店运营型</td></tr>
+  <tr><td>⬆️ 商店等级+1</td><td>突破9级上限</td><td>终局突破，高风险高回报</td></tr>
+</table>
+
+<h3>7.2 阵营/职业组件 · 协鸣计数的"万能拼图"</h3>
+<p>10 种组件（4阵营 + 6职业）可以装备到任意武将上，让该武将<strong>额外参与对应协鸣的计数</strong>。例如：</p>
+<ul>
+  <li>把「蜀国组件」装备到关羽上 → 关羽在蜀协鸣中计数+1（本身已计1，现在计2）</li>
+  <li>把「法师组件」装备到甘宁（吴·弓手）上 → 甘宁参与法师协鸣计数</li>
+</ul>
+<p>组件的获取渠道：① 科技轮中 33.3% 概率出现在第3格 ② 战斗后有 5% 概率掉落。</p>
+
+<div class="highlight">
+  <strong>对星海弈境的启示：</strong>组件系统是一个极简但强大的设计——一个道具就改变了阵容的协鸣方程。星海如果引入类似的"阵营徽章"（装备后该英雄被视为X阵营），将催生出大量非传统的阵容搭配，大幅延缓策略最优解的收敛速度。</div>
+
+<!-- ═══════════ 八 ═══════════ -->
+<h2>八、创新总结与建议</h2>
+
+<div class="card">
+  <h3>🔑 核心创新点汇总</h3>
+  <table>
+    <tr><th style="width: 30%;">创新机制</th><th>核心思想</th><th>对星海的可迁移性</th></tr>
+    <tr>
+      <td>职业+兵种双规制</td>
+      <td>协鸣和克制两个独立维度并行</td>
+      <td>⭐⭐⭐⭐⭐ 高 — 增加战场策略深度，UX 成本低</td>
+    </tr>
+    <tr>
+      <td>隐藏协鸣+传说模式</td>
+      <td>Rogue-lite 式每局变量</td>
+      <td>⭐⭐⭐⭐⭐ 高 — 极大提升重玩价值</td>
+    </tr>
+    <tr>
+      <td>轮盘赌概率化触发</td>
+      <td>管理随机性 > 消除随机性</td>
+      <td>⭐⭐⭐⭐ 中高 — 需要精细调参</td>
+    </tr>
+    <tr>
+      <td>AI内战生态</td>
+      <td>模拟多人竞技的"生存压力"</td>
+      <td>⭐⭐⭐⭐ 中高 — 实现成本可控，沉浸感回报高</td>
+    </tr>
+    <tr>
+      <td>分次渐进商店升级</td>
+      <td>小额多次>大额一次性</td>
+      <td>⭐⭐⭐⭐⭐ 高 — 移动端交互优化明显</td>
+    </tr>
+    <tr>
+      <td>阵营/职业组件系统</td>
+      <td>一个道具打破协鸣约束</td>
+      <td>⭐⭐⭐⭐⭐ 高 — 低成本高回报的设计杠杆</td>
+    </tr>
+    <tr>
+      <td>30秒准备倒计时</td>
+      <td>进度条替代数字，视觉压力降低</td>
+      <td>⭐⭐⭐ 中 — UX 细节优化</td>
+    </tr>
+  </table>
+</div>
+
+<h3>8.1 一份诚恳的建议</h3>
+<p>作为星海弈境的忠实玩家和策略游戏爱好者，我想真诚地提出几点建议：</p>
+<ol>
+  <li><strong>隐藏协鸣 × 星海英雄池：</strong>星海拥有庞大的英雄池（梦战全角色），如果能通过"隐藏关系"（师徒、宿敌、同阵营老兵）激活额外协鸣，玩家会发现每一局都有新的搭配可能性。这比单纯增加新英雄更节省开发成本。</li>
+  <li><strong>AI内战排行榜：</strong>即使在纯 PvE 模式下，一个"联赛积分榜"也能让玩家感受到竞技压力。AI 之间的输赢记录如果可视化，会让 PvE 模式不再像"闯关打怪"。</li>
+  <li><strong>倒计时进度条：</strong>在移动端，圆形进度条的视觉压力远小于跳动的数字，这个小改动对用户体验的提升可能出人意料。</li>
+  <li><strong>轮盘赌式的概率事件：</strong>"管理随机性"是 Rogue-lite 的精髓，也是让自走棋不被"最优解"困住的解法。星海完全可以加入概率触发的事件（而非固定回合必然触发）。</li>
+  <li><strong>传说装备的故事化：</strong>当一把武器不仅有属性，还有"这把刀铸于瑶池玄龟遗骨"的叙事时，玩家的情感投入是完全不同的。星海的装备系统如果加入简短的故事线，会成为玩家论坛讨论的宝藏。</li>
+</ol>
+
+<h3>8.2 结语</h3>
+<div class="highlight">
+  <p>再次感谢紫龙团队带来了「星海弈境」这样一款精妙的策略游戏。它重新定义了"自走棋可以有多深"，也为像我这样的策略爱好者打开了一扇新的大门。这款三国同人作品是基于星海核心框架的学习和致敬，如果其中任何一个设计能对星海的未来发展提供一点点帮助，将是我最大的荣幸。</p>
+  <p>祝梦幻模拟战越来越好，期待在星海中体验更多的创新与惊喜。</p>
+</div>
+
+<p class="signature">
+  2026年6月30日<br>
+  一位星海弈境的忠实玩家<br>
+  同人作品在线体验：<a href="https://0738e1160c95448f8e2e7d20e8810f9c.app.codebuddy.work" style="color: #58a6ff;">将星棋局</a>
+</p>
+
+</body>
+</html>

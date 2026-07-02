@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三国自走棋 · 48将全表 v3.0</title>
+<style>
+:root {
+  --bg: #0d1117; --card: #161b22; --border: #30363d;
+  --text: #e6edf3; --muted: #8b949e;
+  --gold: #f0c040; --purple: #a371f7; --blue: #58a6ff;
+  --red: #f85149; --green: #3fb950; --wei: #4477b2; --shu: #e07040;
+  --wu: #3fb950; --qun: #a371f7; --devil: #f85149;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:'Segoe UI','Microsoft YaHei',sans-serif; padding:20px; }
+h1 { text-align:center; font-size:22px; margin-bottom:6px; }
+.sub { text-align:center; color:var(--muted); font-size:12px; margin-bottom:24px; }
+.section { margin-bottom:28px; }
+.section h2 { font-size:16px; padding:8px 12px; border-radius:6px 6px 0 0; margin-bottom:0; }
+.section h2.cost1 { background:#8899aa; color:#fff; }
+.section h2.cost2 { background:#3fb950; color:#fff; }
+.section h2.cost3 { background:#58a6ff; color:#fff; }
+.section h2.cost4 { background:#a371f7; color:#fff; }
+.section h2.cost5 { background:#f0c040; color:#0d1117; }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+th, td { padding:6px 8px; text-align:left; border-bottom:1px solid var(--border); }
+th { background:#1c2128; color:var(--muted); font-weight:600; position:sticky; top:0; }
+tr:hover { background:rgba(255,255,255,0.03); }
+.tag {
+  display:inline-block; padding:0 5px; border-radius:3px; font-size:10px;
+  margin:1px 2px; white-space:nowrap;
+}
+.tag.tiger { background:#f0c04022; color:#f0c040; }
+.tag.short { background:#f8514922; color:#f85149; }
+.tag.strategist { background:#a371f722; color:#a371f7; }
+.tag.emperor { background:#f0c04022; color:#f0c040; }
+.tag.devil { background:#f8514922; color:#f85149; }
+.tag.immortal { background:#a371f722; color:#a371f7; }
+.tag.fate { background:#ff784b22; color:#ff784b; }
+.tag.magic { background:#a371f722; color:#a371f7; }
+.stats-grid {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:16px 0;
+}
+.stat-card {
+  background:var(--card); border:1px solid var(--border); border-radius:8px;
+  padding:14px; text-align:center;
+}
+.stat-card .num { font-size:28px; font-weight:700; }
+.stat-card .lbl { font-size:11px; color:var(--muted); margin-top:4px; }
+.troop-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; }
+.troop-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; }
+.troop-card h4 { font-size:13px; margin-bottom:6px; }
+.troop-card .cnt { font-size:24px; font-weight:700; }
+.syn-hid { background:#1c2128; border:1px dashed var(--border); border-radius:8px; padding:14px; }
+.syn-hid h3 { font-size:13px; margin-bottom:8px; }
+.syn-hid ul { list-style:none; font-size:11px; line-height:1.8; color:var(--muted); }
+.syn-hid li span { color:var(--text); }
+.footnote { font-size:11px; color:var(--muted); margin-top:12px; }
+.hl { color:var(--gold); }
+</style>
+</head>
+<body>
+
+<h1>🏯 三国自走棋 · 全武将表 v3.0</h1>
+<div class="sub">48将 · 六职业 · 六兵种 · 八隐藏标记 · 五费金字塔</div>
+
+<!-- 1费 -->
+<div class="section">
+<h2 class="cost1">⬜ 1费英雄（白色·基础牌）— 12张</h2>
+<table>
+<tr><th>#</th><th>武将</th><th>职业</th><th>阵营</th><th>兵种</th><th>隐藏标记</th><th>技能方向</th></tr>
+<tr><td>1</td><td>吕蒙</td><td>骑兵</td><td style="color:var(--wu)">吴</td><td>刺客</td><td>—</td><td>白衣渡江 · 隐身破隐</td></tr>
+<tr><td>2</td><td>关平</td><td>战士</td><td style="color:var(--shu)">蜀</td><td>步兵</td><td>—</td><td>低级战士 · 父子联动潜力</td></tr>
+<tr><td>3</td><td>刘禅</td><td>法师</td><td style="color:var(--shu)">蜀</td><td>策士</td><td>—</td><td>惊魂未定 · 范围恐惧/减速</td></tr>
+<tr><td>4</td><td>陆绩</td><td>弓手</td><td style="color:var(--wu)">吴</td><td>弓兵</td><td>—</td><td>怀橘 · 增益传递</td></tr>
+<tr><td>5</td><td>曹纯</td><td>骑兵</td><td style="color:var(--wei)">魏</td><td>骑兵</td><td>—</td><td>虎豹骑 · 速攻冲锋</td></tr>
+<tr><td>6</td><td>许攸</td><td>法师</td><td style="color:var(--qun)">群</td><td>策士</td><td>—</td><td>短命鬼隐藏协鸣组件</td></tr>
+<tr><td>7</td><td>华雄</td><td>战士</td><td style="color:var(--qun)">群</td><td>骑兵</td><td>—</td><td>隐藏协鸣需要</td></tr>
+<tr><td>8</td><td>公孙瓒</td><td>骑兵</td><td style="color:var(--qun)">群</td><td>骑兵</td><td>—</td><td>白马义从 · 冲锋突进</td></tr>
+<tr><td>9</td><td>汉献帝</td><td>辅助</td><td style="color:var(--qun)">群</td><td>皇帝</td><td><span class="tag emperor">皇帝</span></td><td>天命所归 · 光环</td></tr>
+<tr><td>10</td><td>周泰</td><td>坦克</td><td style="color:var(--wu)">吴</td><td>枪兵</td><td>—</td><td>不死 · 低血量免伤</td></tr>
+<tr><td>11</td><td>华佗</td><td>辅助</td><td style="color:var(--qun)">群</td><td>策士</td><td>—</td><td>悬壶济世 · 治疗</td></tr>
+<tr><td>12</td><td>张苞</td><td>坦克</td><td style="color:var(--shu)">蜀</td><td>枪兵</td><td>—</td><td>初级枪兵 · 三爷之子</td></tr>
+</table>
+</div>
+
+<!-- 2费 -->
+<div class="section">
+<h2 class="cost2">🟢 2费英雄（绿色·进阶牌）— 12张</h2>
+<table>
+<tr><th>#</th><th>武将</th><th>职业</th><th>阵营</th><th>兵种</th><th>隐藏标记</th><th>技能方向</th></tr>
+<tr><td>1</td><td>刘备</td><td>辅助</td><td style="color:var(--shu)">蜀</td><td>策士</td><td><span class="tag emperor">皇帝</span></td><td>仁德 · 群体回复</td></tr>
+<tr><td>2</td><td>孙权</td><td>辅助</td><td style="color:var(--wu)">吴</td><td>策士</td><td>—</td><td>制衡 · 自回血+光环</td></tr>
+<tr><td>3</td><td>张飞</td><td>战士</td><td style="color:var(--shu)">蜀</td><td>枪兵</td><td><span class="tag tiger">五虎将</span></td><td>怒吼 · 范围减攻速</td></tr>
+<tr><td>4</td><td>于禁</td><td>战士</td><td style="color:var(--wei)">魏</td><td>枪兵</td><td>五子良将</td><td>严整 · 治军光环</td></tr>
+<tr><td>5</td><td>乐进</td><td>战士</td><td style="color:var(--wei)">魏</td><td>步兵</td><td>五子良将</td><td>先登 · 首击爆发</td></tr>
+<tr><td>6</td><td>许褚</td><td>坦克</td><td style="color:var(--wei)">魏</td><td>步兵</td><td>—</td><td>虎痴 · 低血加防</td></tr>
+<tr><td>7</td><td>黄盖</td><td>坦克</td><td style="color:var(--wu)">吴</td><td>枪兵</td><td>—</td><td>苦肉 · 受伤反弹</td></tr>
+<tr><td>8</td><td>郭嘉</td><td>法师</td><td style="color:var(--wei)">魏</td><td>策士</td><td><span class="tag strategist">军师</span> <span class="tag short">短命鬼</span></td><td>遗计 · 阵亡全体增伤</td></tr>
+<tr><td>9</td><td>荀彧</td><td>辅助</td><td style="color:var(--wei)">魏</td><td>策士</td><td><span class="tag strategist">军师</span></td><td>王佐 · 最低友方回血</td></tr>
+<tr><td>10</td><td>李儒</td><td>法师</td><td style="color:var(--qun)">群</td><td>策士</td><td><span class="tag strategist">军师</span></td><td>鸩火 · 毒火灼烧+禁疗</td></tr>
+<tr><td>11</td><td>太史慈</td><td>弓手</td><td style="color:var(--wu)">吴</td><td>弓兵</td><td>—</td><td>箭无虚发 · 3击贯穿</td></tr>
+<tr><td>12</td><td>夏侯渊</td><td>骑兵</td><td style="color:var(--wei)">魏</td><td>骑兵</td><td>—</td><td>神速 · 急行连射</td></tr>
+</table>
+</div>
+
+<!-- 3费 -->
+<div class="section">
+<h2 class="cost3">🔵 3费英雄（蓝色·精锐牌）— 12张</h2>
+<table>
+<tr><th>#</th><th>武将</th><th>职业</th><th>阵营</th><th>兵种</th><th>隐藏标记</th><th>技能方向</th></tr>
+<tr><td>1</td><td>关羽</td><td>骑兵</td><td style="color:var(--shu)">蜀</td><td>骑兵</td><td><span class="tag tiger">五虎将</span></td><td>武圣 · 最大血量伤害</td></tr>
+<tr><td>2</td><td>赵云</td><td>骑兵</td><td style="color:var(--shu)">蜀</td><td>枪兵</td><td><span class="tag tiger">五虎将</span></td><td>龙胆 · 3击附带血量伤害</td></tr>
+<tr><td>3</td><td>黄忠</td><td>弓手</td><td style="color:var(--shu)">蜀</td><td>骑兵</td><td><span class="tag tiger">五虎将</span></td><td>精准神射 · 暴击+反骑</td></tr>
+<tr><td>4</td><td>张郃</td><td>骑兵</td><td style="color:var(--wei)">魏</td><td>骑兵</td><td>五子良将</td><td>巧变 · 低血量斩杀</td></tr>
+<tr><td>5</td><td>姜维</td><td>战士</td><td style="color:var(--shu)">蜀</td><td>刺客</td><td>—</td><td>继志 · 友军阵亡叠属性</td></tr>
+<tr><td>6</td><td>典韦</td><td>坦克</td><td style="color:var(--wei)">魏</td><td>枪兵</td><td><span class="tag short">短命鬼</span></td><td>古之恶来 · 双戟反击</td></tr>
+<tr><td>7</td><td>张辽</td><td>战士</td><td style="color:var(--wei)">魏</td><td>骑兵</td><td><span class="tag tiger">白虎</span> 五子良将</td><td>威震逍遥津 · 冲阵减速</td></tr>
+<tr><td>8</td><td>徐晃</td><td>坦克</td><td style="color:var(--wei)">魏</td><td style="color:var(--gold)">⚠待定</td><td>五子良将</td><td>长驱直入 · 无视防御</td></tr>
+<tr><td>9</td><td>周瑜</td><td>辅助</td><td style="color:var(--wu)">吴</td><td>骑兵</td><td><span class="tag strategist">军师</span> <span class="tag short">短命鬼</span></td><td>顾曲 · 移动光环加攻速</td></tr>
+<tr><td>10</td><td>庞统</td><td>法师</td><td style="color:var(--shu)">蜀</td><td>策士</td><td><span class="tag strategist">军师</span> <span class="tag short">短命鬼</span></td><td>连环计 · 相邻传递伤害</td></tr>
+<tr><td>11</td><td>程昱</td><td>法师</td><td style="color:var(--wei)">魏</td><td>弓兵</td><td>—</td><td>十面埋伏 · 全屏AOE+减速</td></tr>
+<tr><td>12</td><td>陆逊</td><td>辅助</td><td style="color:var(--wu)">吴</td><td>刺客</td><td>—</td><td>火烧连营 · 背后放火烧阵</td></tr>
+</table>
+</div>
+
+<!-- 4费 -->
+<div class="section">
+<h2 class="cost4">🟣 4费英雄（紫色·传说牌）— 8张</h2>
+<table>
+<tr><th>#</th><th>武将</th><th>职业</th><th>阵营</th><th>兵种</th><th>隐藏标记</th><th>技能方向</th></tr>
+<tr><td>1</td><td>马超</td><td>战士</td><td style="color:var(--qun)">群</td><td>骑兵</td><td><span class="tag tiger">五虎将</span></td><td>锦马超 · 击杀加攻速</td></tr>
+<tr><td>2</td><td>曹操</td><td>骑兵</td><td style="color:var(--wei)">魏</td><td>骑兵</td><td><span class="tag emperor">皇帝</span></td><td>奸雄 · 偷取全体攻击</td></tr>
+<tr><td>3</td><td>左慈</td><td>辅助</td><td style="color:var(--qun)">群</td><td>策士</td><td><span class="tag immortal">仙人</span></td><td>遁甲天书 · 化虚回生</td></tr>
+<tr><td>4</td><td>诸葛亮</td><td>法师</td><td style="color:var(--shu)">蜀</td><td>策士</td><td><span class="tag strategist">军师</span></td><td>八阵图 · 全屏AOE</td></tr>
+<tr><td>5</td><td>司马懿</td><td style="color:var(--gold)">辅助/法师</td><td style="color:var(--wei)">魏</td><td>策士</td><td><span class="tag strategist">军师</span></td><td>狼顾 · 双职业·远期变身</td></tr>
+<tr><td>6</td><td>张角</td><td>法师</td><td style="color:var(--qun)">群</td><td>策士</td><td><span class="tag fate">天命</span></td><td>黄天当立 · 雷击</td></tr>
+<tr><td>7</td><td>魏延</td><td>坦克</td><td style="color:var(--shu)">蜀</td><td>刺客</td><td>—</td><td>子午奇袭 · 跳后排嘲讽</td></tr>
+<tr><td>8</td><td>甘宁</td><td>弓手</td><td style="color:var(--wu)">吴</td><td>弓兵</td><td>—</td><td>锦帆 · 百骑劫营</td></tr>
+</table>
+</div>
+
+<!-- 5费 -->
+<div class="section">
+<h2 class="cost5">🟡 5费英雄（金色·神话牌）— 4张</h2>
+<table>
+<tr><th>#</th><th>武将</th><th>职业</th><th>阵营</th><th>兵种</th><th>隐藏标记</th><th>技能方向</th></tr>
+<tr><td>1</td><td>吕布</td><td>骑兵</td><td style="color:var(--qun)">群</td><td>骑兵</td><td>飞将</td><td>无双 · 全屏AOE+无敌</td></tr>
+<tr><td>2</td><td>孙策</td><td>战士</td><td style="color:var(--wu)">吴</td><td>骑兵</td><td><span class="tag short">短命鬼</span></td><td>霸王 · 击杀全属性叠加</td></tr>
+<tr><td>3</td><td>董卓</td><td style="color:var(--red)">魔王</td><td style="color:var(--qun)">群</td><td style="color:var(--red)">魔物</td><td><span class="tag devil">魔王</span></td><td>魔王降世 · 独享协鸣</td></tr>
+<tr><td>4</td><td>袁绍</td><td>战士</td><td style="color:var(--qun)">群</td><td>策士</td><td><span class="tag magic">魔剑士</span></td><td>四世三公 · 战士触发法伤</td></tr>
+</table>
+</div>
+
+<!-- 统计 -->
+<div class="section">
+<h2 style="background:var(--card);color:var(--text);border-radius:6px;">📊 全维度统计</h2>
+
+<div class="stats-grid">
+  <div class="stat-card"><div class="num">48</div><div class="lbl">总武将数</div></div>
+  <div class="stat-card"><div class="num">6</div><div class="lbl">职业数</div></div>
+  <div class="stat-card"><div class="num">6</div><div class="lbl">兵种标签数</div></div>
+  <div class="stat-card"><div class="num">8</div><div class="lbl">隐藏标记组</div></div>
+</div>
+
+<h3 style="font-size:13px;margin:16px 0 8px;">职业分布</h3>
+<div class="troop-grid">
+  <div class="troop-card"><h4>⚔️ 战士</h4><div class="cnt">10</div><div style="font-size:10px;color:var(--muted)">关平/张飞/于禁/乐进/姜维/张辽/马超/孙策/袁绍</div></div>
+  <div class="troop-card"><h4>🐎 骑兵</h4><div class="cnt">9</div><div style="font-size:10px;color:var(--muted)">吕蒙/曹纯/公孙瓒/夏侯渊/关羽/赵云/张郃/曹操/吕布</div></div>
+  <div class="troop-card"><h4>🛡️ 坦克</h4><div class="cnt">8</div><div style="font-size:10px;color:var(--muted)">周泰/张苞/许褚/黄盖/典韦/徐晃/魏延</div></div>
+  <div class="troop-card"><h4>🔮 法师</h4><div class="cnt">8</div><div style="font-size:10px;color:var(--muted)">刘禅/许攸/郭嘉/李儒/庞统/程昱/诸葛亮/张角</div></div>
+  <div class="troop-card"><h4>💚 辅助</h4><div class="cnt">8</div><div style="font-size:10px;color:var(--muted)">汉献帝/华佗/刘备/孙权/荀彧/周瑜/陆逊/左慈</div></div>
+  <div class="troop-card"><h4>⚔️ 弓手</h4><div class="cnt">4</div><div style="font-size:10px;color:var(--muted)">陆绩/太史慈/黄忠/甘宁</div></div>
+</div>
+
+<h3 style="font-size:13px;margin:16px 0 8px;">阵营分布</h3>
+<div class="troop-grid">
+  <div class="troop-card"><h4 style="color:var(--wei)">🔴 魏</h4><div class="cnt">15</div></div>
+  <div class="troop-card"><h4 style="color:var(--shu)">🟠 蜀</h4><div class="cnt">13</div></div>
+  <div class="troop-card"><h4 style="color:var(--wu)">🟢 吴</h4><div class="cnt">10</div></div>
+  <div class="troop-card"><h4 style="color:var(--qun)">🟣 群</h4><div class="cnt">13</div></div>
+  <div class="troop-card"><h4 style="color:var(--red)">💀 魔王</h4><div class="cnt">1</div></div>
+  <div class="troop-card"></div>
+</div>
+
+<h3 style="font-size:13px;margin:16px 0 8px;">兵种标签分布</h3>
+<div class="troop-grid">
+  <div class="troop-card"><h4>🐎 骑兵</h4><div class="cnt">14</div></div>
+  <div class="troop-card"><h4>🧠 策士</h4><div class="cnt">14</div></div>
+  <div class="troop-card"><h4>⚔️ 步兵</h4><div class="cnt">5</div></div>
+  <div class="troop-card"><h4>🛡️ 枪兵</h4><div class="cnt">8</div></div>
+  <div class="troop-card"><h4>🏹 弓兵</h4><div class="cnt">6</div></div>
+  <div class="troop-card"><h4>🗡️ 刺客</h4><div class="cnt">6</div></div>
+</div>
+
+</div>
+
+<!-- 隐藏标记 -->
+<div class="section">
+<h2 style="background:var(--card);color:var(--gold);border-radius:6px;">🔮 隐藏标记体系</h2>
+
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+
+<div class="syn-hid">
+<h3>🐉 五虎将 <span style="color:var(--gold)">5人触发</span></h3>
+<ul>
+<li>跨阵营 <span>(蜀4+群1)</span></li>
+<li><span>2费张飞 · 3费关羽/赵云/黄忠 · 4费马超</span></li>
+<li style="color:var(--muted)">唯一跨阵营隐藏标记，玩家需打破阵营思维</li>
+</ul>
+</div>
+
+<div class="syn-hid">
+<h3>⚔️ 五子良将 <span style="color:var(--gold)">5人触发</span></h3>
+<ul>
+<li>全魏</li>
+<li><span>2费于禁/乐进 · 3费张郃/张辽/徐晃</span></li>
+<li style="color:var(--muted)">横跨2-3费，中期成型</li>
+</ul>
+</div>
+
+<div class="syn-hid">
+<h3>🧠 军师天团 <span style="color:var(--gold)">分阵营小光环 / 6人全光环</span></h3>
+<ul>
+<li>魏3·蜀2·吴1</li>
+<li><span>魏：郭嘉·荀彧·司马懿 | 蜀：诸葛亮·庞统 | 吴：周瑜</span></li>
+<li style="color:var(--muted)">魏3最难凑但含金量最高</li>
+</ul>
+</div>
+
+<div class="syn-hid">
+<h3>💀 短命鬼 <span style="color:var(--gold)">3人小光环 / 5人全光环</span></h3>
+<ul>
+<li>跨阵营</li>
+<li><span>典韦(30+)·郭嘉(38)·周瑜(36)·庞统(36)·孙策(26)</span></li>
+<li style="color:var(--muted)">典/郭/周/庞/孙 · 一炮害三贤起手</li>
+</ul>
+</div>
+
+<div class="syn-hid">
+<h3>👑 皇帝 <span style="color:var(--gold)">3人触发</span></h3>
+<ul>
+<li>蜀·魏·群</li>
+<li><span>1费汉献帝 · 2费刘备 · 4费曹操</span></li>
+</ul>
+</div>
+
+<div class="syn-hid">
+<h3>☀️ 天命 <span style="color:var(--gold)">待定</span></h3>
+<ul>
+<li>群</li>
+<li><span>4费张角 · 汉献帝？(待连线)</span></li>
+</ul>
+</div>
+
+<div class="syn-hid">
+<h3>☯️ 仙人 / 🐅 白虎 / 👹 魔王</h3>
+<ul>
+<li>独立标签，不参与协鸣结算</li>
+<li><span>仙人→左慈 · 白虎→张辽 · 魔王→董卓(独享协鸣)</span></li>
+</ul>
+</div>
+
+<div class="syn-hid">
+<h3>⚡ 魔剑士 / 飞将</h3>
+<ul>
+<li>独立标签，特殊技能触发器</li>
+<li><span>魔剑士→袁绍(战士法伤) · 飞将→吕布</span></li>
+</ul>
+</div>
+
+</div>
+</div>
+
+<!-- 克制链 -->
+<div class="section">
+<h2 style="background:var(--card);color:var(--text);border-radius:6px;">⚡ 兵种克制链</h2>
+<table style="font-size:12px;">
+<tr><th>方向</th><th>效果</th><th>涉及兵种</th></tr>
+<tr><td>🐎 骑兵 → 🏹 弓兵</td><td>伤害+25%</td><td>14骑 vs 6弓</td></tr>
+<tr><td>🏹 弓兵 → 🗡️ 刺客</td><td>暴露行踪，伤害+20%</td><td>6弓 vs 6刺</td></tr>
+<tr><td>🛡️ 枪兵 → 🐎 骑兵</td><td>受到骑兵伤害-25%</td><td>8枪 vs 14骑</td></tr>
+<tr><td>🗡️ 刺客 → ⚔️ 步兵</td><td>绕后切脆皮</td><td>6刺 vs 5步</td></tr>
+<tr><td>⚔️ 步兵 → 🛡️ 枪兵</td><td>灵活破阵</td><td>5步 vs 8枪</td></tr>
+<tr><td>🧠 策士 — 无克制</td><td>中立方，法系自由输出</td><td>14策士</td></tr>
+</table>
+<p class="footnote">※ 黄忠(弓手·骑兵兵种)不受骑兵克制，老将特例</p>
+</div>
+
+<!-- 协鸣门槛 -->
+<div class="section">
+<h2 style="background:var(--card);color:var(--text);border-radius:6px;">🎯 职业协鸣门槛</h2>
+<table style="font-size:12px;">
+<tr><th>职业</th><th>人数</th><th>2协鸣</th><th>4协鸣</th><th>6协鸣</th><th>评价</th></tr>
+<tr><td>⚔️ 战士</td><td>10</td><td>✅ 轻松</td><td>✅ 可达成</td><td>✅ 可能</td><td>从旧版14→10，健康</td></tr>
+<tr><td>🐎 骑兵</td><td>9</td><td>✅ 轻松</td><td>✅ 可达成</td><td>❌</td><td>新职业，分布均匀</td></tr>
+<tr><td>🛡️ 坦克</td><td>8</td><td>✅ 轻松</td><td>✅ 可达成</td><td>❌</td><td>各费用都有，稳</td></tr>
+<tr><td>🔮 法师</td><td>8</td><td>✅ 轻松</td><td>✅ 可达成</td><td>❌</td><td>1-4费分布均匀</td></tr>
+<tr><td>💚 辅助</td><td>9</td><td>✅ 轻松</td><td>✅ 可达成</td><td>❌</td><td>含左慈仙人、陆逊刺客</td></tr>
+<tr><td>🏹 弓手</td><td>4</td><td>✅ 可达成</td><td>❌</td><td>❌</td><td>仅4人，门槛设2/2</td></tr>
+</table>
+</div>
+
+<div class="footnote" style="text-align:center;margin-top:24px;">
+v3.0 · 2026-06-29 · 双轨体系(职业协力+兵种克制) · 隐藏标记8组<br>
+⭐ 待确认：徐晃兵种(大斧长驱直入→步兵?) · 弓手协鸣门槛(仅4人→2/2)
+</div>
+
+</body>
+</html>

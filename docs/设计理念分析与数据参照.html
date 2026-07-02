@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三国自走棋 — 设计理念分析与数据参照</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --gold: #ffd700;
+    --green: #3fb950;
+    --purple: #bc8cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Microsoft YaHei", sans-serif;
+    line-height: 1.9;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+  h1 { font-size: 28px; color: var(--gold); text-align: center; margin-bottom: 6px; }
+  .subtitle { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+  h2 { font-size: 22px; color: var(--accent); border-bottom: 2px solid var(--border); padding-bottom: 8px; margin: 48px 0 20px; }
+  h3 { font-size: 17px; color: var(--green); margin: 28px 0 12px; }
+  h4 { font-size: 15px; color: var(--purple); margin: 20px 0 8px; }
+  p { margin-bottom: 14px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+  }
+  .highlight {
+    background: rgba(255,215,0,0.08);
+    border-left: 3px solid var(--gold);
+    padding: 12px 16px;
+    margin: 14px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  th { background: var(--card); color: var(--accent); font-weight: bold; }
+  .toc a { color: var(--accent); text-decoration: none; display: block; padding: 3px 0; font-size: 14px; }
+  .toc a:hover { text-decoration: underline; }
+  .toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 28px;
+    margin: 24px 0;
+  }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .stat-card h4 { margin: 0 0 8px; font-size: 14px; }
+  .stat-card .val { font-size: 22px; font-weight: bold; }
+  .wei { color: #4169E1; }
+  .shu { color: #FF6347; }
+  .wu { color: #32CD32; }
+  .code-block {
+    background: #000;
+    color: #3fb950;
+    padding: 16px;
+    border-radius: 8px;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>📊 三国自走棋 — 设计理念分析与数据参照</h1>
+<div class="subtitle">文档版本 v1.0 · 涵盖协鸣、装备、武将数值、经济与AI设计</div>
+
+<div class="toc">
+  <strong style="color:#ffd700">📑 目录</strong>
+  <a href="#philosophy">一、总体设计哲学</a>
+  <a href="#synergy">二、协鸣系统设计</a>
+  <a href="#heroes">三、武将卡设计</a>
+  <a href="#items">四、装备系统设计</a>
+  <a href="#economy">五、经济系统设计</a>
+  <a href="#ai">六、AI对手设计</a>
+  <a href="#combat">七、战斗数值设计</a>
+  <a href="#tech">八、科技系统设计</a>
+  <a href="#balance">九、整体平衡性分析</a>
+</div>
+
+<!-- ====== 一、总体设计哲学 ====== -->
+<h2 id="philosophy">一、总体设计哲学</h2>
+
+<div class="card">
+  <h4>🎮 核心设计理念：策略自由度最大化</h4>
+  <p>三国自走棋的设计遵循<strong>"规则简洁、策略深邃"</strong>的原则。每个子系统都力求简单易懂，但组合起来产生丰富的战术深度：</p>
+  <ul>
+    <li><strong>协鸣 × 装备 × 科技</strong>：三层加成系统叠加，玩家可以在不同维度做出选择</li>
+    <li><strong>装备无类型限制</strong>：4个自由槽位，玩家完全自主决定搭配策略</li>
+    <li><strong>AI风格差异化</strong>：7个对手各有不同策略，避免所有战斗感觉雷同</li>
+    <li><strong>伤害公式透明</strong>：回合+三角数，玩家可以准确预估战斗后果</li>
+  </ul>
+</div>
+
+<div class="highlight">
+  <strong>设计约束</strong>：单AI玩家零操作要求（自动战斗），不需要联机配对，适合碎片时间。所有数据硬编码在JS中（无服务器依赖），可离线运行。
+</div>
+
+<!-- ====== 二、协鸣系统 ====== -->
+<h2 id="synergy">二、协鸣系统设计</h2>
+
+<h3>2.1 双重协鸣架构</h3>
+<p>
+  每个武将拥有 <strong>1个阵营协鸣 + 1个职业协鸣</strong>。
+  这意味着一张卡同时参与两个协鸣池的计算，给阵容构建提供了非线性决策空间。
+</p>
+<p>例如：赵云（蜀+战士）放进4蜀3战士阵容中，同时激活了蜀国4人Tier2和战士2人Tier1，产生协同爆发。</p>
+
+<h3>2.2 阵营协鸣：3×3阶设计</h3>
+<table>
+  <tr><th>阵营</th><th>Tier1 (2人)</th><th>Tier2 (4人)</th><th>Tier3 (6人)</th><th>设计意图</th></tr>
+  <tr><td class="wei">魏</td><td>攻击+10%</td><td>攻击+25%+血量+20%</td><td>15%血量护盾</td><td>攻守兼备的稳健型</td></tr>
+  <tr><td class="shu">蜀</td><td>暴击率+15%</td><td>暴伤+40%</td><td>暴击回血5%</td><td>高风险高回报爆发型</td></tr>
+  <tr><td class="wu">吴</td><td>攻速+20%</td><td>灼烧(2%最大HP/s)</td><td>死亡爆炸(20%HP)</td><td>消耗战，越打越强</td></tr>
+</table>
+
+<div class="highlight">
+  <strong>设计思路</strong>：三大阵营形成<strong>剪刀石头布</strong>式的策略三角——魏稳克蜀爆、蜀爆克吴耗、吴耗克魏稳。但实际数值上不做严格相克，而是通过不同的成长曲线来实现差异化体验。
+</div>
+
+<h3>2.3 职业协鸣：6×2阶设计</h3>
+<table>
+  <tr><th>职业</th><th>T1门槛</th><th>T1效果</th><th>T2门槛</th><th>T2效果</th></tr>
+  <tr><td>战士</td><td>2人</td><td>血量+15%</td><td>4人</td><td>攻击力+30%</td></tr>
+  <tr><td>法师</td><td>2人</td><td>技能伤害+20%</td><td>4人</td><td>冷却-30%</td></tr>
+  <tr><td>坦克</td><td>2人</td><td>受伤-15%</td><td>4人</td><td>嘲讽</td></tr>
+  <tr><td>刺客</td><td>2人</td><td>暴击率+25%</td><td>3人</td><td>击杀隐身</td></tr>
+  <tr><td>弓手</td><td>2人</td><td>距离+1</td><td>4人</td><td>20%双射</td></tr>
+  <tr><td>辅助</td><td>2人</td><td>治疗+30%</td><td>3人</td><td>每秒回1%</td></tr>
+</table>
+
+<div class="highlight">
+  <strong>门槛非对称设计</strong>：刺客和辅助的T2只需3人（而非4人），因为这两个职业的英雄池较小，降低成型门槛。这是刻意的<strong>设计宽容度</strong>，避免某些流派因卡池不足而永远无法成型。
+</div>
+
+<h3>2.4 协鸣叠加机制</h3>
+<p>
+  协鸣效果之间是<strong>乘法叠加</strong>，而非加法。例如：蜀国T1（暴击+15%）+ 刺客T1（暴击+25%）= 40%暴击率。
+  这创造了一种"1+1>2"的协同效应，鼓励玩家探索跨阵营+跨职业的混合阵容。
+</p>
+
+<h3>2.5 协鸣与武将分布</h3>
+<table>
+  <tr><th>协鸣</th><th>人数</th><th>武将列表</th></tr>
+  <tr><td>魏</td><td>4人</td><td>许褚(1费)、典韦(2费)、司马懿(3费)、廉颇(4费)</td></tr>
+  <tr><td>蜀</td><td>4人</td><td>赵云(1费)、黄忠(1费)、关羽(2费)、张飞(2费)、诸葛亮(3费)、马超(4费)</td></tr>
+  <tr><td>吴</td><td>4人</td><td>孙权(1费)、莲花(2费)、周瑜(3费)、吕蒙(3费)、孙策(5费)</td></tr>
+  <tr><td>战士</td><td>5人</td><td>赵云、关羽、张飞、典韦、马超、吕布、孙策</td></tr>
+  <tr><td>法师</td><td>4人</td><td>莲花、诸葛亮、司马懿、周瑜、典勇</td></tr>
+  <tr><td>坦克</td><td>2人</td><td>许褚、廉颇</td></tr>
+  <tr><td>刺客</td><td>2人</td><td>张郃、吕布、典勇</td></tr>
+  <tr><td>弓手</td><td>1人</td><td>黄忠</td></tr>
+  <tr><td>辅助</td><td>2人</td><td>孙权、吕蒙</td></tr>
+</table>
+
+<div class="highlight">
+  <strong>池分布不均</strong>：蜀国(6人)远超魏(4人)，战士(7人)远超坦克(2人)。这是有意为之——不同流派的获取难度不同，"蜀国战士"容易凑，"坦克流"更难但成型后收益更高。这创造了<strong>风险-回报</strong>的策略张力。
+</div>
+
+<!-- ====== 三、武将卡设计 ====== -->
+<h2 id="heroes">三、武将卡设计</h2>
+
+<h3>3.1 全英雄数值一览</h3>
+<table>
+  <tr><th>费</th><th>武将</th><th>HP</th><th>ATK</th><th>DEF</th><th>SPD</th><th>RNG</th><th>协鸣</th><th>技能</th></tr>
+  <tr><td class="cost-1">1</td><td>赵云🐉</td><td>600</td><td>45</td><td>25</td><td>1.0</td><td>1</td><td>蜀/战</td><td>龙胆：每3攻附带15%HP伤害</td></tr>
+  <tr><td class="cost-1">1</td><td>黄忠🏹</td><td>500</td><td>50</td><td>20</td><td>0.9</td><td>3</td><td>蜀/弓</td><td>老当益壮：20%概率2倍暴击</td></tr>
+  <tr><td class="cost-1">1</td><td>许褚💪</td><td>750</td><td>40</td><td>35</td><td>0.8</td><td>1</td><td>魏/坦</td><td>虎痴：半血时防御+50%</td></tr>
+  <tr><td class="cost-1">1</td><td>孙权👑</td><td>550</td><td>35</td><td>25</td><td>1.0</td><td>2</td><td>吴/辅</td><td>制衡：每5秒回复8%HP</td></tr>
+  <tr><td class="cost-2">2</td><td>关羽🔴</td><td>800</td><td>65</td><td>35</td><td>0.95</td><td>1</td><td>蜀/战</td><td>武圣：每攻附带5%HP伤害</td></tr>
+  <tr><td class="cost-2">2</td><td>张飞🐯</td><td>900</td><td>60</td><td>40</td><td>0.85</td><td>1</td><td>蜀/战</td><td>怒吼：每10秒周围减攻速30%</td></tr>
+  <tr><td class="cost-2">2</td><td>典韦🪓</td><td>700</td><td>60</td><td>30</td><td>0.9</td><td>1</td><td>魏/战</td><td>恶来：每击杀攻击永久+10%</td></tr>
+  <tr><td class="cost-2">2</td><td>莲花🌸</td><td>500</td><td>55</td><td>20</td><td>1.1</td><td>3</td><td>吴/法</td><td>灼莲：攻击附带灼烧3秒</td></tr>
+  <tr><td class="cost-3">3</td><td>诸葛亮🪄</td><td>500</td><td>40</td><td>20</td><td>1.0</td><td>4</td><td>蜀/法</td><td>八阵图：每8秒全体80%ATK AOE</td></tr>
+  <tr><td class="cost-3">3</td><td>司马懿🦊</td><td>600</td><td>55</td><td>30</td><td>1.0</td><td>2</td><td>魏/法</td><td>鬼才：反弹30%技能伤害</td></tr>
+  <tr><td class="cost-3">3</td><td>周瑜🔥</td><td>550</td><td>50</td><td>25</td><td>1.05</td><td>3</td><td>吴/法</td><td>赤壁：25%火焰风暴溅射</td></tr>
+  <tr><td class="cost-3">3</td><td>吕蒙📚</td><td>650</td><td>50</td><td>35</td><td>0.95</td><td>2</td><td>吴/辅</td><td>白衣渡江：开战隐身+攻速+50%</td></tr>
+  <tr><td class="cost-4">4</td><td>廉颇🏰</td><td>1200</td><td>55</td><td>60</td><td>0.7</td><td>1</td><td>魏/坦</td><td>负荆：每降20%HP防御+15%</td></tr>
+  <tr><td class="cost-4">4</td><td>张郃🎯</td><td>700</td><td>75</td><td>30</td><td>1.1</td><td>2</td><td>魏/刺</td><td>巧变：15%秒杀&lt;30%HP敌</td></tr>
+  <tr><td class="cost-4">4</td><td>马超⚡</td><td>800</td><td>80</td><td>30</td><td>1.3</td><td>1</td><td>蜀/战</td><td>锦马超：基础攻速+30%+击杀+20%</td></tr>
+  <tr><td class="cost-5">5</td><td>吕布👹</td><td>1000</td><td>100</td><td>45</td><td>1.1</td><td>1</td><td>战/刺</td><td>无双：每5秒周围AOE+无敌1秒</td></tr>
+  <tr><td class="cost-5">5</td><td>孙策🌟</td><td>950</td><td>90</td><td>40</td><td>1.15</td><td>1</td><td>吴/战</td><td>霸王：每击杀全属性+10%可叠</td></tr>
+  <tr><td class="cost-5">5</td><td>典勇🗡️</td><td>850</td><td>85</td><td>35</td><td>1.2</td><td>2</td><td>刺/法</td><td>影杀：30%沉默目标2秒</td></tr>
+</table>
+
+<h3>3.2 费用曲线分析</h3>
+<div class="stat-grid">
+  <div class="stat-card">
+    <h4>1费均值</h4>
+    <div class="val" style="color:#8b949e">HP 600 · ATK 42.5 · DEF 26.3</div>
+    <p style="color:var(--muted);font-size:12px">基础线，易于合成。赵云/黄忠/许褚/孙权</p>
+  </div>
+  <div class="stat-card">
+    <h4>2费均值</h4>
+    <div class="val" style="color:#3fb950">HP 725 · ATK 60 · DEF 31.3</div>
+    <p style="color:var(--muted);font-size:12px">1费1.2×属性，核心战力层</p>
+  </div>
+  <div class="stat-card">
+    <h4>3费均值</h4>
+    <div class="val" style="color:#58a6ff">HP 575 · ATK 48.8 · DEF 27.5</div>
+    <p style="color:var(--muted);font-size:12px">ATK反降但技能/射程质变，战术支点</p>
+  </div>
+  <div class="stat-card">
+    <h4>4费均值</h4>
+    <div class="val" style="color:#bc8cff">HP 900 · ATK 70 · DEF 40</div>
+    <p style="color:var(--muted);font-size:12px">属性跳跃，技能带斩杀/叠防</p>
+  </div>
+  <div class="stat-card">
+    <h4>5费均值</h4>
+    <div class="val" style="color:#ffd700">HP 933 · ATK 91.7 · DEF 40</div>
+    <p style="color:var(--muted);font-size:12px">终极战力，一张可定乾坤</p>
+  </div>
+</div>
+
+<div class="highlight">
+  <strong>3费的"价值洼地"</strong>：3费英雄的基础属性反而低于2费，但技能质变（AOE/反弹/隐身/溅射）使其在后期协鸣体系下价值极高。这是刻意的——鼓励玩家从"堆属性"转向"搭体系"。
+</div>
+
+<h3>3.3 合星成长曲线</h3>
+<table>
+  <tr><th>星级</th><th>所需1星数</th><th>HP倍率</th><th>ATK倍率</th><th>DEF倍率</th><th>综合战力</th></tr>
+  <tr><td>★</td><td>1</td><td>×1</td><td>×1</td><td>×1</td><td>1×</td></tr>
+  <tr><td>★★</td><td>3</td><td>×2</td><td>×2</td><td>×2</td><td>约2.5×</td></tr>
+  <tr><td>★★★</td><td>9</td><td>×4</td><td>×4</td><td>×4</td><td>约6×</td></tr>
+</table>
+<p>合星的资源转化效率：3张1星合成1张2星，占用1个棋盘位但提供2.5×战力。从占位效率看，合星永远比堆数量更优。</p>
+
+<!-- ====== 四、装备系统 ====== -->
+<h2 id="items">四、装备系统设计</h2>
+
+<h3>4.1 自由槽位理念</h3>
+<div class="card">
+  <h4>设计决策：为什么不做类型限制？</h4>
+  <p>传统装备系统通常按槽位类型限制（武器槽/防具槽/坐骑槽），这实际上是在<strong>替玩家做选择</strong>。自由槽位将全部决策权交还玩家：</p>
+  <ul>
+    <li><strong>玩家A</strong>：吕布装备4把武器（方天画戟+青龙刀+穿云弓+绝影）→ 极限输出流</li>
+    <li><strong>玩家B</strong>：吕布装备4件防装（玄武甲+藤甲+黄金铠+护身符）→ 铁壁坦克流</li>
+    <li><strong>玩家C</strong>：吕布2攻2防 → 均衡流</li>
+  </ul>
+  <p>同一张卡，<strong>4种完全不同的玩法方向</strong>。这种"溢出可能性"带来的策略深度远比固定槽位丰富。</p>
+</div>
+
+<h3>4.2 装备数值参照表</h3>
+<table>
+  <tr><th>装备</th><th>费</th><th>ATK</th><th>DEF</th><th>HP</th><th>SPD</th><th>暴击</th><th>技能伤</th><th>射程</th><th>护盾</th><th>性价比</th></tr>
+  <tr><td>青龙刀🗡️</td><td>1</td><td>+15</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>15ATK/💰</td></tr>
+  <tr><td>玄武甲🛡️</td><td>1</td><td>-</td><td>+15</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>15DEF/💰</td></tr>
+  <tr><td>麒麟盔⛑️</td><td>1</td><td>-</td><td>-</td><td>+200</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>200HP/💰</td></tr>
+  <tr><td>智慧法杖🪄</td><td>2</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+30%</td><td>-</td><td>-</td><td>15%技伤/💰</td></tr>
+  <tr><td>闪电靴👟</td><td>2</td><td>-</td><td>-</td><td>-</td><td>+0.2</td><td>-</td><td>-</td><td>-</td><td>-</td><td>0.1SPD/💰</td></tr>
+  <tr><td>暴击戒指💍</td><td>2</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+15%</td><td>-</td><td>-</td><td>-</td><td>7.5%暴/💰</td></tr>
+  <tr><td>穿云弓🏹</td><td>3</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>+1</td><td>-</td><td>射程刚性</td></tr>
+  <tr><td>赤兔马🐎</td><td>3</td><td>-</td><td>-</td><td>-</td><td>+0.3</td><td>-</td><td>-</td><td>-</td><td>-</td><td>0.1SPD/💰</td></tr>
+  <tr><td>方天画戟🔱</td><td>4</td><td>+30</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>7.5ATK/💰</td></tr>
+  <tr><td>绝影💨</td><td>4</td><td>-</td><td>-</td><td>-</td><td>+0.25</td><td>+10%</td><td>-</td><td>-</td><td>-</td><td>复合属性</td></tr>
+  <tr><td>传国玉玺🏆</td><td>5</td><td>+15</td><td>+10</td><td>+100</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>全能泛用</td></tr>
+</table>
+
+<div class="highlight">
+  <strong>性价比递减规律</strong>：基础装备（1费）单位金币收益最高，高级装备（4-5费）提供复合属性或功能性效果。这与游戏经济系统配合——前期精打细算用基础装，后期富裕后升高级装。
+</div>
+
+<h3>4.3 装备与协鸣的乘法效应</h3>
+<div class="code-block">吕布（5费，ATK=100）+ 4件攻击装（方天画戟+30, 青龙刀+15, 绝影+25%攻速, 暴击戒指+15%暴）
++ 战士协鸣T2（ATK+30%）+ 蜀国协鸣T1（暴击+15%）+ 刺客协鸣T1（暴击+25%）
+= 基础ATK 100+45=145 × 1.3 = 188.5 → 双协鸣暴击率 10%+15%+15%+25%=65%
+→ 每次攻击期望伤害 = 188.5 × (0.35 + 0.65×1.5) = 188.5 × 1.325 = ~250</div>
+<p>从100基础攻击到250期望伤害——2.5倍增幅来自装备和协鸣的<strong>乘法叠加</strong>。这就是策略深度的来源。</p>
+
+<!-- ====== 五、经济系统 ====== -->
+<h2 id="economy">五、经济系统设计</h2>
+
+<h3>5.1 金币流动模型</h3>
+<table>
+  <tr><th>来源</th><th>公式</th><th>Lv1示例</th><th>Lv5示例</th></tr>
+  <tr><td>基础收入</td><td>固定5💰/回合</td><td>5</td><td>5</td></tr>
+  <tr><td>利息</td><td>floor(金币/2)</td><td>0-2</td><td>0-25</td></tr>
+  <tr><td>科技加成</td><td>开源节流+2</td><td>0</td><td>0-2</td></tr>
+  <tr><td>售卖收入</td><td>cost×3^(star-1)</td><td>1-9</td><td>1-243</td></tr>
+</table>
+
+<h3>5.2 售卖公式设计</h3>
+<p>一星售卖 = cost，二星 = 3×cost，三星 = 9×cost。合星消耗3张但售价3倍——打平。如果从商店3次购买同卡，总花费3×cost，合成二星售价3×cost，恰好不亏。这避免了"合星反而贬值"的悖论。</p>
+
+<h3>5.3 升级成本曲线</h3>
+<table>
+  <tr><th>Lv→Lv+1</th><th>自动回合</th><th>手动费用</th><th>决策点</th></tr>
+  <tr><td>1→2</td><td>1回合</td><td>4💰</td><td>一般不手动</td></tr>
+  <tr><td>3→4</td><td>2回合</td><td>12💰</td><td>急需4费卡时手动</td></tr>
+  <tr><td>5→6</td><td>4回合</td><td>20💰</td><td>关键决策：等还是买</td></tr>
+  <tr><td>7→8</td><td>6回合</td><td>28💰</td><td>后期手动冲Lv8</td></tr>
+</table>
+<div class="highlight">
+  <strong>自动vs手动</strong>：自动升级是"免费"的，但需要耐心。手动升级立即生效但花费金币。这是时间-金钱的经典权衡——战线拉长时自动更优，需要即时战力时手动更优。
+</div>
+
+<!-- ====== 六、AI对手 ====== -->
+<h2 id="ai">六、AI对手设计</h2>
+
+<h3>6.1 7种AI风格档案</h3>
+<table>
+  <tr><th>对手</th><th>协鸣偏好</th><th>队伍生成策略</th><th>装备/科技倾向</th></tr>
+  <tr><td>⚔️ 激进派</td><td>刺客</td><td>高ATK低HP，优先刺客/战士</td><td>偏攻击装</td></tr>
+  <tr><td>💪 强人卡</td><td>战士</td><td>高合星概率(round×8%)</td><td>均衡</td></tr>
+  <tr><td>🛡️ 装备流</td><td>坦克</td><td>高DEF高HP，坦克为主</td><td>偏防御装</td></tr>
+  <tr><td>🏹 远程党</td><td>弓手</td><td>偏好远程棋子</td><td>偏射程装</td></tr>
+  <tr><td>🔬 科技派</td><td>辅助</td><td>辅助+治疗阵容</td><td>偏科技</td></tr>
+  <tr><td>🎲 运气党</td><td>蜀</td><td>随机混合，但偏好蜀国</td><td>随机的</td></tr>
+  <tr><td>⚖️ 均衡派</td><td>魏</td><td>攻守均衡阵容</td><td>均衡</td></tr>
+</table>
+
+<h3>6.2 AI间对战模拟</h3>
+<p>
+  每轮后台有AI间对战（排除当前与玩家对战的AI）。用的是<strong>实力比随机判定</strong>而非完整战斗模拟——
+  因为完整模拟7场AI对战太消耗性能且玩家不可见。实力比公式：
+</p>
+<div class="code-block">teamPower = Σ( (ATK + DEF×0.6) × maxHP × (0.5 + SPD) )
+胜率 = powerA / (powerA + powerB)
+存活数 = team.length × (胜方实力比 / (1 + 胜方实力比))</div>
+
+<div class="highlight">
+  <strong>为什么不完整模拟？</strong>这是典型的"结果近似 vs 过程还原"的设计权衡。完整模拟AI对战需要渲染7组战斗，对性能影响大且对玩家体验无增量价值。实力比模型能快速得出合理结果，满足"背景淘汰"的需求。
+</div>
+
+<!-- ====== 七、战斗数值 ====== -->
+<h2 id="combat">七、战斗数值设计</h2>
+
+<h3>7.1 伤害公式</h3>
+<div class="code-block">实际伤害 = max(1, 攻击伤害 - DEF×0.5) × (1 - damageReduction) - shield</div>
+<p>护甲减免采用半值公式（每点防御减少0.5伤害），防止防御堆叠导致无敌。减伤是独立的乘法因子（坦克协鸣、技能效果）。</p>
+
+<h3>7.2 掉血公式：回合+三角数</h3>
+<table>
+  <tr><th>轮次</th><th>幸存0人</th><th>幸存1人</th><th>幸存3人</th><th>幸存5人</th></tr>
+  <tr><td>1</td><td>1</td><td>2</td><td>7</td><td>16</td></tr>
+  <tr><td>5</td><td>5</td><td>6</td><td>11</td><td>20</td></tr>
+  <tr><td>10</td><td>10</td><td>11</td><td>16</td><td>25</td></tr>
+  <tr><td>15</td><td>15</td><td>16</td><td>21</td><td>30</td></tr>
+</table>
+<div class="highlight">
+  <strong>设计意图</strong>：三角数使碾压局（对方5人存活→16+伤害）和险胜局（对方1人存活→2伤害）产生巨大伤害差。这个机制天然地惩罚"实力差距过大"的局面，避免强者无限滚雪球——越碾压对方，对方受的伤越重，越早被淘汰。
+</div>
+
+<h3>7.3 暴击模型</h3>
+<p>基础暴击率10%，暴击伤害1.5倍。蜀国T1+15%、刺客T1+25%、暴击戒指+15%、绝影+10%、科技致命一击+10% → 最大可达85%暴击率。暴击是游戏中最重要的伤害放大器。</p>
+
+<h3>7.4 目标选择AI</h3>
+<div class="code-block">优先级：有嘲讽→攻击嘲讽者 > 最低血量目标</div>
+<p>简单高效的二值选择。嘲讽（坦克T2）可以强制改变对方攻击目标，实现"保护后排"的战术效果。</p>
+
+<!-- ====== 八、科技系统 ====== -->
+<h2 id="tech">八、科技系统设计</h2>
+
+<h3>8.1 科技轮次安排</h3>
+<p>装备轮：1/2/5/7/10/13/17/21/25 — 共9轮，频率前期高后期低</p>
+<p>科技轮：3/4/6/8/9/11/12/14/15/16/18/19/20/22/23/24 — 共16轮，覆盖中后期</p>
+<div class="highlight">
+  <strong>设计逻辑</strong>：前期快速给装备（1-2轮就有武器），让玩家立刻体验装备系统。中期科技密集出现（3-15轮几乎每轮都有），后期间隔拉长给玩家消化时间。
+</div>
+
+<h3>8.2 科技选择策略</h3>
+<p>每次从剩余未习得的科技中随机3选1。不能重复获得同一科技。后期池子缩小，更容易获得想要的科技——这创造了一种"越往后越容易出关键科技"的预期。</p>
+
+<!-- ====== 九、平衡性 ====== -->
+<h2 id="balance">九、整体平衡性分析</h2>
+
+<h3>9.1 当前已知平衡点</h3>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <h4>✅ 协鸣人数门槛合理</h4>
+    <p>2/4/6人分层使小协鸣容易达到但效果弱，大协鸣难达到但效果质变。符合"投入-回报"曲线。</p>
+  </div>
+  <div class="stat-card">
+    <h4>✅ 装备性价比递减</h4>
+    <p>低费装单位金币效率高，高费装提供复合/功能性。玩家根据经济状况做选择。</p>
+  </div>
+  <div class="stat-card">
+    <h4>⚠️ 蜀国偏强</h4>
+    <p>蜀国6将+暴击体系，成型容易且输出爆炸。需观察是否需下调暴击数值。</p>
+  </div>
+  <div class="stat-card">
+    <h4>⚠️ 弓手/坦克池太浅</h4>
+    <p>黄忠独苗弓手，坦克仅许褚+廉颇。后续需扩充武将池。</p>
+  </div>
+  <div class="stat-card">
+    <h4>⚠️ 经济滚雪球</h4>
+    <p>连胜+高利息可能形成不可逆的经济优势。或需引入"连败补偿"机制。</p>
+  </div>
+  <div class="stat-card">
+    <h4>⚠️ 5费卡过强</h4>
+    <p>吕布无双5秒AOE+无敌，后期一张可翻盘。需观察是否需加cd或减伤。</p>
+  </div>
+</div>
+
+<h3>9.2 未来平衡性优化方向</h3>
+<ul>
+  <li>扩充武将池：增加吴国、坦克、弓手、辅助方向的英雄</li>
+  <li>引入连败补偿：连败额外金币或免费刷新</li>
+  <li>调优5费卡：稍微拉低吕布/孙策的AOE效率</li>
+  <li>调优暴击体系：蜀国T1暴击15%→12%可能更合理</li>
+  <li>引入更多装备：给法系、辅助专属装备</li>
+</ul>
+
+<p style="text-align:center;margin-top:40px;color:var(--muted);font-size:13px;">
+  —— 设计文档基于当前 v1.0 版本，数据截止 2026-06-29 ——
+</p>
+
+</body>
+</html>
