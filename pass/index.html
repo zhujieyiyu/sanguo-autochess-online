@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Password Blackbox</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  color: #e6edf3;
+  min-height: 100vh;
+  padding: 20px;
+}
+.container { max-width: 720px; margin: 0 auto; }
+header {
+  text-align: center;
+  padding: 30px 0 20px;
+  border-bottom: 1px solid #21262d;
+  margin-bottom: 30px;
+}
+h1 { font-size: 28px; margin-bottom: 8px; }
+h1 .logo { color: #FFD700; }
+.subtitle { color: #8b949e; font-size: 13px; }
+
+.warning {
+  background: #1c1c00;
+  border: 1px solid #FFD700;
+  color: #FFD700;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-bottom: 8px;
+  text-align: center;
+  line-height: 1.6;
+}
+.tip {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  color: #8b949e;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 11px;
+  margin-bottom: 20px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card h2 {
+  font-size: 15px;
+  color: #8b949e;
+  margin-bottom: 12px;
+  font-weight: normal;
+  letter-spacing: 0.5px;
+}
+
+button {
+  background: #238636;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+button:hover { background: #2ea043; }
+button:disabled { background: #30363d; color: #8b949e; cursor: not-allowed; }
+button.secondary { background: #21262d; border: 1px solid #30363d; }
+button.secondary:hover { background: #30363d; }
+button.danger { background: #da3633; }
+button.danger:hover { background: #f85149; }
+button.small { padding: 4px 10px; font-size: 12px; }
+
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.row + .row { margin-top: 8px; }
+
+input[type="number"] {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  color: #e6edf3;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: 'Courier New', monospace;
+}
+input[type="number"]:focus {
+  outline: none;
+  border-color: #1f6feb;
+}
+
+label { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+input[type="checkbox"] { cursor: pointer; }
+
+.entry-list { margin-top: 12px; }
+.entry {
+  background: #0d1117;
+  border: 1px solid #21262d;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.entry-idx {
+  color: #FFD700;
+  font-size: 12px;
+  min-width: 22px;
+  font-family: 'Courier New', monospace;
+}
+.entry-content { flex: 1; min-width: 0; }
+.entry-field {
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  word-break: break-all;
+}
+.entry-field-1 { color: #79c0ff; }
+.entry-field-2 { color: #a5d6ff; margin-top: 2px; }
+.entry-actions { display: flex; gap: 4px; }
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6e7681;
+  font-size: 13px;
+}
+
+.hidden { display: none !important; }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+.modal {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+}
+.modal h3 { font-size: 16px; margin-bottom: 12px; }
+.modal p { font-size: 13px; color: #8b949e; margin-bottom: 16px; line-height: 1.5; }
+.modal-buttons { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #238636;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  z-index: 2000;
+  animation: fadeIn 0.2s;
+}
+.toast.error { background: #da3633; }
+@keyframes fadeIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+.copy-feedback {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #238636;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 2000;
+  animation: slideIn 0.2s;
+}
+@keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+.generator-output {
+  background: #0d1117;
+  border: 1px solid #FFD700;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 12px;
+}
+.generator-output .label { font-size: 11px; color: #8b949e; margin-bottom: 4px; }
+.generator-output .value {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  color: #FFD700;
+  word-break: break-all;
+  letter-spacing: 1px;
+  user-select: all;
+  cursor: pointer;
+}
+.generator-output .value:hover { color: #fff; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1><span class="logo">⬛</span> Password Blackbox</h1>
+    <div class="subtitle">极简无状态密码生成器</div>
+  </header>
+
+  <div class="warning">
+    ⚠ 文件以明文 JSON 形式保存于本地，请妥善保管，避免放置网盘/同步盘/共享目录
+  </div>
+  <div class="tip">
+    💡 本工具不做任何用途标识，请自行记录每个字符串对应哪个网站
+  </div>
+
+  <!-- 入口状态 -->
+  <div id="entryState">
+    <div class="card">
+      <h2>📂 选择操作</h2>
+      <div class="row">
+        <button id="btnNew">➕ 新建</button>
+        <button id="btnImport" class="secondary">📥 导入</button>
+        <input type="file" id="fileInput" accept=".json,.txt,.dat,*" class="hidden">
+      </div>
+    </div>
+  </div>
+
+  <!-- 生成器状态 -->
+  <div id="generatorState" class="hidden">
+    <div class="card">
+      <h2>🎲 生成新条目</h2>
+      <div class="row">
+        <label><input type="checkbox" id="optDigits" checked> 数字 (0-9)</label>
+        <label><input type="checkbox" id="optLower" checked> 小写字母 (a-z)</label>
+        <label><input type="checkbox" id="optUpper" checked> 大写字母 (A-Z)</label>
+        <label><input type="checkbox" id="optSymbol"> 符号 (!@#$...)</label>
+      </div>
+      <div class="row" style="margin-top:12px;">
+        <label>密码长度：</label>
+        <input type="number" id="optLength" value="16" min="4" max="64" style="width:60px;">
+        <span style="color:#6e7681;font-size:12px;">字段1长度：</span>
+        <input type="number" id="optUserLength" value="12" min="4" max="32" style="width:60px;">
+      </div>
+      <div class="row" style="margin-top:16px;">
+        <button id="btnGenerate">🎲 生成</button>
+        <button id="btnAddToList" class="secondary" disabled>➕ 加入列表</button>
+      </div>
+      <div id="generatedOutput" class="generator-output hidden">
+        <div class="label">字段1（点击复制）</div>
+        <div class="value" id="genField1"></div>
+        <div class="label" style="margin-top:8px;">字段2（点击复制）</div>
+        <div class="value" id="genField2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 条目列表状态 -->
+  <div id="listState" class="hidden">
+    <div class="card">
+      <h2>📋 条目列表 <span id="entryCount" style="color:#FFD700;">(0)</span></h2>
+      <div class="row" style="margin-bottom:12px;">
+        <button id="btnBackToEntry" class="secondary small">↩ 返回</button>
+        <button id="btnExport">💾 导出</button>
+      </div>
+      <div id="entryList" class="entry-list">
+        <div class="empty-state">暂无条目 · 从上面生成第一条</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 确认弹窗 -->
+<div id="modal" class="modal-overlay hidden">
+  <div class="modal">
+    <h3 id="modalTitle"></h3>
+    <p id="modalContent"></p>
+    <div class="modal-buttons">
+      <button id="modalCancel" class="secondary">取消</button>
+      <button id="modalOk">确定</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== 状态管理 ====================
+const state = {
+  entries: [],       // [{a8f2k1m9: f1, f9g1h4j6: f2}]
+  generated: null,
+};
+
+// 文件魔数（看着像哈希值，不暴露工具名）
+const MAGIC = 'X7K9Q2M4';
+// 数据字段名（看起来像哈希值，导入时按这些 key 识别）
+const K_ENTRY = 'a8f2k1m9';
+const K_FIELD1 = 'b3c7d2e5';
+const K_FIELD2 = 'f9g1h4j6';
+
+// ==================== 工具函数 ====================
+const $ = (id) => document.getElementById(id);
+
+function showState(name) {
+  $('entryState').classList.add('hidden');
+  $('generatorState').classList.add('hidden');
+  $('listState').classList.add('hidden');
+  $(name).classList.remove('hidden');
+}
+
+function toast(msg, type = 'success') {
+  const t = document.createElement('div');
+  t.className = 'toast' + (type === 'error' ? ' error' : '');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2000);
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const f = document.createElement('div');
+    f.className = 'copy-feedback';
+    f.textContent = '✓ 已复制';
+    document.body.appendChild(f);
+    setTimeout(() => f.remove(), 1500);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+
+function showModal({ title, content, okText = '确定', cancelText = '取消' }) {
+  return new Promise((resolve) => {
+    $('modalTitle').textContent = title;
+    $('modalContent').textContent = content;
+    $('modalOk').textContent = okText;
+    $('modalCancel').textContent = cancelText;
+    $('modal').classList.remove('hidden');
+    
+    const cleanup = () => {
+      $('modal').classList.add('hidden');
+      $('modalOk').onclick = null;
+      $('modalCancel').onclick = null;
+    };
+    
+    $('modalOk').onclick = () => { cleanup(); resolve(true); };
+    $('modalCancel').onclick = () => { cleanup(); resolve(false); };
+  });
+}
+
+// ==================== 字符集 ====================
+const CHARSETS = {
+  digits: '0123456789',
+  lower: 'abcdefghijklmnopqrstuvwxyz',
+  upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  symbol: '!@#$%^&*()-_=+[]{};:,.<>?'
+};
+
+function randomString(length, charset) {
+  if (!charset) return '';
+  const arr = new Uint32Array(length);
+  crypto.getRandomValues(arr);
+  let s = '';
+  for (let i = 0; i < length; i++) {
+    s += charset[arr[i] % charset.length];
+  }
+  return s;
+}
+
+function buildCharset(opts) {
+  let cs = '';
+  if (opts.digits) cs += CHARSETS.digits;
+  if (opts.lower) cs += CHARSETS.lower;
+  if (opts.upper) cs += CHARSETS.upper;
+  if (opts.symbol) cs += CHARSETS.symbol;
+  return cs;
+}
+
+function randomFilename() {
+  const chars = CHARSETS.lower + CHARSETS.digits;
+  let name = '';
+  const arr = new Uint32Array(8);
+  crypto.getRandomValues(arr);
+  for (let i = 0; i < 8; i++) name += chars[arr[i] % chars.length];
+  return name + '.json';
+}
+
+// ==================== 生成器 ====================
+function generate() {
+  const opts = {
+    digits: $('optDigits').checked,
+    lower: $('optLower').checked,
+    upper: $('optUpper').checked,
+    symbol: $('optSymbol').checked,
+  };
+  const passLen = parseInt($('optLength').value) || 16;
+  const userLen = parseInt($('optUserLength').value) || 12;
+  
+  const passCs = buildCharset(opts);
+  const userCs = buildCharset({ digits: true, lower: true, upper: false, symbol: false });
+  
+  if (!passCs) {
+    toast('请至少选择一种字符', 'error');
+    return;
+  }
+  
+  state.generated = {
+    f1: randomString(userLen, userCs),
+    f2: randomString(passLen, passCs)
+  };
+  
+  $('genField1').textContent = state.generated.f1;
+  $('genField2').textContent = state.generated.f2;
+  $('generatedOutput').classList.remove('hidden');
+  $('btnAddToList').disabled = false;
+}
+
+function addToList() {
+  if (!state.generated) return;
+  // 用 K_FIELD1/K_FIELD2 哈希风格的 key 存储
+  state.entries.push({
+    [K_FIELD1]: state.generated.f1,
+    [K_FIELD2]: state.generated.f2
+  });
+  state.generated = null;
+  $('generatedOutput').classList.add('hidden');
+  $('btnAddToList').disabled = true;
+  renderList();
+  toast('已加入列表');
+}
+
+// ==================== 列表渲染 ====================
+function renderList() {
+  const list = $('entryList');
+  $('entryCount').textContent = `(${state.entries.length})`;
+  
+  if (state.entries.length === 0) {
+    list.innerHTML = '<div class="empty-state">暂无条目 · 从上面生成第一条</div>';
+    return;
+  }
+  
+  list.innerHTML = state.entries.map((e, i) => {
+    const f1 = e[K_FIELD1] || '';
+    const f2 = e[K_FIELD2] || '';
+    return `
+    <div class="entry">
+      <div class="entry-idx">#${String(i + 1).padStart(2, '0')}</div>
+      <div class="entry-content">
+        <div class="entry-field entry-field-1">📋 ${f1}</div>
+        <div class="entry-field entry-field-2">🔑 ${f2}</div>
+      </div>
+      <div class="entry-actions">
+        <button class="small secondary" data-act="copy-f1" data-i="${i}">复制字段1</button>
+        <button class="small secondary" data-act="copy-f2" data-i="${i}">复制字段2</button>
+        <button class="small danger" data-act="del" data-i="${i}">删除</button>
+      </div>
+    </div>
+  `;
+  }).join('');
+  
+  list.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => handleEntryAction(btn.dataset.act, parseInt(btn.dataset.i));
+  });
+}
+
+async function handleEntryAction(act, idx) {
+  const entry = state.entries[idx];
+  if (!entry) return;
+  
+  if (act === 'copy-f1') copyToClipboard(entry[K_FIELD1] || '');
+  else if (act === 'copy-f2') copyToClipboard(entry[K_FIELD2] || '');
+  else if (act === 'del') {
+    const ok = await showModal({
+      title: '确认删除？',
+      content: `条目 #${idx + 1} 将从列表移除（导出时不会包含）。\n\n确定删除？`,
+      okText: '删除',
+      cancelText: '取消'
+    });
+    if (ok) {
+      state.entries.splice(idx, 1);
+      renderList();
+      toast('已删除');
+    }
+  }
+}
+
+// ==================== 导出 ====================
+async function exportVault() {
+  if (state.entries.length === 0) {
+    toast('条目为空', 'error');
+    return;
+  }
+  
+  const filename = randomFilename();
+  // 用 MAGIC 字段 + 哈希风格 key 构造，外部看不出含义
+  const data = {
+    [MAGIC]: 1,
+    [K_ENTRY]: state.entries
+  };
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  toast(`✓ 已导出 ${filename}`);
+}
+
+// ==================== 导入 ====================
+async function importVault(file) {
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    
+    // 用 MAGIC 字段识别（不暴露工具名）
+    if (data[MAGIC] === undefined || !data[K_ENTRY] || !Array.isArray(data[K_ENTRY])) {
+      throw new Error('文件格式不识别');
+    }
+    
+    // 验证每个条目结构
+    const entries = [];
+    for (const e of data[K_ENTRY]) {
+      if (!e || typeof e[K_FIELD1] !== 'string' || typeof e[K_FIELD2] !== 'string') {
+        throw new Error('条目结构错误');
+      }
+      entries.push({
+        [K_FIELD1]: e[K_FIELD1],
+        [K_FIELD2]: e[K_FIELD2]
+      });
+    }
+    
+    state.entries = entries;
+    showState('listState');
+    renderList();
+    toast(`✓ 已导入 ${state.entries.length} 条`);
+  } catch (e) {
+    toast('导入失败：' + e.message, 'error');
+  }
+}
+
+// ==================== 事件绑定 ====================
+$('btnNew').onclick = () => {
+  showState('generatorState');
+  state.entries = [];
+  state.generated = null;
+  $('generatedOutput').classList.add('hidden');
+  $('btnAddToList').disabled = true;
+};
+
+$('btnImport').onclick = () => $('fileInput').click();
+
+$('fileInput').onchange = (e) => {
+  const file = e.target.files[0];
+  if (file) importVault(file);
+  e.target.value = '';
+};
+
+$('btnGenerate').onclick = generate;
+$('btnAddToList').onclick = addToList;
+
+$('btnBackToEntry').onclick = () => showState('entryState');
+
+$('btnExport').onclick = exportVault;
+
+// 点击生成结果复制
+$('genField1').onclick = () => state.generated && copyToClipboard(state.generated.f1);
+$('genField2').onclick = () => state.generated && copyToClipboard(state.generated.f2);
+
+// 启动
+showState('entryState');
+</script>
+</body>
+</html>
