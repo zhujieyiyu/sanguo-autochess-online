@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Password Blackbox</title>
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<title>⬛</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -11,18 +12,19 @@ body {
   background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
   color: #e6edf3;
   min-height: 100vh;
+  display: flex;
+  justify-content: center;
   padding: 20px;
 }
-.container { max-width: 1200px; margin: 0 auto; }
+.container { max-width: 1200px; width: 100%; }
 header {
   text-align: center;
-  padding: 30px 0 20px;
+  padding: 16px 0 12px;
   border-bottom: 1px solid #21262d;
   margin-bottom: 20px;
 }
-h1 { font-size: 26px; margin-bottom: 6px; }
-h1 .logo { color: #FFD700; }
-.subtitle { color: #8b949e; font-size: 12px; }
+h1 { font-size: 26px; }
+h1 .logo { color: #c9d1d9; }
 
 .warning {
   background: #1c1c00;
@@ -201,8 +203,7 @@ input[type="checkbox"] { cursor: pointer; }
 <body>
 <div class="container">
   <header>
-    <h1><span class="logo">⬛</span> Password Blackbox</h1>
-    <div class="subtitle">极简无状态密码生成器</div>
+    <h1><span class="logo">⬛</span></h1>
   </header>
 
   <div class="warning">
