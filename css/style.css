@@ -31,12 +31,14 @@ body {
   overflow-x: hidden;
   min-height: 100vh;
   user-select: none;
+  display: flex;
+  justify-content: center;
 }
 
 /* ═══ 游戏容器 ═══ */
 #game-container {
   max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
