@@ -2009,6 +2009,14 @@ class Game {
             this.playerHP -= totalDmg;
             this.addLog('damage', `💔 败给${opp.name}！幸存${survivors}人，-${totalDmg}HP (轮次${this.round}+三角${triDmg})  剩余: ${Math.max(0, this.playerHP)}`);
             if (window.AUDIO) window.AUDIO.defeat();
+            // 多人模式：扣自己血时同步 matchmaker
+            if (this.isMultiplayer && this.matchmaker) {
+              const me = this.matchmaker.players.find(p => p.isMe);
+              if (me) {
+                me.hp = this.playerHP;
+                this.matchmaker.damagePlayer(me.id, 0); // 仅刷新 HUD
+              }
+            }
         } else {
             // 玩家胜利 → AI 对手受到对称伤害
             const survivors = result.survivorsWinner || 0;
@@ -2019,6 +2027,18 @@ class Game {
             if (window.AUDIO) window.AUDIO.victory();
             // 🏆 夺冠 → 解锁上场英雄的 SR 徽章
             this._unlockCodexSR();
+            // 多人模式：把对手的扣血同步到 matchmaker
+            if (this.isMultiplayer && this.matchmaker) {
+              const target = this.matchmaker.players.find(p => p.id === opp.id);
+              if (target) {
+                target.hp = opp.hp;
+                if (opp.hp <= 0) {
+                  this.matchmaker.eliminatePlayer(opp.id);
+                } else {
+                  this.matchmaker.game._updateMultiplayerHUD();
+                }
+              }
+            }
             if (opp.hp <= 0) {
                 opp.hp = 0;
                 opp.alive = false;
@@ -2592,6 +2612,40 @@ class Game {
 
         this.addLog('round', `🎮 多人对战开始！${players.length} 名玩家同台竞技`);
         this.addLog('round', `📋 你的对手：${this.aiOpponents.map(a => a.name).join('、')}`);
+
+        // 显示多人 HUD
+        this._updateMultiplayerHUD();
+        const hud = document.getElementById('multiplayer-hud');
+        if (hud) hud.classList.remove('hidden');
+    }
+
+    // 多人 HUD：顶部小卡片显示所有玩家血量
+    _updateMultiplayerHUD() {
+        if (!this.isMultiplayer || !this.matchmaker) return;
+        const hud = document.getElementById('multiplayer-hud');
+        if (!hud) return;
+        const players = this.matchmaker.players;
+        hud.innerHTML = players.map(p => {
+            const isDead = !p.alive || p.hp <= 0;
+            const color = p.isMe ? '#FFD700' : p.trait.color;
+            const bg = p.isMe ? 'rgba(255,215,0,0.18)' : 'rgba(255,255,255,0.04)';
+            const hpPct = Math.max(0, Math.min(100, p.hp));
+            const hpColor = hpPct > 60 ? '#3fb950' : hpPct > 30 ? '#d29922' : '#da3633';
+            return `
+              <div title="${p.name}" style="display:flex;flex-direction:column;align-items:center;gap:1px;padding:3px 7px;background:${bg};border:1px solid ${isDead ? '#da3633' : color};border-radius:4px;${isDead ? 'opacity:0.4;text-decoration:line-through;' : ''}min-width:62px;">
+                <div style="display:flex;align-items:center;gap:2px;">
+                  <span style="font-size:12px;">${p.avatar}</span>
+                  <span style="color:${color};font-weight:bold;font-size:10px;">${p.name.length > 5 ? p.name.slice(0,5)+'…' : p.name}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:3px;width:100%;">
+                  <div style="flex:1;height:4px;background:#21262d;border-radius:2px;overflow:hidden;">
+                    <div style="height:100%;width:${hpPct}%;background:${hpColor};transition:width 0.3s;"></div>
+                  </div>
+                  <span style="color:${hpColor};font-size:9px;min-width:18px;text-align:right;">${p.hp}</span>
+                </div>
+              </div>
+            `;
+        }).join('');
     }
 
     _showMultiplayerResult(players, winner) {
@@ -2649,6 +2703,12 @@ class Game {
                 self.updateUI();
                 self._refreshAIUI();
                 self._refreshLegendModeUI();
+                // 隐藏多人 HUD
+                const hud = document.getElementById('multiplayer-hud');
+                if (hud) {
+                  hud.classList.add('hidden');
+                  hud.innerHTML = '';
+                }
                 self.addLog('round', '🏠 已返回大厅（单机模式）');
             });
         }

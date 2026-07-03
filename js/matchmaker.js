@@ -168,6 +168,7 @@
         player.alive = false;
         player.hp = 0;
       }
+      this.game._updateMultiplayerHUD();
       // 检查游戏是否结束
       const alivePlayers = this.players.filter(p => p.alive);
       if (alivePlayers.length === 1) {
@@ -184,6 +185,8 @@
         player.hp = Math.max(0, player.hp - dmg);
         if (player.hp <= 0) {
           this.eliminatePlayer(playerId);
+        } else {
+          this.game._updateMultiplayerHUD();
         }
       }
     }
