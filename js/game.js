@@ -2471,9 +2471,9 @@ class Game {
     // 联机版逻辑（v2 - 用户感受度优先）
     // =============================================
 
-    onlinePlayerName: null,
-    isMultiplayer: false,
-    multiplayerPlayers: [],
+    onlinePlayerName = null;
+    isMultiplayer = false;
+    multiplayerPlayers = [];
 
     _openOnlineOverlay() {
         const overlay = document.getElementById('online-overlay');
